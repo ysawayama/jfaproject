@@ -140,7 +140,7 @@ export default function MatchStory() {
                     <div className="flex items-start gap-3">
                       <div className="text-3xl">{event.emoji}</div>
                       <div className="flex-1">
-                        {event.time && (
+                        {'time' in event && event.time && (
                           <div className="text-sm font-semibold text-gray-600 mb-1">
                             ⏱️ {event.time}
                           </div>
@@ -150,7 +150,7 @@ export default function MatchStory() {
                         </div>
 
                         {/* 写真プレースホルダー */}
-                        {event.hasPhoto && (
+                        {'hasPhoto' in event && event.hasPhoto && (
                           <div className="mt-3 aspect-video bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center max-w-md">
                             <div className="text-center">
                               <div className="text-4xl mb-1">📸</div>
@@ -160,7 +160,7 @@ export default function MatchStory() {
                         )}
 
                         {/* コメント */}
-                        {event.comment && (
+                        {'comment' in event && event.comment && (
                           <div className="mt-3 bg-white rounded-lg p-3 border border-gray-200">
                             <div className="text-sm text-gray-700">
                               💬 <span className="font-semibold">{event.comment.author}:</span>{' '}
@@ -170,7 +170,7 @@ export default function MatchStory() {
                         )}
 
                         {/* コーチからのコメント */}
-                        {event.author && (
+                        {'author' in event && event.author && (
                           <div className="text-sm text-gray-600 mt-2">
                             - {event.author}
                           </div>
