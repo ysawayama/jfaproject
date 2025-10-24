@@ -1,30 +1,59 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+/* JFA チーム統合ポータル - グローバルスタイル */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  /* ベースカラー（60%） */
+  --base-white: #FFFFFF;
+  --base-light: #F5F7FA;
+  --base-dark: #1D1D1F;
+
+  /* サムライブルー（30% - JFAブランド） */
+  --samurai-blue: #0033A0;
+  --samurai-blue-dark: #002370;
+  --samurai-blue-light: #E6EBF5;
+
+  /* アクセントカラー（10%） */
+  --accent-success: #1CE8A4;
+  --accent-alert: #EA3A3A;
+  --accent-warning: #FFB800;
+  --accent-info: #4C9AFF;
+
+  /* ニュートラル */
+  --neutral-gray: #86868B;
+  --neutral-border: #E1E4E8;
+
+  /* 後方互換性 */
   --background: #ffffff;
   --foreground: #1D1D1F;
-  --samurai-blue: #0033A0;
   --hinomaru-red: #E60012;
-  --neutral-gray: #86868B;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: 'Noto Sans JP', sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer base {
+  body {
+    color: var(--base-dark);
+    background: var(--base-white);
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: '游ゴシック', 'Yu Gothic', 'YuGothic', sans-serif;
-  font-weight: bold;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    font-weight: 700;
+    color: var(--base-dark);
+  }
+
+  /* フォーカススタイル（アクセシビリティ） */
+  *:focus-visible {
+    outline: 2px solid var(--samurai-blue);
+    outline-offset: 2px;
+  }
 }
 
 @layer utilities {
@@ -32,7 +61,21 @@ h1, h2, h3, h4, h5, h6 {
     text-wrap: balance;
   }
 
-  /* Premium Card Effect - Sorare風 */
+  /* === カードコンポーネント === */
+  .team-card {
+    background: var(--base-white);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 51, 160, 0.08);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .team-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 51, 160, 0.12);
+  }
+
+  /* Premium Card Effect - Sorare風（既存互換） */
   .premium-card {
     background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.95) 100%);
     box-shadow:
@@ -48,7 +91,51 @@ h1, h2, h3, h4, h5, h6 {
       0 6px 6px rgba(0,0,0,0.08);
   }
 
-  /* Smooth Scroll Animation */
+  /* === ボタンコンポーネント === */
+  .btn {
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--samurai-blue);
+    color: var(--base-white);
+  }
+
+  .btn-primary:hover {
+    background: var(--samurai-blue-dark);
+  }
+
+  .btn-secondary {
+    background: var(--base-white);
+    color: var(--samurai-blue);
+    border: 2px solid var(--samurai-blue);
+  }
+
+  .btn-secondary:hover {
+    background: var(--samurai-blue-light);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--samurai-blue);
+  }
+
+  .btn-ghost:hover {
+    background: var(--samurai-blue-light);
+  }
+
+  /* === アニメーション === */
   .fade-in {
     opacity: 0;
     transform: translateY(20px);
@@ -60,7 +147,7 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(0);
   }
 
-  /* Gradient Overlay - Barcelona風 */
+  /* === グラデーション === */
   .hero-gradient {
     background: linear-gradient(
       to bottom,
@@ -70,10 +157,36 @@ h1, h2, h3, h4, h5, h6 {
     );
   }
 
-  /* Stats Number Style */
+  .samurai-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--samurai-blue) 0%,
+      var(--samurai-blue-dark) 100%
+    );
+  }
+
+  /* === テキストスタイル === */
   .stat-number {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-weight: 600;
     letter-spacing: -0.02em;
+  }
+
+  /* === レイアウトユーティリティ === */
+  .container-wide {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* === セクションスペーシング === */
+  .section-spacing {
+    padding: 64px 0;
+  }
+
+  @media (max-width: 768px) {
+    .section-spacing {
+      padding: 48px 0;
+    }
   }
 }

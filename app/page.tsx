@@ -20,8 +20,8 @@ export default function Home() {
           </p>
         </div>
 
-        {/* 3つのダッシュボード選択 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        {/* 4つのダッシュボード選択 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {/* 選手ダッシュボード */}
           <Link
             href="/player"
@@ -124,6 +124,41 @@ export default function Home() {
             </div>
             <div className="mt-6 bg-red-500 text-white px-6 py-3 rounded-lg font-semibold inline-block">
               管理画面を見る →
+            </div>
+          </Link>
+
+          {/* チームポータル */}
+          <Link
+            href="/team"
+            className="block bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all p-8 text-center hover:scale-105 transform duration-200"
+          >
+            <div className="text-6xl mb-4">🇯🇵</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              チームポータル
+            </h2>
+            <p className="text-gray-600 mb-4">
+              A代表チーム統合管理
+            </p>
+            <div className="space-y-2 text-sm text-left text-gray-700">
+              <div className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                <span>スケジュール・試合管理</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                <span>メンバー・データ分析</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                <span>メディア・コミュニケーション</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                <span>内部管理＋外部公開</span>
+              </div>
+            </div>
+            <div className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold inline-block">
+              チームポータルを見る →
             </div>
           </Link>
         </div>
@@ -249,10 +284,10 @@ export default function Home() {
         {/* フッター */}
         <footer className="text-center py-8 text-gray-500 mt-16">
           <p className="text-sm">
-            JFA 緑プロジェクト - 3つのダッシュボード + イントラネット機能
+            JFA 緑プロジェクト - 4つのダッシュボード + チームポータル + イントラネット機能
           </p>
           <p className="text-xs mt-2">
-            2025年最新ベストプラクティス実装
+            2025年最新ベストプラクティス実装 | モダンデザインシステム
           </p>
         </footer>
       </div>
