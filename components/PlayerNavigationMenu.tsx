@@ -24,7 +24,7 @@ export default function PlayerNavigationMenu({ playerId }: PlayerNavigationMenuP
   const [activeTab, setActiveTab] = useState<'main' | 'data'>('main');
 
   const mainMenuItems: MenuItem[] = [
-    { id: 'national-team', label: '日本代表経歴', icon: '🇯🇵', href: `/player/${playerId}/national-team` },
+    { id: 'career-log', label: 'サッカーライフログ', icon: '📖', href: `/player/${playerId}/career-log` },
     { id: 'training-menu', label: 'Training Menu / レポーティング機能', icon: '📋', href: `/player/${playerId}/training-menu` },
     { id: 'match-record', label: '試合記録', icon: '⚽', href: `/player/${playerId}/match-record` },
     { id: 'video', label: 'Video', icon: '🎥', href: `/player/${playerId}/video` },
