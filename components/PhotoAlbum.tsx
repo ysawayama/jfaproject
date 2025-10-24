@@ -1,34 +1,117 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function PhotoAlbum() {
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'match' | 'practice' | 'my-child'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'official' | 'match' | 'training'>('all');
 
-  // 写真データ（モック）
-  const photos = [
-    { id: 1, category: 'match', date: '10/20', caption: 'ゴールの瞬間', likes: 12, myChild: true },
-    { id: 2, category: 'match', date: '10/20', caption: 'チーム全員で喜ぶ', likes: 8, myChild: true },
-    { id: 3, category: 'match', date: '10/18', caption: 'ドリブル突破', likes: 15, myChild: true },
-    { id: 4, category: 'practice', date: '10/17', caption: 'パス練習', likes: 5, myChild: true },
-    { id: 5, category: 'match', date: '10/15', caption: 'スタート前', likes: 10, myChild: false },
-    { id: 6, category: 'practice', date: '10/14', caption: 'シュート練習', likes: 7, myChild: true },
-    { id: 7, category: 'match', date: '10/13', caption: '試合後の集合写真', likes: 20, myChild: false },
-    { id: 8, category: 'match', date: '10/12', caption: 'アシストの瞬間', likes: 9, myChild: true },
+  // 久保建英選手の公式写真ソース
+  const officialPhotos = [
+    {
+      id: 1,
+      category: 'official',
+      title: '公式Instagram',
+      description: '久保建英選手の公式Instagramアカウント',
+      link: 'https://www.instagram.com/takefusa.kubo/',
+      icon: '📸',
+      platform: 'Instagram',
+      followers: '1.5M+',
+    },
+    {
+      id: 2,
+      category: 'official',
+      title: 'Getty Images',
+      description: '試合中のプロフェッショナル写真',
+      link: 'https://www.gettyimages.co.jp/写真/久保-建英',
+      icon: '🎯',
+      platform: 'Getty Images',
+      count: '1000+',
+    },
+    {
+      id: 3,
+      category: 'official',
+      title: 'ゲキサカフォト',
+      description: '最新の試合写真とニュース',
+      link: 'https://web.gekisaka.jp/relatedarticle/photonews?player_id=38483',
+      icon: '📰',
+      platform: 'ゲキサカ',
+      count: '新着随時更新',
+    },
+    {
+      id: 4,
+      category: 'official',
+      title: 'JFA公式',
+      description: '日本代表としての公式写真',
+      link: 'https://www.jfa.jp/samuraiblue/member/kubo_takefusa.html',
+      icon: '🇯🇵',
+      platform: 'JFA',
+      type: '代表戦',
+    },
   ];
 
+  // 試合写真リファレンス
+  const matchPhotoReferences = [
+    {
+      id: 5,
+      category: 'match',
+      title: 'アヤックス戦 (2024.11.28)',
+      description: '1ゴール1アシストの活躍',
+      season: '2024-25',
+      competition: 'ヨーロッパリーグ',
+      highlight: 'マラドーナのようなドリブル',
+    },
+    {
+      id: 6,
+      category: 'match',
+      title: 'レアル・マドリード戦 (2025.04.01)',
+      description: 'コパ・デル・レイ準決勝',
+      season: '2024-25',
+      competition: 'コパ・デル・レイ',
+      highlight: '圧巻のアシスト',
+    },
+    {
+      id: 7,
+      category: 'match',
+      title: 'FCバルセロナ戦',
+      description: 'ラ・リーガでの活躍',
+      season: '2024-25',
+      competition: 'ラ・リーガ',
+      highlight: 'エル・クラシコでの奮闘',
+    },
+  ];
+
+  // トレーニング/オフィシャル写真カテゴリ
+  const trainingReferences = [
+    {
+      id: 8,
+      category: 'training',
+      title: 'レアル・ソシエダ トレーニング',
+      description: '日々の練習風景',
+      type: 'クラブ練習',
+    },
+    {
+      id: 9,
+      category: 'training',
+      title: '日本代表トレーニング',
+      description: '代表合宿での様子',
+      type: '代表練習',
+    },
+  ];
+
+  const allPhotos = [...officialPhotos, ...matchPhotoReferences, ...trainingReferences];
+
   // フィルタリング
-  const filteredPhotos = photos.filter((photo) => {
+  const filteredPhotos = allPhotos.filter((photo) => {
     if (selectedFilter === 'all') return true;
-    if (selectedFilter === 'my-child') return photo.myChild;
     return photo.category === selectedFilter;
   });
 
   const filterOptions = [
-    { value: 'all', label: 'すべて', icon: '📷', count: photos.length },
-    { value: 'my-child', label: '我が子', icon: '⭐', count: photos.filter(p => p.myChild).length },
-    { value: 'match', label: '試合', icon: '⚽', count: photos.filter(p => p.category === 'match').length },
-    { value: 'practice', label: '練習', icon: '🏃', count: photos.filter(p => p.category === 'practice').length },
+    { value: 'all', label: 'すべて', icon: '📷', count: allPhotos.length },
+    { value: 'official', label: '公式ソース', icon: '⭐', count: officialPhotos.length },
+    { value: 'match', label: '試合', icon: '⚽', count: matchPhotoReferences.length },
+    { value: 'training', label: 'トレーニング', icon: '🏃', count: trainingReferences.length },
   ];
 
   return (
@@ -36,10 +119,34 @@ export default function PhotoAlbum() {
       <div className="mb-6">
         <h3 className="font-bold text-gray-800 text-2xl mb-2 flex items-center gap-2">
           <span>📸</span>
-          フォトアルバム
+          フォトギャラリー
         </h3>
         <p className="text-sm text-gray-600">
-          試合や練習の写真が自動で整理されます
+          久保建英選手の公式写真ソースと試合・トレーニング写真
+        </p>
+      </div>
+
+      {/* 公式Instagramセクション */}
+      <div className="mb-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">📸</span>
+            <div>
+              <h4 className="text-lg font-bold text-gray-800">公式Instagram</h4>
+              <p className="text-sm text-gray-600">@takefusa.kubo - フォロワー 1.5M+</p>
+            </div>
+          </div>
+          <Link
+            href="https://www.instagram.com/takefusa.kubo/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
+          >
+            Instagramで見る →
+          </Link>
+        </div>
+        <p className="text-sm text-gray-600">
+          最新の試合写真、トレーニング風景、プライベートショットを公式アカウントでチェック
         </p>
       </div>
 
@@ -70,90 +177,131 @@ export default function PhotoAlbum() {
         ))}
       </div>
 
-      {/* 写真グリッド */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-        {filteredPhotos.map((photo) => (
-          <div
-            key={photo.id}
-            className="group relative cursor-pointer rounded-lg overflow-hidden shadow hover:shadow-xl transition-all"
-          >
-            {/* 写真プレースホルダー */}
-            <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-400 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-5xl mb-2">📷</div>
-                <div className="text-xs text-gray-700">{photo.caption}</div>
-              </div>
-            </div>
-
-            {/* ホバーオーバーレイ */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-end p-3">
-              <div className="transform translate-y-full group-hover:translate-y-0 transition-transform w-full">
-                <div className="text-white text-sm font-semibold mb-1">
-                  {photo.caption}
+      {/* 写真ソースグリッド */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {filteredPhotos.map((photo) => {
+          // 公式ソースの場合
+          if ('platform' in photo) {
+            return (
+              <Link
+                key={photo.id}
+                href={photo.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200 hover:border-primary hover:shadow-xl transition-all"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="text-5xl">{photo.icon}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-lg font-bold text-gray-800 group-hover:text-primary transition-colors">
+                        {photo.title}
+                      </h4>
+                      <span className="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full font-semibold">
+                        {photo.platform}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">{photo.description}</p>
+                    {'followers' in photo && (
+                      <div className="text-sm font-semibold text-purple-600">
+                        👥 {photo.followers} フォロワー
+                      </div>
+                    )}
+                    {'count' in photo && (
+                      <div className="text-sm font-semibold text-blue-600">
+                        📷 {photo.count} 写真
+                      </div>
+                    )}
+                    {'type' in photo && (
+                      <div className="text-sm font-semibold text-green-600">
+                        🏆 {photo.type}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-xs text-white/80">
-                  <span>{photo.date}</span>
-                  <span>❤️ {photo.likes}</span>
+                <div className="mt-4 text-primary font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
+                  <span>写真を見る</span>
+                  <span>→</span>
                 </div>
+              </Link>
+            );
+          }
+
+          // 試合写真リファレンス
+          if ('competition' in photo) {
+            return (
+              <div
+                key={photo.id}
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 hover:shadow-xl transition-all"
+              >
+                <div className="mb-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
+                      {photo.season}
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-full">
+                      {photo.competition}
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-800">{photo.title}</h4>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">{photo.description}</p>
+                {photo.highlight && (
+                  <div className="bg-yellow-100 text-yellow-800 px-3 py-2 rounded-lg text-sm font-semibold">
+                    ⭐ {photo.highlight}
+                  </div>
+                )}
               </div>
+            );
+          }
+
+          // トレーニング写真リファレンス
+          return (
+            <div
+              key={photo.id}
+              className="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-6 border-2 border-green-200 hover:shadow-xl transition-all"
+            >
+              <div className="mb-3">
+                <h4 className="text-lg font-bold text-gray-800">{photo.title}</h4>
+                {'type' in photo && (
+                  <span className="inline-block mt-2 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                    {photo.type}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-600">{photo.description}</p>
             </div>
-
-            {/* 我が子マーク */}
-            {photo.myChild && (
-              <div className="absolute top-2 right-2 bg-yellow-400 text-white text-xs px-2 py-1 rounded-full font-bold shadow">
-                ⭐
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* アクションボタン */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <button className="bg-primary text-white px-4 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
-          <span>📤</span>
-          写真をアップロード
-        </button>
-        <button className="bg-blue-500 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
-          <span>💾</span>
-          選択した写真をダウンロード
-        </button>
-        <button className="bg-purple-500 text-white px-4 py-3 rounded-lg font-semibold hover:bg-purple-600 transition-colors flex items-center justify-center gap-2">
-          <span>🔗</span>
-          アルバムを共有
-        </button>
+          );
+        })}
       </div>
 
       {/* 統計情報 */}
-      <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+        <h4 className="font-bold text-gray-800 mb-4">フォトギャラリー統計</h4>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-2xl font-bold text-blue-600">{photos.length}</div>
-            <div className="text-xs text-gray-600">総写真数</div>
+            <div className="text-3xl font-bold text-blue-600">{officialPhotos.length}</div>
+            <div className="text-sm text-gray-600 mt-1">公式ソース</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-purple-600">
-              {photos.filter(p => p.myChild).length}
-            </div>
-            <div className="text-xs text-gray-600">我が子の写真</div>
+            <div className="text-3xl font-bold text-purple-600">{matchPhotoReferences.length}</div>
+            <div className="text-sm text-gray-600 mt-1">試合写真</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-pink-600">
-              {photos.reduce((sum, p) => sum + p.likes, 0)}
-            </div>
-            <div className="text-xs text-gray-600">いいね合計</div>
+            <div className="text-3xl font-bold text-green-600">{trainingReferences.length}</div>
+            <div className="text-sm text-gray-600 mt-1">トレーニング</div>
           </div>
         </div>
       </div>
 
-      {/* 自動整理の説明 */}
-      <div className="mt-4 bg-yellow-50 rounded-lg p-4 border-l-4 border-yellow-400">
+      {/* 著作権に関する注意 */}
+      <div className="mt-6 bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400">
         <div className="flex items-start gap-3">
-          <div className="text-2xl">✨</div>
+          <div className="text-2xl">⚠️</div>
           <div>
-            <div className="font-semibold text-gray-800 mb-1">自動整理機能</div>
+            <div className="font-semibold text-gray-800 mb-1">写真の利用について</div>
             <div className="text-sm text-gray-600">
-              AIが自動で我が子を認識し、写真を整理します。試合や練習ごとに自動でアルバムが作成されます。
+              掲載されている写真は各公式ソースの著作権で保護されています。外部リンクから公式サイトでご覧いただけます。
             </div>
           </div>
         </div>

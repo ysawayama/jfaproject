@@ -1,0 +1,261 @@
+{
+  "player": "久保 建英",
+  "note": "⚪︎印は未確定データです。後から正確な数値を入力してください。",
+  "careerTimeline": [
+    {
+      "year": "2015",
+      "category": "U-15日本代表",
+      "ageGroup": "U-15",
+      "callups": [
+        {
+          "period": "2015年",
+          "tournament": "AFC U-16選手権 予選",
+          "matches": "⚪︎",
+          "goals": "⚪︎",
+          "assists": "⚪︎",
+          "note": "U-15日本代表として活動"
+        }
+      ],
+      "totalMatches": "⚪︎",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": []
+    },
+    {
+      "year": "2017",
+      "category": "U-17日本代表",
+      "ageGroup": "U-17",
+      "callups": [
+        {
+          "period": "2017年",
+          "tournament": "FIFA U-17ワールドカップ インド2017",
+          "matches": "⚪︎",
+          "goals": "⚪︎",
+          "assists": "⚪︎",
+          "note": "U-17ワールドカップに出場"
+        }
+      ],
+      "totalMatches": "⚪︎",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": [
+        "FIFA U-17ワールドカップ出場"
+      ]
+    },
+    {
+      "year": "2017-2018",
+      "category": "U-20日本代表",
+      "ageGroup": "U-20",
+      "callups": [
+        {
+          "period": "2017-2018年",
+          "tournament": "各種国際親善試合",
+          "matches": "⚪︎",
+          "goals": "⚪︎",
+          "assists": "⚪︎",
+          "note": "U-20日本代表として活動"
+        }
+      ],
+      "totalMatches": "⚪︎",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": []
+    },
+    {
+      "year": "2018",
+      "category": "U-19日本代表",
+      "ageGroup": "U-19",
+      "callups": [
+        {
+          "period": "2018年",
+          "tournament": "AFC U-19選手権",
+          "matches": "⚪︎",
+          "goals": "⚪︎",
+          "assists": "⚪︎",
+          "note": "U-19日本代表として活動"
+        }
+      ],
+      "totalMatches": "⚪︎",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": []
+    },
+    {
+      "year": "2018-2019",
+      "category": "U-21日本代表",
+      "ageGroup": "U-21",
+      "callups": [
+        {
+          "period": "2018-2019年",
+          "tournament": "各種国際親善試合",
+          "matches": "⚪︎",
+          "goals": "⚪︎",
+          "assists": "⚪︎",
+          "note": "U-21日本代表として活動"
+        }
+      ],
+      "totalMatches": "⚪︎",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": []
+    },
+    {
+      "year": "2019",
+      "category": "A代表デビュー",
+      "ageGroup": "A代表",
+      "callups": [
+        {
+          "period": "2019年6月",
+          "tournament": "コパ・アメリカ2019",
+          "matches": "3",
+          "goals": "0",
+          "assists": "0",
+          "note": "A代表デビュー。コパ・アメリカに出場（チリ戦、ウルグアイ戦、エクアドル戦）"
+        }
+      ],
+      "totalMatches": "3",
+      "totalGoals": "0",
+      "totalAssists": "0",
+      "highlights": [
+        "2019年6月 A代表デビュー（コパ・アメリカ）",
+        "史上最年少でコパ・アメリカ出場"
+      ]
+    },
+    {
+      "year": "2021",
+      "category": "U-24日本代表（東京オリンピック）",
+      "ageGroup": "U-24",
+      "callups": [
+        {
+          "period": "2021年7-8月",
+          "tournament": "東京2020オリンピック",
+          "matches": "6",
+          "goals": "⚪︎",
+          "assists": "⚪︎",
+          "note": "U-24日本代表（オーバーエイジ枠ではない）として東京オリンピックに出場"
+        }
+      ],
+      "totalMatches": "6",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": [
+        "東京2020オリンピック出場",
+        "ベスト4進出に貢献"
+      ]
+    },
+    {
+      "year": "2022",
+      "category": "A代表（ワールドカップ）",
+      "ageGroup": "A代表",
+      "callups": [
+        {
+          "period": "2022年11-12月",
+          "tournament": "FIFAワールドカップ カタール2022",
+          "matches": "4",
+          "goals": "0",
+          "assists": "⚪︎",
+          "note": "ワールドカップ初出場。グループステージ全試合とベスト16のクロアチア戦に出場"
+        }
+      ],
+      "totalMatches": "⚪︎",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": [
+        "FIFAワールドカップ カタール2022出場",
+        "ベスト16進出に貢献"
+      ]
+    },
+    {
+      "year": "2023",
+      "category": "A代表",
+      "ageGroup": "A代表",
+      "callups": [
+        {
+          "period": "2023年1-2月",
+          "tournament": "AFCアジアカップ2023",
+          "matches": "⚪︎",
+          "goals": "⚪︎",
+          "assists": "⚪︎",
+          "note": "アジアカップに出場"
+        }
+      ],
+      "totalMatches": "⚪︎",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": []
+    },
+    {
+      "year": "2024-2025",
+      "category": "A代表（現在）",
+      "ageGroup": "A代表",
+      "callups": [
+        {
+          "period": "2024-2025年",
+          "tournament": "FIFAワールドカップ2026アジア予選",
+          "matches": "⚪︎",
+          "goals": "⚪︎",
+          "assists": "⚪︎",
+          "note": "ワールドカップ予選で活躍中"
+        },
+        {
+          "period": "2025年10月",
+          "tournament": "国際親善試合",
+          "matches": "1",
+          "goals": "0",
+          "assists": "0",
+          "note": "ブラジル戦（3-2勝利）に出場。日本がブラジルに歴史的初勝利"
+        }
+      ],
+      "totalMatches": "⚪︎",
+      "totalGoals": "⚪︎",
+      "totalAssists": "⚪︎",
+      "highlights": [
+        "2025年10月 対ブラジル戦（日本の歴史的初勝利）"
+      ]
+    }
+  ],
+  "overallSummary": {
+    "aTeam": {
+      "totalMatches": "46",
+      "totalGoals": "7",
+      "totalAssists": "15",
+      "note": "最新データ（2025年10月時点）"
+    },
+    "youthTeams": {
+      "note": "U-15からU-24まで各年代別代表で活躍。詳細データは⚪︎印の箇所に後から入力してください。"
+    }
+  },
+  "majorTournaments": [
+    {
+      "year": "2017",
+      "tournament": "FIFA U-17ワールドカップ",
+      "category": "U-17",
+      "result": "グループステージ敗退"
+    },
+    {
+      "year": "2019",
+      "tournament": "コパ・アメリカ",
+      "category": "A代表",
+      "result": "グループステージ敗退",
+      "note": "A代表デビュー"
+    },
+    {
+      "year": "2021",
+      "tournament": "東京2020オリンピック",
+      "category": "U-24",
+      "result": "ベスト4"
+    },
+    {
+      "year": "2022",
+      "tournament": "FIFAワールドカップ カタール",
+      "category": "A代表",
+      "result": "ベスト16"
+    },
+    {
+      "year": "2023",
+      "tournament": "AFCアジアカップ",
+      "category": "A代表",
+      "result": "⚪︎"
+    }
+  ]
+}

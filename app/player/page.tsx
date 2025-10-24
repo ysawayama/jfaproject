@@ -3,34 +3,31 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import PlayerHeader from '@/components/PlayerHeader';
-import GrowthChart from '@/components/GrowthChart';
-import SkillRadar from '@/components/SkillRadar';
+import PlayerTabNavigation from '@/components/PlayerTabNavigation';
+import AnimatedSection from '@/components/AnimatedSection';
+import SeasonPerformance from '@/components/SeasonPerformance';
 import MatchHistory from '@/components/MatchHistory';
 import Achievements from '@/components/Achievements';
 import NotificationCenter from '@/components/NotificationCenter';
 import MessageList from '@/components/MessageList';
 import NewsFeed from '@/components/NewsFeed';
-import ParentDashboardView from '@/components/ParentDashboardView';
-import GamificationPanel from '@/components/GamificationPanel';
 import WeeklyGrowthReport from '@/components/WeeklyGrowthReport';
-import MatchStory from '@/components/MatchStory';
 import PhotoAlbum from '@/components/PhotoAlbum';
-import PushNotificationMock from '@/components/PushNotificationMock';
+import NationalTeamStats from '@/components/NationalTeamStats';
+import PlayerNavigationMenu from '@/components/PlayerNavigationMenu';
 import {
   demoPlayer,
-  demoMatches,
-  currentSkills,
-  growthHistory,
   achievements,
   demoNotifications,
   demoMessages,
   demoNewsItems,
+  kuboNationalTeamData,
 } from '@/lib/demo-data';
-
-type ViewMode = 'player' | 'parent';
+import seasonPerformanceData from '@/public/data/kubo-season-performance.json';
+import recentMatches from '@/public/data/kubo-recent-matches.json';
 
 export default function PlayerDashboard() {
-  const [viewMode, setViewMode] = useState<ViewMode>('player');
+  const [activeTab, setActiveTab] = useState('overview');
   // 選手向けにフィルタリング
   const playerMessages = demoMessages.filter(
     m => m.type === 'feedback' || m.type === 'direct' || m.to?.id === 'player-001'
@@ -40,8 +37,6 @@ export default function PlayerDashboard() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* プッシュ通知モック */}
-      <PushNotificationMock />
 
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* ナビゲーション */}
@@ -66,6 +61,14 @@ export default function PlayerDashboard() {
         {/* ヘッダー */}
         <PlayerHeader player={demoPlayer} />
 
+        {/* タブナビゲーション - Chelsea風 */}
+        <PlayerTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {/* ナビゲーションメニュー */}
+        <div className="mt-8">
+          <PlayerNavigationMenu playerId={demoPlayer.id} />
+        </div>
+
         {/* 緊急通知 */}
         {urgentNotifications.length > 0 && (
           <div className="mb-8">
@@ -81,102 +84,76 @@ export default function PlayerDashboard() {
           </div>
         )}
 
-        {/* ビューモード切り替えタブ */}
-        <div className="mb-8 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow p-1 inline-flex">
-            <button
-              onClick={() => setViewMode('player')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                viewMode === 'player'
-                  ? 'bg-primary text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">⚽</span>
-                <span>選手ビュー</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setViewMode('parent')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                viewMode === 'parent'
-                  ? 'bg-primary text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">👨‍👩‍👦</span>
-                <span>保護者ビュー</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* メインコンテンツ: ビューモードに応じて切り替え */}
-        {viewMode === 'parent' ? (
-          <ParentDashboardView player={demoPlayer} />
-        ) : (
+        {/* タブコンテンツ */}
+        {activeTab === 'overview' && (
           <>
-        {/* メインコンテンツ: 2カラムレイアウト */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* 左カラム (2/3) */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Magic Moment: 成長の可視化 */}
-            <GrowthChart data={growthHistory} />
+            {/* 日本代表戦績セクション */}
+            <AnimatedSection delay={0}>
+              <NationalTeamStats data={kuboNationalTeamData} />
+            </AnimatedSection>
 
-            {/* スキルレーダー */}
-            <SkillRadar skills={currentSkills} />
+            {/* メインコンテンツ: 2カラムレイアウト */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              {/* 左カラム (2/3) */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* 週次成長レポート */}
+                <AnimatedSection delay={100}>
+                  <WeeklyGrowthReport />
+                </AnimatedSection>
 
-            {/* 試合履歴 */}
-            <MatchHistory matches={demoMatches.slice(0, 3)} />
+                {/* ニュースフィード */}
+                <AnimatedSection delay={200}>
+                  <NewsFeed newsItems={demoNewsItems} maxItems={3} />
+                </AnimatedSection>
 
-            {/* 週次成長レポート */}
-            <WeeklyGrowthReport />
-          </div>
+                {/* フォトアルバム */}
+                <AnimatedSection delay={300}>
+                  <PhotoAlbum />
+                </AnimatedSection>
+              </div>
 
-          {/* 右カラム (1/3) */}
-          <div className="space-y-6">
-            {/* 通知 */}
-            <NotificationCenter
-              notifications={demoNotifications.slice(0, 3)}
-            />
+              {/* 右カラム (1/3) */}
+              <div className="space-y-6">
+                {/* 達成バッジ - Chelsea風 */}
+                <AnimatedSection delay={150}>
+                  <Achievements achievements={achievements} />
+                </AnimatedSection>
 
-            {/* メッセージ */}
-            <MessageList messages={playerMessages.slice(0, 3)} />
+                {/* 通知 */}
+                <AnimatedSection delay={250}>
+                  <NotificationCenter
+                    notifications={demoNotifications.slice(0, 3)}
+                  />
+                </AnimatedSection>
 
-            {/* 達成バッジ */}
-            <Achievements achievements={achievements} />
+                {/* メッセージ */}
+                <AnimatedSection delay={350}>
+                  <MessageList messages={playerMessages.slice(0, 3)} />
+                </AnimatedSection>
+              </div>
+            </div>
+          </>
+        )}
 
-            {/* ゲーミフィケーション */}
-            <GamificationPanel />
-          </div>
-        </div>
+        {activeTab === 'stats' && (
+          <AnimatedSection>
+            <SeasonPerformance data={seasonPerformanceData} />
+          </AnimatedSection>
+        )}
 
-        {/* ニュースフィード */}
-        <div className="mb-8">
-          <NewsFeed newsItems={demoNewsItems} maxItems={3} />
-        </div>
+        {activeTab === 'matches' && (
+          <AnimatedSection>
+            <MatchHistory matches={recentMatches} playerId={demoPlayer.id} />
+          </AnimatedSection>
+        )}
 
-        {/* 最新の試合ストーリー */}
-        <div className="mb-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              <span>📖</span>
-              最新の試合ストーリー
-            </h2>
-            <div className="text-sm text-gray-600">
-              試合終了後、自動で作成されます
+        {activeTab === 'evaluation' && (
+          <div className="mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">評価セクション</h2>
+              <p className="text-gray-600">コーチからの評価やフィードバックがここに表示されます。</p>
             </div>
           </div>
-          <MatchStory />
-        </div>
-
-        {/* フォトアルバム */}
-        <div className="mb-8">
-          <PhotoAlbum />
-        </div>
-          </>
         )}
 
         {/* フッター */}

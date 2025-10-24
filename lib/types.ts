@@ -10,6 +10,13 @@ export interface Player {
   team: string;
   jerseyNumber: number;
   registeredAt: string; // サッカー人生の始まり
+  profileImage?: string; // プロフィール画像
+  birthDate?: string; // 生年月日
+  height?: number; // 身長（cm）
+  weight?: number; // 体重（kg）
+  birthPlace?: string; // 出身地
+  club?: string; // 所属クラブ
+  previousClubs?: string[]; // 前所属クラブ
 }
 
 export interface Coach {

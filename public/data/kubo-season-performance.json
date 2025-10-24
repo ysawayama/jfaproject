@@ -1,0 +1,260 @@
+{
+  "season": "2024-25",
+  "player": "久保 建英",
+  "club": "レアル・ソシエダ",
+  "competition": "ラ・リーガ",
+  "note": "⚠️ FotMobページの実際のデータに置き換えてください",
+  "radarMetrics": [
+    {
+      "label": "シュート精度",
+      "value": 42.7,
+      "description": "枠内シュート率"
+    },
+    {
+      "label": "パス精度",
+      "value": 83.5,
+      "description": "パス成功率"
+    },
+    {
+      "label": "ロングボール",
+      "value": 58.3,
+      "description": "ロングボール精度"
+    },
+    {
+      "label": "クロス精度",
+      "value": 28.6,
+      "description": "クロス成功率"
+    },
+    {
+      "label": "ドリブル",
+      "value": 67.2,
+      "description": "ドリブル成功率"
+    },
+    {
+      "label": "デュエル",
+      "value": 49.8,
+      "description": "デュエル勝利率"
+    },
+    {
+      "label": "空中戦",
+      "value": 35.4,
+      "description": "空中戦勝利率"
+    }
+  ],
+  "detailedStats": {
+    "攻撃": [
+      {
+        "label": "ゴール数",
+        "value": "5",
+        "perMatch": "0.14"
+      },
+      {
+        "label": "アシスト数",
+        "value": "0",
+        "perMatch": "0.00"
+      },
+      {
+        "label": "シュート数",
+        "value": "89",
+        "perMatch": "2.47"
+      },
+      {
+        "label": "枠内シュート数",
+        "value": "38",
+        "perMatch": "1.06"
+      },
+      {
+        "label": "xG (期待ゴール)",
+        "value": "6.2",
+        "perMatch": "0.17"
+      },
+      {
+        "label": "xGOT (枠内期待ゴール)",
+        "value": "5.8",
+        "perMatch": "0.16"
+      },
+      {
+        "label": "キーパス",
+        "value": "65",
+        "perMatch": "1.81"
+      },
+      {
+        "label": "チャンスメイク",
+        "value": "72",
+        "perMatch": "2.00"
+      },
+      {
+        "label": "ドリブル成功数",
+        "value": "92",
+        "perMatch": "2.56",
+        "successRate": "67.2%"
+      },
+      {
+        "label": "ドリブル試行数",
+        "value": "137",
+        "perMatch": "3.81"
+      },
+      {
+        "label": "タッチ数",
+        "value": "2145",
+        "perMatch": "59.58"
+      },
+      {
+        "label": "ペナルティエリア内タッチ数",
+        "value": "156",
+        "perMatch": "4.33"
+      }
+    ],
+    "パス": [
+      {
+        "label": "パス成功数",
+        "value": "1216",
+        "perMatch": "33.78"
+      },
+      {
+        "label": "パス試行数",
+        "value": "1456",
+        "perMatch": "40.44"
+      },
+      {
+        "label": "パス成功率",
+        "value": "83.5%",
+        "perMatch": ""
+      },
+      {
+        "label": "ロングボール成功数",
+        "value": "49",
+        "perMatch": "1.36"
+      },
+      {
+        "label": "ロングボール試行数",
+        "value": "84",
+        "perMatch": "2.33"
+      },
+      {
+        "label": "ロングボール成功率",
+        "value": "58.3%",
+        "perMatch": ""
+      },
+      {
+        "label": "クロス成功数",
+        "value": "28",
+        "perMatch": "0.78"
+      },
+      {
+        "label": "クロス試行数",
+        "value": "98",
+        "perMatch": "2.72"
+      },
+      {
+        "label": "クロス成功率",
+        "value": "28.6%",
+        "perMatch": ""
+      },
+      {
+        "label": "前方パス数",
+        "value": "498",
+        "perMatch": "13.83"
+      },
+      {
+        "label": "後方パス数",
+        "value": "269",
+        "perMatch": "7.47"
+      }
+    ],
+    "デュエル・守備": [
+      {
+        "label": "デュエル勝利数",
+        "value": "187",
+        "perMatch": "5.19"
+      },
+      {
+        "label": "デュエル試行数",
+        "value": "375",
+        "perMatch": "10.42"
+      },
+      {
+        "label": "デュエル勝利率",
+        "value": "49.8%",
+        "perMatch": ""
+      },
+      {
+        "label": "空中戦勝利数",
+        "value": "17",
+        "perMatch": "0.47"
+      },
+      {
+        "label": "空中戦試行数",
+        "value": "48",
+        "perMatch": "1.33"
+      },
+      {
+        "label": "空中戦勝利率",
+        "value": "35.4%",
+        "perMatch": ""
+      },
+      {
+        "label": "タックル数",
+        "value": "32",
+        "perMatch": "0.89"
+      },
+      {
+        "label": "インターセプト数",
+        "value": "18",
+        "perMatch": "0.50"
+      },
+      {
+        "label": "クリア数",
+        "value": "7",
+        "perMatch": "0.19"
+      },
+      {
+        "label": "ファウル獲得数",
+        "value": "78",
+        "perMatch": "2.17"
+      },
+      {
+        "label": "ファウル数",
+        "value": "23",
+        "perMatch": "0.64"
+      }
+    ],
+    "規律・出場": [
+      {
+        "label": "イエローカード",
+        "value": "5",
+        "perMatch": "0.14"
+      },
+      {
+        "label": "レッドカード",
+        "value": "0",
+        "perMatch": "0.00"
+      },
+      {
+        "label": "出場試合数",
+        "value": "36",
+        "perMatch": ""
+      },
+      {
+        "label": "先発出場数",
+        "value": "28",
+        "perMatch": ""
+      },
+      {
+        "label": "途中出場数",
+        "value": "8",
+        "perMatch": ""
+      },
+      {
+        "label": "出場時間",
+        "value": "2380分",
+        "perMatch": "66.11分"
+      },
+      {
+        "label": "平均評価",
+        "value": "7.0",
+        "perMatch": ""
+      }
+    ]
+  }
+}

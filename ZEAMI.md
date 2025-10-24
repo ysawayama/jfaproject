@@ -117,29 +117,18 @@ Archiving:
 
 ### User Information
 ```yaml
-Name/Nickname: Fumi
-Preferred Language: Japanese
-Experience Level: Advanced (JFA Project Lead)
+Name/Nickname: # Ask at first interaction
+Preferred Language: # English/Japanese/etc.
+Experience Level: # Beginner/Intermediate/Advanced
 ```
 
 ### Project Vision (Set through initial dialogue)
 ```yaml
-What to Build: JFA Green Registration Platform (緑登録)
-Why Building: Transform Japanese soccer development, achieve 2050 World Cup victory
-Target Users:
-  - Players (5-80 years old)
-  - Coaches (volunteer to professional)
-  - JFA Administrators
-  - Parents/Guardians (for U-13 players)
-Key Features:
-  - Lifelong IDP (Individual Development Plan)
-  - Growth visualization (Magic Moment)
-  - Training content management (LMS)
-  - Multi-role dashboard (Player/Coach/JFA Admin)
-Success Criteria:
-  - 500,000 users within 10 years
-  - Becomes de facto standard for Japanese soccer
-  - Enables data-driven talent development
+What to Build: # Clarify through conversation
+Why Building: # Understand motivation
+Target Users: # Who will use this
+Key Features: # Main functionalities
+Success Criteria: # What defines completion
 ```
 
 ## 🗺️ Project Map

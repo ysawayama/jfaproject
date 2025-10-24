@@ -10,26 +10,27 @@ interface AchievementsProps {
 
 export default function Achievements({ achievements }: AchievementsProps) {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        🏆 達成バッジ
+    <div className="premium-card rounded-xl p-6">
+      <h2 className="text-2xl font-heading font-bold text-neutral-900 mb-6 flex items-center gap-2">
+        <span className="text-3xl">🏆</span>
+        <span>達成バッジ</span>
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-3">
         {achievements.map((achievement) => (
           <div
             key={achievement.id}
-            className="border-2 border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg p-4 hover:shadow-lg transition-all hover:scale-105"
+            className="premium-card border-l-4 border-hinomaru rounded-lg p-4 bg-gradient-to-br from-hinomaru/5 to-hinomaru/10"
           >
             <div className="flex items-start gap-3">
-              <div className="text-4xl">{achievement.icon}</div>
+              <div className="text-4xl flex-shrink-0">{achievement.icon}</div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-800 mb-1">
+                <h3 className="font-heading font-bold text-neutral-900 mb-1">
                   {achievement.title}
                 </h3>
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-neutral-600 mb-2">
                   {achievement.description}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-neutral-600 font-medium">
                   獲得日: {format(new Date(achievement.unlockedAt), 'yyyy年M月d日', { locale: ja })}
                 </p>
               </div>

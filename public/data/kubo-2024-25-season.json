@@ -1,0 +1,143 @@
+{
+  "season": "2024-25",
+  "club": "レアル・ソシエダ",
+  "overall": {
+    "totalMatches": 54,
+    "totalGoals": 7,
+    "totalAssists": 4,
+    "totalMinutes": 3490
+  },
+  "byCompetition": {
+    "laliga": {
+      "matches": 36,
+      "goals": 5,
+      "assists": 0,
+      "minutes": 2380,
+      "yellowCards": 5,
+      "averageRating": 7.0
+    },
+    "europaLeague": {
+      "matches": 11,
+      "goals": 2,
+      "assists": 2,
+      "minutes": 701,
+      "yellowCards": 0,
+      "averageRating": 7.8
+    },
+    "copaDelRey": {
+      "matches": 5,
+      "goals": 0,
+      "assists": 2,
+      "minutes": 409,
+      "yellowCards": 0,
+      "averageRating": 7.5
+    }
+  },
+  "highlightMatches": [
+    {
+      "date": "2025-10-19",
+      "competition": "ラ・リーガ",
+      "opponent": "セルタ",
+      "result": "1-1",
+      "outcome": "draw",
+      "goals": 0,
+      "assists": 0,
+      "note": "最新試合（現在足首負傷で欠場中）"
+    },
+    {
+      "date": "2025-04-06",
+      "competition": "ラ・リーガ",
+      "opponent": "ラス・パルマス",
+      "result": "3-1",
+      "outcome": "win",
+      "goals": 0,
+      "assists": 0,
+      "minutesPlayed": 22,
+      "note": "途中出場。88分にゴールを決めたがVARでオフサイド判定",
+      "videoUrl": "https://www.youtube.com/embed/_ujWOdYjiOw"
+    },
+    {
+      "date": "2025-04-01",
+      "competition": "コパ・デル・レイ準決勝",
+      "opponent": "レアル・マドリード",
+      "result": "4-4",
+      "outcome": "draw",
+      "goals": 0,
+      "assists": 1,
+      "note": "オジャルサバルへのアシスト。現地メディアから最高評価",
+      "videoUrl": "https://youtu.be/IAxVqN-TOCw?t=1"
+    },
+    {
+      "date": "2024-12-12",
+      "competition": "ヨーロッパリーグ",
+      "opponent": "ディナモ・キエフ",
+      "result": "3-0",
+      "outcome": "win",
+      "goals": 0,
+      "assists": 1,
+      "note": "1アシストを記録"
+    },
+    {
+      "date": "2024-11-28",
+      "competition": "ヨーロッパリーグ",
+      "opponent": "アヤックス",
+      "result": "2-0",
+      "outcome": "win",
+      "goals": 1,
+      "assists": 1,
+      "minutesPlayed": 90,
+      "note": "1ゴール1アシスト。85分に得点。「メッシのよう」「マラドーナのよう」と現地メディアが絶賛",
+      "videoUrl": "https://www.youtube.com/embed/-ByZm8_scWI"
+    },
+    {
+      "date": "2024-11-03",
+      "competition": "ラ・リーガ",
+      "opponent": "セビージャ",
+      "result": "2-0",
+      "outcome": "win",
+      "goals": 1,
+      "assists": 0,
+      "note": "1ゴールを記録"
+    },
+    {
+      "date": "2024-09-28",
+      "competition": "ラ・リーガ",
+      "opponent": "バレンシア",
+      "result": "3-0",
+      "outcome": "win",
+      "goals": 1,
+      "assists": 0,
+      "note": "1ゴールを記録",
+      "videoUrl": "https://www.youtube.com/embed/VPqtptnfG84"
+    },
+    {
+      "date": "2024-08-24",
+      "competition": "ラ・リーガ",
+      "opponent": "エスパニョール",
+      "result": "1-0",
+      "outcome": "win",
+      "goals": 1,
+      "assists": 0,
+      "note": "途中出場から1ゴール"
+    }
+  ],
+  "nationalTeam2026WCQ": {
+    "matches": 11,
+    "goals": 4,
+    "assists": 8,
+    "averageRating": 8.0,
+    "note": "2026ワールドカップアジア予選での活躍"
+  },
+  "careerStats": {
+    "totalMatches": 227,
+    "totalGoals": 33,
+    "totalAssists": 16,
+    "yellowCards": 23,
+    "redCards": 1
+  },
+  "currentStatus": {
+    "injury": "足首損傷",
+    "contractUntil": "2029-06-30",
+    "marketValue": "31百万ユーロ"
+  }
+}
