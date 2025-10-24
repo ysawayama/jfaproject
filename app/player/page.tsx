@@ -24,7 +24,34 @@ import {
   kuboNationalTeamData,
 } from '@/lib/demo-data';
 import seasonPerformanceData from '@/public/data/kubo-season-performance.json';
-import recentMatches from '@/public/data/kubo-recent-matches.json';
+import recentMatchesData from '@/public/data/kubo-recent-matches.json';
+
+// 型定義
+interface MatchData {
+  matchId: string;
+  date: string;
+  competition: string;
+  competitionType: 'club' | 'national';
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  result: 'win' | 'loss' | 'draw';
+  venue: string;
+  playerPerformance: {
+    started: boolean;
+    minutesPlayed: number;
+    position: string;
+    rating: number;
+    goals: number;
+    assists: number;
+    [key: string]: any;
+  };
+  note?: string;
+  fotmobUrl?: string;
+}
+
+const recentMatches = recentMatchesData as MatchData[];
 
 export default function PlayerDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
