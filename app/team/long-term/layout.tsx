@@ -13,12 +13,16 @@ import {
   DollarSign,
   Settings,
   ChevronLeft,
+  Users2,
+  MapPin,
 } from 'lucide-react';
 
 const navigationItems = [
   { name: 'ダッシュボード', href: '/team/long-term', icon: LayoutDashboard },
   { name: '選手名簿', href: '/team/long-term/roster', icon: Users },
   { name: 'スケジュール', href: '/team/long-term/schedule', icon: Calendar },
+  { name: 'マッチメイク', href: '/team/long-term/matchmaking', icon: Users2 },
+  { name: 'グランド検索', href: '/team/long-term/ground-search', icon: MapPin },
   { name: '出欠管理', href: '/team/long-term/attendance', icon: ClipboardCheck },
   { name: '連絡帳', href: '/team/long-term/messages', icon: MessageSquare },
   { name: '成長記録', href: '/team/long-term/growth', icon: TrendingUp },
