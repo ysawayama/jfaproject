@@ -2,11 +2,12 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import React from 'react';
 
 interface BottomNavItem {
   id: string;
   label: string;
-  icon: JSX.Element;
+  icon: React.ReactElement;
   href: string;
 }
 
