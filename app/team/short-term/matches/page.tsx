@@ -94,7 +94,7 @@ export default function MatchesPage() {
       {/* ヘッダー */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-base-dark mb-2">試合管理</h1>
+          <h1 className="text-3xl font-bold text-base-dark mb-2">試合記録</h1>
           <p className="text-neutral-600">
             試合記録・スタッツ・レポート管理
           </p>

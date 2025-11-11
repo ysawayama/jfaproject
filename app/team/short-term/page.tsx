@@ -201,49 +201,16 @@ export default function ShortTermDashboard() {
         </div>
       </section>
 
-      {/* クイックアクション */}
-      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
-        <div className="border-b border-neutral-200 bg-neutral-50 px-4 sm:px-6 py-3 sm:py-4">
-          <h2 className="text-lg sm:text-xl font-bold text-base-dark">
-            クイックアクション
-          </h2>
-        </div>
-        <div className="p-4 sm:p-6 lg:p-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className="group bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all"
-                >
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-base-dark mb-1 text-sm sm:text-base">
-                    {action.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-neutral-600">
-                    {action.description}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
       {/* タブセクション */}
       <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
         {/* タブヘッダー */}
-        <div className="border-b border-neutral-200 bg-neutral-50 p-3 sm:p-4">
-          <div className="flex gap-2 bg-white p-1.5 rounded-xl shadow-sm max-w-md mx-auto sm:mx-0">
+        <div className="border-b border-neutral-200 bg-neutral-50 p-4 sm:p-6">
+          <div className="flex gap-3 bg-white p-2 rounded-xl shadow-sm max-w-2xl mx-auto sm:mx-0">
             <button
               onClick={() => setActiveTab('pre-call')}
-              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-sm transition-all ${
+              className={`flex-1 sm:flex-initial px-6 sm:px-10 py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg md:text-xl transition-all ${
                 activeTab === 'pre-call'
-                  ? 'bg-samurai text-white shadow-md'
+                  ? 'bg-samurai text-white shadow-lg scale-105'
                   : 'text-neutral-600 hover:text-base-dark hover:bg-neutral-50'
               }`}
             >
@@ -251,9 +218,9 @@ export default function ShortTermDashboard() {
             </button>
             <button
               onClick={() => setActiveTab('representative')}
-              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-sm transition-all ${
+              className={`flex-1 sm:flex-initial px-6 sm:px-10 py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg md:text-xl transition-all ${
                 activeTab === 'representative'
-                  ? 'bg-samurai text-white shadow-md'
+                  ? 'bg-samurai text-white shadow-lg scale-105'
                   : 'text-neutral-600 hover:text-base-dark hover:bg-neutral-50'
               }`}
             >
@@ -265,7 +232,89 @@ export default function ShortTermDashboard() {
         {/* タブコンテンツ */}
         <div className="p-4 sm:p-6 lg:p-8">
           {activeTab === 'pre-call' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div className="space-y-6">
+              {/* 統計カード */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* 総候補数 */}
+                <Link
+                  href="/team/short-term/candidates"
+                  className="group bg-gradient-to-br from-samurai to-samurai-dark rounded-xl p-6 text-white hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <Users className="w-8 h-8 opacity-80" />
+                  </div>
+                  <p className="text-3xl font-bold mb-1">{stats.totalCandidates}</p>
+                  <p className="text-sm opacity-90">総候補数</p>
+                </Link>
+
+                {/* 招集確定 */}
+                <Link
+                  href="/team/short-term/candidates?status=confirmed"
+                  className="group bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <CheckCircle2 className="w-8 h-8 opacity-80" />
+                  </div>
+                  <p className="text-3xl font-bold mb-1">{stats.confirmed}</p>
+                  <p className="text-sm opacity-90">招集確定</p>
+                </Link>
+
+                {/* 候補選手 */}
+                <Link
+                  href="/team/short-term/candidates?status=candidate"
+                  className="group bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <AlertCircle className="w-8 h-8 opacity-80" />
+                  </div>
+                  <p className="text-3xl font-bold mb-1">{stats.watchlisted}</p>
+                  <p className="text-sm opacity-90">候補選手</p>
+                </Link>
+
+                {/* 視察中 */}
+                <Link
+                  href="/team/short-term/candidates?status=scouting"
+                  className="group bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <Eye className="w-8 h-8 opacity-80" />
+                  </div>
+                  <p className="text-3xl font-bold mb-1">{stats.upcomingScoutings}</p>
+                  <p className="text-sm opacity-90">視察中</p>
+                </Link>
+              </div>
+
+              {/* クイックアクション */}
+              <div className="bg-gradient-to-r from-neutral-50 to-white rounded-xl p-6 border border-neutral-200">
+                <h2 className="text-xl font-bold text-base-dark mb-4">
+                  クイックアクション
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {quickActions.map((action) => {
+                    const Icon = action.icon;
+                    return (
+                      <Link
+                        key={action.href}
+                        href={action.href}
+                        className="group bg-white rounded-xl p-6 border border-neutral-200 hover:shadow-lg hover:border-samurai transition-all"
+                      >
+                        <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                          <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="font-bold text-base-dark mb-1">
+                          {action.title}
+                        </h3>
+                        <p className="text-sm text-neutral-600">
+                          {action.description}
+                        </p>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 既存のコンテンツ */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* 今後の活動予定 */}
             <div className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200">
               <h2 className="text-lg sm:text-xl font-bold text-base-dark mb-4">
@@ -342,18 +391,19 @@ export default function ShortTermDashboard() {
               </Link>
             </div>
             </div>
+            </div>
           )}
 
           {activeTab === 'representative' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* 試合管理の概要 */}
+            {/* 本活動の戦績 */}
             <Link
               href="/team/short-term/matches"
               className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-bold text-base-dark group-hover:text-samurai transition-colors">
-                  試合管理の概要
+                  本活動の戦績
                 </h2>
                 <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
               </div>
@@ -391,7 +441,7 @@ export default function ShortTermDashboard() {
 
             {/* 次の公式戦 */}
             <Link
-              href="/team/short-term/schedule"
+              href="/team/short-term/schedule/15"
               className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-4">
@@ -425,7 +475,7 @@ export default function ShortTermDashboard() {
 
             {/* 対戦相手の情報 */}
             <Link
-              href="/team/short-term/tactics"
+              href="/team/short-term/tactics/1"
               className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-4">

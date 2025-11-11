@@ -22,24 +22,60 @@ export default function AttendancePage() {
 
   const selectedEvent = teamEvents.find((e) => e.id === selectedEventId);
 
-  // モック出欠データ（実際にはAPIから取得）
-  const mockAttendance: Record<string, AttendanceStatus> = {
-    p1: 'present',
-    p2: 'present',
-    p3: 'absent',
-    p4: 'present',
-    p5: 'late',
-    p6: 'present',
-    p7: 'pending',
-    p8: 'pending',
+  // イベントごとのモック出欠データ（実際にはAPIから取得）
+  // 各イベントのattendanceCountに合わせた詳細データ
+  const mockAttendanceByEvent: Record<string, Record<string, AttendanceStatus>> = {
+    // 通常練習 10/28: present=68, absent=8, pending=4
+    'ev101': {
+      p1: 'present', p2: 'present', p3: 'present', p4: 'present', p5: 'present',
+      p6: 'present', p7: 'present', p8: 'absent', p9: 'pending', p10: 'late',
+    },
+    // 通常練習 10/29: present=70, absent=6, pending=4
+    'ev102': {
+      p1: 'present', p2: 'present', p3: 'present', p4: 'present', p5: 'present',
+      p6: 'present', p7: 'present', p8: 'present', p9: 'pending', p10: 'late',
+    },
+    // 秋季大会 1回戦 10/31: present=72, absent=5, pending=3
+    'ev103': {
+      p1: 'present', p2: 'present', p3: 'present', p4: 'present', p5: 'present',
+      p6: 'present', p7: 'present', p8: 'present', p9: 'pending', p10: 'absent',
+    },
+    // 通常練習 11/01: present=65, absent=10, pending=5
+    'ev1': {
+      p1: 'present', p2: 'present', p3: 'present', p4: 'present', p5: 'present',
+      p6: 'present', p7: 'late', p8: 'absent', p9: 'pending', p10: 'absent',
+    },
+    // 練習試合 vs 桜台FC 11/02: present=58, absent=15, pending=7
+    'ev2': {
+      p1: 'present', p2: 'present', p3: 'present', p4: 'present', p5: 'present',
+      p6: 'absent', p7: 'absent', p8: 'absent', p9: 'pending', p10: 'late',
+    },
+    // 秋季大会 2回戦 11/03: present=62, absent=12, pending=6
+    'ev104': {
+      p1: 'present', p2: 'present', p3: 'present', p4: 'present', p5: 'present',
+      p6: 'present', p7: 'present', p8: 'absent', p9: 'absent', p10: 'pending',
+    },
+    // 通常練習 11/04: present=67, absent=9, pending=4
+    'ev105': {
+      p1: 'present', p2: 'present', p3: 'present', p4: 'present', p5: 'present',
+      p6: 'present', p7: 'present', p8: 'present', p9: 'absent', p10: 'late',
+    },
   };
 
+  // 選択中のイベントの出欠データを取得
+  const mockAttendance = mockAttendanceByEvent[selectedEventId] || {};
+
+  // 選択中のイベントのattendanceCountから統計を表示
+  // late と early-leave は present の一部として含まれるが、詳細表示用に分離
+  const lateCount = players.filter((p) => mockAttendance[p.id] === 'late').length;
+  const earlyLeaveCount = players.filter((p) => mockAttendance[p.id] === 'early-leave').length;
+
   const attendanceByStatus = {
-    present: players.filter((p) => mockAttendance[p.id] === 'present'),
-    absent: players.filter((p) => mockAttendance[p.id] === 'absent'),
-    late: players.filter((p) => mockAttendance[p.id] === 'late'),
-    'early-leave': players.filter((p) => mockAttendance[p.id] === 'early-leave'),
-    pending: players.filter((p) => mockAttendance[p.id] === 'pending'),
+    present: selectedEvent?.attendanceCount.present || 0,
+    absent: selectedEvent?.attendanceCount.absent || 0,
+    late: lateCount,
+    'early-leave': earlyLeaveCount,
+    pending: selectedEvent?.attendanceCount.pending || 0,
   };
 
   return (
@@ -54,7 +90,7 @@ export default function AttendancePage() {
 
       {/* 統計カード */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {Object.entries(attendanceByStatus).map(([status, playerList]) => {
+        {Object.entries(attendanceByStatus).map(([status, count]) => {
           const statusInfo = getAttendanceStatusInfo(status as AttendanceStatus);
           return (
             <div
@@ -62,7 +98,7 @@ export default function AttendancePage() {
               className="bg-white rounded-xl p-4 border border-neutral-200"
             >
               <p className={`text-2xl font-bold ${statusInfo.color}`}>
-                {playerList.length}
+                {count}
               </p>
               <p className="text-sm text-neutral-600">{statusInfo.label}</p>
             </div>

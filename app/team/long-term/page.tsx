@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Users,
@@ -11,6 +12,7 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  Trophy,
 } from 'lucide-react';
 import {
   teamInfo,
@@ -19,6 +21,7 @@ import {
   teamEvents,
   getLongTermStats,
   getMessageCategoryInfo,
+  getGradeStats,
 } from '@/lib/team/long-term-data';
 
 export default function LongTermDashboard() {
@@ -29,16 +32,12 @@ export default function LongTermDashboard() {
     .slice(0, 3);
   const recentMessages = teamMessages.slice(0, 3);
 
+  // 学年選択用のステート（初期値は6年生）
+  const [selectedGrade, setSelectedGrade] = useState(6);
+  const gradeStats = getGradeStats(selectedGrade);
+
   return (
     <div className="space-y-6">
-      {/* ヘッダー */}
-      <div>
-        <h1 className="text-3xl font-bold text-base-dark mb-2">ダッシュボード</h1>
-        <p className="text-neutral-600">
-          {teamInfo.name}の管理画面です
-        </p>
-      </div>
-
       {/* チーム情報カード */}
       <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-3 sm:mb-4 gap-3">
@@ -65,6 +64,102 @@ export default function LongTermDashboard() {
           <div className="bg-white/10 rounded-lg p-3">
             <p className="text-xs sm:text-sm text-green-100">ホームグラウンド</p>
             <p className="font-semibold text-sm sm:text-base">{teamInfo.homeGround}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 今シーズンの戦績 */}
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-neutral-200">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-base-dark flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-orange-500" />
+            今シーズンの戦績
+          </h2>
+          <Link
+            href="/team/long-term/matches"
+            className="text-sm font-medium text-green-600 hover:text-green-700"
+          >
+            すべて見る →
+          </Link>
+        </div>
+
+        {/* 学年選択 */}
+        <div className="mb-4 sm:mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {[1, 2, 3, 4, 5, 6].map((grade) => (
+              <button
+                key={grade}
+                onClick={() => setSelectedGrade(grade)}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
+                  selectedGrade === grade
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                }`}
+              >
+                {grade}年生
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 戦績表示 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 公式戦 */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+            <h3 className="text-sm font-semibold text-blue-700 mb-3">公式戦</h3>
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="text-3xl font-bold text-blue-900">
+                {gradeStats.official.total}
+              </span>
+              <span className="text-sm text-blue-600">試合</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-green-700 font-semibold">
+                {gradeStats.official.wins}勝
+              </span>
+              <span className="text-red-700 font-semibold">
+                {gradeStats.official.losses}敗
+              </span>
+              <span className="text-neutral-700 font-semibold">
+                {gradeStats.official.draws}分
+              </span>
+            </div>
+          </div>
+
+          {/* 練習試合 */}
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+            <h3 className="text-sm font-semibold text-purple-700 mb-3">練習試合</h3>
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="text-3xl font-bold text-purple-900">
+                {gradeStats.practice.total}
+              </span>
+              <span className="text-sm text-purple-600">試合</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-green-700 font-semibold">
+                {gradeStats.practice.wins}勝
+              </span>
+              <span className="text-red-700 font-semibold">
+                {gradeStats.practice.losses}敗
+              </span>
+              <span className="text-neutral-700 font-semibold">
+                {gradeStats.practice.draws}分
+              </span>
+            </div>
+          </div>
+
+          {/* チーム総試合数 */}
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+            <h3 className="text-sm font-semibold text-orange-700 mb-3">チーム総試合数</h3>
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="text-3xl font-bold text-orange-900">
+                {gradeStats.total}
+              </span>
+              <span className="text-sm text-orange-600">試合</span>
+            </div>
+            <div className="text-sm text-orange-700">
+              公式戦 + 練習試合
+            </div>
           </div>
         </div>
       </div>
@@ -122,7 +217,7 @@ export default function LongTermDashboard() {
               <p className="text-xl sm:text-2xl font-bold text-green-600">
                 {stats.upcomingEvents}
               </p>
-              <p className="text-xs sm:text-sm text-neutral-600">今後の予定</p>
+              <p className="text-xs sm:text-sm text-neutral-600">今週の予定</p>
             </div>
           </div>
         </div>
@@ -130,12 +225,12 @@ export default function LongTermDashboard() {
 
       {/* メインコンテンツグリッド */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 今後の予定 */}
+        {/* 今週の予定 */}
         <div className="bg-white rounded-xl border border-neutral-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-base-dark flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              今後の予定
+              今週の予定
             </h2>
             <Link
               href="/team/long-term/schedule"
@@ -146,13 +241,14 @@ export default function LongTermDashboard() {
           </div>
           <div className="space-y-3">
             {upcomingEvents.map((event) => (
-              <div
+              <Link
                 key={event.id}
-                className="p-4 bg-neutral-50 rounded-lg border border-neutral-200 hover:shadow-md transition-shadow"
+                href={`/team/long-term/schedule/${event.id}`}
+                className="block p-4 bg-neutral-50 rounded-lg border border-neutral-200 hover:shadow-md hover:border-green-300 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-neutral-800">
+                    <h3 className="font-semibold text-neutral-800 group-hover:text-green-600">
                       {event.title}
                     </h3>
                     <p className="text-sm text-neutral-600 mt-1">
@@ -182,7 +278,7 @@ export default function LongTermDashboard() {
                     未回答 {event.attendanceCount.pending}名
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Home,
   Award,
@@ -20,6 +21,8 @@ import {
   Clock,
   Zap,
   User,
+  ShoppingBag,
+  Star,
 } from 'lucide-react';
 import MobileMenu from '@/components/MobileMenu';
 import {
@@ -30,6 +33,7 @@ import {
   takahashiIDPGoals,
   takahashiMedia,
   takahashiUpcomingActivities,
+  takahashiShoesLog,
 } from '@/lib/player/takahashi-data';
 
 export default function TakahashiPlayerDashboard() {
@@ -46,37 +50,18 @@ export default function TakahashiPlayerDashboard() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 max-w-7xl">
-        {/* ナビゲーション */}
-        <div className="mb-4 sm:mb-6 flex items-center justify-between bg-white rounded-lg shadow px-3 sm:px-4 lg:px-6 py-3">
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-            <Link
-              href="/player"
-              className="text-green-600 hover:underline font-semibold flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
-            >
-              <Home className="w-4 h-4 flex-shrink-0" />
-              <span className="hidden sm:inline">選手ポータル</span>
-              <span className="sm:hidden">戻る</span>
-            </Link>
-            <span className="hidden sm:inline text-gray-300">|</span>
-            <span className="font-bold text-gray-700 text-xs sm:text-base truncate">
-              {player.name}
-            </span>
-          </div>
-
-          {/* デスクトップメニュー */}
+        {/* ヒーロー画面 */}
+        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 lg:mb-8 text-white relative">
+          {/* チームページへボタン */}
           <Link
             href="/team/long-term"
-            className="hidden lg:block text-sm text-gray-600 hover:text-green-600"
+            className="absolute top-4 right-4 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-lg transition-all text-white font-semibold text-sm flex items-center gap-2"
           >
-            チームポータルへ
+            <Users className="w-4 h-4" />
+            <span className="hidden sm:inline">チームページへ</span>
+            <span className="sm:hidden">チーム</span>
           </Link>
 
-          {/* モバイルメニュー */}
-          <MobileMenu items={menuItems} currentPath="/player/amateur/takahashi" />
-        </div>
-
-        {/* ヒーロー画面 */}
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 lg:mb-8 text-white">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
             {/* プロフィール写真 */}
             <div className="flex-shrink-0">
@@ -135,59 +120,64 @@ export default function TakahashiPlayerDashboard() {
           </div>
         </div>
 
-        {/* IDP目標概要 */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-            <Target className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-            2024年度 シーズン目標
-          </h2>
-
-          <div className="bg-blue-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-blue-200">
-            <pre className="whitespace-pre-wrap text-xs sm:text-sm text-gray-700 font-sans leading-relaxed">
-              {idpGoals.seasonGoal}
-            </pre>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-                強み
-              </h3>
-              <ul className="space-y-2">
-                {idpGoals.strengths.map((strength, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-2 text-sm text-gray-700"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-600 mt-2"></div>
-                    <span>{strength}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Circle className="w-5 h-5 text-orange-600" />
-                改善ポイント
-              </h3>
-              <ul className="space-y-2">
-                {idpGoals.weaknesses.map((weakness, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-2 text-sm text-gray-700"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-600 mt-2"></div>
-                    <span>{weakness}</span>
-                  </li>
-                ))}
-              </ul>
+        {/* アンカーナビゲーション */}
+        <div className="mb-4 sm:mb-6 lg:mb-8 sticky top-0 z-10 bg-gradient-to-br from-gray-50 to-gray-100 pb-2">
+          <div className="bg-white rounded-xl shadow-md p-2 overflow-x-auto">
+            <div className="flex gap-2 min-w-max">
+              <a
+                href="#performance"
+                className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors font-semibold text-sm whitespace-nowrap"
+              >
+                個人パフォーマンス
+              </a>
+              <a
+                href="#goals"
+                className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-semibold text-sm whitespace-nowrap"
+              >
+                目標
+              </a>
+              <a
+                href="#team-record"
+                className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-semibold text-sm whitespace-nowrap"
+              >
+                チーム戦績
+              </a>
+              <a
+                href="#media"
+                className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-semibold text-sm whitespace-nowrap"
+              >
+                動画
+              </a>
+              <a
+                href="#schedule"
+                className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors font-semibold text-sm whitespace-nowrap"
+              >
+                スケジュール
+              </a>
+              <a
+                href="#soccer-note"
+                className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors font-semibold text-sm whitespace-nowrap"
+              >
+                サッカーノート
+              </a>
+              <a
+                href="#life-log"
+                className="px-4 py-2 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors font-semibold text-sm whitespace-nowrap"
+              >
+                サッカーライフログ
+              </a>
+              <a
+                href="#shoes-log"
+                className="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 transition-colors font-semibold text-sm whitespace-nowrap"
+              >
+                マイシューズログ
+              </a>
             </div>
           </div>
         </div>
 
         {/* 個人パフォーマンス */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
+        <div id="performance" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8 scroll-mt-20">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
             <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             個人パフォーマンス
@@ -295,24 +285,24 @@ export default function TakahashiPlayerDashboard() {
 
           {/* 通算記録 */}
           <div className="bg-gradient-to-r from-gray-700 to-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
-            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 text-white">
               サッカー人生 通算記録（公式戦のみ）
             </h3>
             <div className="grid grid-cols-3 gap-3 sm:gap-6">
               <div className="text-center">
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 text-white">
                   {performance.careerOfficial.matches}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-300">試合出場</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 text-white">
                   {performance.careerOfficial.goals}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-300">ゴール</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 text-white">
                   {performance.careerOfficial.assists}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-300">アシスト</p>
@@ -320,9 +310,60 @@ export default function TakahashiPlayerDashboard() {
             </div>
           </div>
         </div>
+        {/* IDP目標概要 */}
+        <div id="goals" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8 scroll-mt-20">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+            <Target className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            2024年度 シーズン目標
+          </h2>
+
+          <div className="bg-blue-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-blue-200">
+            <pre className="whitespace-pre-wrap text-xs sm:text-sm text-gray-700 font-sans leading-relaxed">
+              {idpGoals.seasonGoal}
+            </pre>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                強み
+              </h3>
+              <ul className="space-y-2">
+                {idpGoals.strengths.map((strength, index) => (
+                  <li
+                    key={index}
+                    className="flex items-start gap-2 text-sm text-gray-700"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-600 mt-2"></div>
+                    <span>{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <Circle className="w-5 h-5 text-orange-600" />
+                改善ポイント
+              </h3>
+              <ul className="space-y-2">
+                {idpGoals.weaknesses.map((weakness, index) => (
+                  <li
+                    key={index}
+                    className="flex items-start gap-2 text-sm text-gray-700"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-orange-600 mt-2"></div>
+                    <span>{weakness}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
 
         {/* 緑ヶ丘FCの戦績 */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
+        <div id="team-record" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8 scroll-mt-20">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
             <Award className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
             {player.team}の戦績
@@ -382,7 +423,7 @@ export default function TakahashiPlayerDashboard() {
         </div>
 
         {/* 動画/フォトスペース */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
+        <div id="media" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8 scroll-mt-20">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
             <Play className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
             動画 / フォトスペース
@@ -431,7 +472,7 @@ export default function TakahashiPlayerDashboard() {
         </div>
 
         {/* 直近の活動 */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
+        <div id="schedule" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8 scroll-mt-20">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
             <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
             直近の活動スケジュール
@@ -499,7 +540,7 @@ export default function TakahashiPlayerDashboard() {
         </div>
 
         {/* IDP（個人分析シート） */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
+        <div id="soccer-note" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8 scroll-mt-20">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
             <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             サッカーノート
@@ -550,7 +591,7 @@ export default function TakahashiPlayerDashboard() {
         </div>
 
         {/* サッカーライフログ */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
+        <div id="life-log" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8 scroll-mt-20">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
             サッカーライフログ
@@ -612,6 +653,88 @@ export default function TakahashiPlayerDashboard() {
                   </div>
                 </div>
               ))}
+          </div>
+        </div>
+
+        {/* マイシューズログ */}
+        <div id="shoes-log" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8 scroll-mt-20">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-pink-600" />
+            マイシューズログ
+          </h2>
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
+            サッカーを始めてから履いてきた思い出のスパイクたち
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {takahashiShoesLog.map((shoe) => (
+              <div
+                key={shoe.id}
+                className={`relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border-2 transition-all hover:shadow-xl ${
+                  shoe.isCurrentlyUsing
+                    ? 'border-pink-500 shadow-lg'
+                    : 'border-gray-200 hover:border-pink-300'
+                }`}
+              >
+                {/* 現在使用中バッジ */}
+                {shoe.isCurrentlyUsing && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <span className="px-3 py-1 bg-pink-600 text-white rounded-full text-xs font-bold flex items-center gap-1 shadow-md">
+                      <Star className="w-3 h-3 fill-current" />
+                      現在使用中
+                    </span>
+                  </div>
+                )}
+
+                {/* シューズ画像 */}
+                <div className="aspect-square bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+                  {shoe.imageUrl ? (
+                    <Image
+                      src={shoe.imageUrl}
+                      alt={shoe.brandModel}
+                      fill
+                      className="object-contain p-4"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  ) : (
+                    <div className="relative w-full h-full">
+                      {/* プレースホルダー */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <ShoppingBag className="w-16 h-16 sm:w-20 sm:h-20 text-pink-400 mx-auto mb-2" strokeWidth={1.5} />
+                          <p className="text-xs sm:text-sm text-pink-600 font-semibold">
+                            {shoe.order}足目
+                          </p>
+                        </div>
+                      </div>
+                      {/* 装飾 */}
+                      <div className="absolute top-2 left-2 w-8 h-8 bg-white/40 rounded-full"></div>
+                      <div className="absolute bottom-4 right-4 w-12 h-12 bg-white/30 rounded-full"></div>
+                    </div>
+                  )}
+                </div>
+
+                {/* シューズ情報 */}
+                <div className="p-4 sm:p-5 bg-white">
+                  <div className="mb-3">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-1">
+                      {shoe.brandModel}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                      {shoe.period}
+                    </p>
+                  </div>
+
+                  {/* メモ */}
+                  <div className="bg-pink-50 rounded-lg p-3 border border-pink-100">
+                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                      {shoe.memo}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

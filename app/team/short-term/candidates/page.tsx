@@ -28,7 +28,7 @@ export default function CandidatesPage() {
   // URLパラメータからステータスを読み取って初期設定
   useEffect(() => {
     const statusParam = searchParams.get('status');
-    if (statusParam && (statusParam === 'candidate' || statusParam === 'watchlist' || statusParam === 'confirmed')) {
+    if (statusParam && (statusParam === 'candidate' || statusParam === 'watchlist' || statusParam === 'confirmed' || statusParam === 'scouting')) {
       // watchlist -> scouting に変換（データ構造に合わせる）
       const mappedStatus = statusParam === 'watchlist' ? 'scouting' : statusParam;
       setSelectedStatus(mappedStatus as CandidateStatus);

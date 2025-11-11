@@ -12,19 +12,22 @@ import {
   Image,
   DollarSign,
   Settings,
-  ChevronLeft,
   Users2,
   MapPin,
+  Trophy,
+  MessageCircle,
 } from 'lucide-react';
 
 const navigationItems = [
   { name: 'ダッシュボード', href: '/team/long-term', icon: LayoutDashboard },
   { name: '選手名簿', href: '/team/long-term/roster', icon: Users },
+  { name: '試合記録', href: '/team/long-term/matches', icon: Trophy },
   { name: 'スケジュール', href: '/team/long-term/schedule', icon: Calendar },
   { name: 'マッチメイク', href: '/team/long-term/matchmaking', icon: Users2 },
   { name: 'グランド検索', href: '/team/long-term/ground-search', icon: MapPin },
   { name: '出欠管理', href: '/team/long-term/attendance', icon: ClipboardCheck },
   { name: '連絡帳', href: '/team/long-term/messages', icon: MessageSquare },
+  { name: 'コミュニケーション', href: '/team/long-term/communication', icon: MessageCircle },
   { name: '成長記録', href: '/team/long-term/growth', icon: TrendingUp },
   { name: 'アルバム', href: '/team/long-term/album', icon: Image },
   { name: '会費・月謝', href: '/team/long-term/fees', icon: DollarSign },
@@ -47,19 +50,14 @@ export default function LongTermLayout({
             {/* 左側 */}
             <div className="flex items-center gap-4">
               <Link
-                href="/team"
-                className="flex items-center gap-2 text-neutral-600 hover:text-samurai transition-colors"
+                href="/team/long-term"
+                className="hover:opacity-80 transition-opacity"
               >
-                <ChevronLeft className="w-5 h-5" />
-                <span className="text-sm font-medium">戻る</span>
-              </Link>
-              <div className="h-6 w-px bg-neutral-300"></div>
-              <div>
                 <h1 className="text-xl font-bold text-base-dark">
                   緑ヶ丘FC ジュニア
                 </h1>
                 <p className="text-xs text-neutral-600">U-12（小学生チーム）</p>
-              </div>
+              </Link>
               <span className="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded">
                 恒常活動型
               </span>

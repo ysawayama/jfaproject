@@ -469,3 +469,44 @@ export const takahashiSoccerLifeLog: SoccerLifeLog[] = [
     ],
   },
 ];
+
+// マイシューズログ
+export interface SoccerShoe {
+  id: string;
+  brandModel: string;
+  imageUrl: string; // プレースホルダー画像
+  period: string; // 使用期間
+  memo: string;
+  order: number; // 1足目、2足目、3足目
+  isCurrentlyUsing: boolean;
+}
+
+export const takahashiShoesLog: SoccerShoe[] = [
+  {
+    id: 'shoe1',
+    brandModel: 'ナイキ マーキュリアル ヴェイパー 15',
+    imageUrl: '/images/shoes/nike-mercurial-vapor-15.png',
+    period: '2024年4月 - 現在',
+    memo: 'すごく軽くて走りやすい！グリップ力も良くて、ドリブル時の切り返しがしやすくなった。これまでで一番お気に入りのスパイク。',
+    order: 1,
+    isCurrentlyUsing: true,
+  },
+  {
+    id: 'shoe2',
+    brandModel: 'アディダス プレデター エッジ.3',
+    imageUrl: '/images/shoes/adidas-predator-edge-3.png',
+    period: '2022年9月 - 2024年3月',
+    memo: 'パワーが出るスパイクで、シュートの威力が上がった。少し重めだけど、しっかりした履き心地で安定感があった。',
+    order: 2,
+    isCurrentlyUsing: false,
+  },
+  {
+    id: 'shoe3',
+    brandModel: 'プーマ フューチャー Z 4.1',
+    imageUrl: '/images/shoes/puma-future-z-4.png',
+    period: '2020年4月 - 2022年8月',
+    memo: '初めてのスパイク！サッカーを始めた時にコーチに勧めてもらった。フィット感が良くて、初心者でも履きやすかった。思い出の一足。',
+    order: 3,
+    isCurrentlyUsing: false,
+  },
+];

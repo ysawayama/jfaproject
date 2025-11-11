@@ -40,9 +40,9 @@ const navigationStructure = {
     name: '代表活動',
     icon: Trophy,
     items: [
+      { name: '試合記録', href: '/team/short-term/matches', icon: Trophy },
       { name: '練習メニュー', href: '/team/short-term/training', icon: ClipboardList },
       { name: '戦術・スカウト', href: '/team/short-term/tactics', icon: Target },
-      { name: '試合管理', href: '/team/short-term/matches', icon: Trophy },
       { name: '選手評価', href: '/team/short-term/evaluations', icon: Star },
       { name: '医療・コンディション', href: '/team/short-term/medical', icon: Heart },
     ]

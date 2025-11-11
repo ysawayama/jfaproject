@@ -3068,7 +3068,7 @@ export const teamEvents: TeamEvent[] = [
     meetingTime: '9:00',
     opponent: 'TBD（1回戦結果による）',
     attendanceDeadline: '2025-11-01T18:00:00Z',
-    attendanceCount: { present: 0, absent: 0, pending: 80 },
+    attendanceCount: { present: 62, absent: 12, pending: 6 },
   },
   {
     id: 'ev105',
@@ -3081,7 +3081,7 @@ export const teamEvents: TeamEvent[] = [
     description: '体幹トレーニングとパス練習',
     bringItems: ['水筒', 'タオル', '着替え'],
     attendanceDeadline: '2025-11-04T14:00:00Z',
-    attendanceCount: { present: 0, absent: 0, pending: 80 },
+    attendanceCount: { present: 67, absent: 9, pending: 4 },
   },
   {
     id: 'ev106',
@@ -5071,4 +5071,655 @@ export function getPaymentMethodLabel(method: PaymentMethod): string {
     other: 'その他',
   };
   return methodMap[method];
+}
+
+// ===========================
+// 試合記録
+// ===========================
+
+export type MatchType = 'official' | 'practice';
+export type MatchResult = 'win' | 'draw' | 'loss';
+
+export interface MatchRecord {
+  id: string;
+  type: MatchType;
+  date: string;
+  opponent: string;
+  result: MatchResult;
+  ourScore: number;
+  opponentScore: number;
+  venue: string;
+  grade: number; // 学年（1-6）
+  homeAway: 'home' | 'away';
+  videoUrl?: string;
+  images?: string[];
+  scorers?: { playerId: string; playerName: string; goals: number }[];
+  notes?: string;
+}
+
+// 試合記録のモックデータ
+export const matchRecords: MatchRecord[] = [
+  // 6年生の試合
+  {
+    id: 'm001',
+    type: 'official',
+    date: '2025-01-15',
+    opponent: '桜台FC',
+    result: 'win',
+    ourScore: 3,
+    opponentScore: 1,
+    venue: '緑ヶ丘小学校グラウンド',
+    grade: 6,
+    homeAway: 'home',
+    scorers: [
+      { playerId: 'p001', playerName: '田中 太郎', goals: 2 },
+      { playerId: 'p003', playerName: '佐藤 健太', goals: 1 },
+    ],
+    images: ['/images/match001-1.jpg', '/images/match001-2.jpg'],
+  },
+  {
+    id: 'm002',
+    type: 'practice',
+    date: '2025-01-20',
+    opponent: '若葉SC',
+    result: 'draw',
+    ourScore: 2,
+    opponentScore: 2,
+    venue: '若葉公園グラウンド',
+    grade: 6,
+    homeAway: 'away',
+    scorers: [
+      { playerId: 'p001', playerName: '田中 太郎', goals: 1 },
+      { playerId: 'p002', playerName: '山田 次郎', goals: 1 },
+    ],
+  },
+  {
+    id: 'm003',
+    type: 'official',
+    date: '2025-02-05',
+    opponent: '青空FC',
+    result: 'loss',
+    ourScore: 1,
+    opponentScore: 3,
+    venue: '青空小学校グラウンド',
+    grade: 6,
+    homeAway: 'away',
+    scorers: [
+      { playerId: 'p005', playerName: '鈴木 翔太', goals: 1 },
+    ],
+  },
+  {
+    id: 'm004',
+    type: 'official',
+    date: '2025-02-12',
+    opponent: '赤坂ユナイテッド',
+    result: 'win',
+    ourScore: 4,
+    opponentScore: 2,
+    venue: '緑ヶ丘小学校グラウンド',
+    grade: 6,
+    homeAway: 'home',
+    videoUrl: '/videos/match004.mp4',
+    scorers: [
+      { playerId: 'p001', playerName: '田中 太郎', goals: 2 },
+      { playerId: 'p003', playerName: '佐藤 健太', goals: 1 },
+      { playerId: 'p002', playerName: '山田 次郎', goals: 1 },
+    ],
+    images: ['/images/match004-1.jpg', '/images/match004-2.jpg', '/images/match004-3.jpg'],
+  },
+  {
+    id: 'm005',
+    type: 'practice',
+    date: '2025-02-18',
+    opponent: 'ドリームFC',
+    result: 'win',
+    ourScore: 5,
+    opponentScore: 1,
+    venue: '緑ヶ丘小学校グラウンド',
+    grade: 6,
+    homeAway: 'home',
+  },
+
+  // 5年生の試合
+  {
+    id: 'm006',
+    type: 'official',
+    date: '2025-01-18',
+    opponent: '白鳥FC',
+    result: 'win',
+    ourScore: 2,
+    opponentScore: 1,
+    venue: '白鳥グラウンド',
+    grade: 5,
+    homeAway: 'away',
+  },
+  {
+    id: 'm007',
+    type: 'practice',
+    date: '2025-01-25',
+    opponent: '松風SC',
+    result: 'loss',
+    ourScore: 1,
+    opponentScore: 3,
+    venue: '緑ヶ丘小学校グラウンド',
+    grade: 5,
+    homeAway: 'home',
+  },
+  {
+    id: 'm008',
+    type: 'official',
+    date: '2025-02-08',
+    opponent: '虹色FC',
+    result: 'draw',
+    ourScore: 2,
+    opponentScore: 2,
+    venue: '虹色スポーツパーク',
+    grade: 5,
+    homeAway: 'away',
+  },
+  {
+    id: 'm009',
+    type: 'official',
+    date: '2025-02-15',
+    opponent: 'サンライズSC',
+    result: 'win',
+    ourScore: 3,
+    opponentScore: 0,
+    venue: '緑ヶ丘小学校グラウンド',
+    grade: 5,
+    homeAway: 'home',
+    videoUrl: '/videos/match009.mp4',
+  },
+
+  // 4年生の試合
+  {
+    id: 'm010',
+    type: 'practice',
+    date: '2025-01-22',
+    opponent: '星空FC',
+    result: 'win',
+    ourScore: 4,
+    opponentScore: 1,
+    venue: '緑ヶ丘小学校グラウンド',
+    grade: 4,
+    homeAway: 'home',
+  },
+  {
+    id: 'm011',
+    type: 'official',
+    date: '2025-02-01',
+    opponent: '月光SC',
+    result: 'loss',
+    ourScore: 0,
+    opponentScore: 2,
+    venue: '月光グラウンド',
+    grade: 4,
+    homeAway: 'away',
+  },
+  {
+    id: 'm012',
+    type: 'practice',
+    date: '2025-02-10',
+    opponent: '太陽FC',
+    result: 'draw',
+    ourScore: 1,
+    opponentScore: 1,
+    venue: '太陽公園グラウンド',
+    grade: 4,
+    homeAway: 'away',
+  },
+
+  // 3年生の試合
+  {
+    id: 'm013',
+    type: 'official',
+    date: '2025-01-28',
+    opponent: '大地SC',
+    result: 'win',
+    ourScore: 3,
+    opponentScore: 2,
+    venue: '緑ヶ丘小学校グラウンド',
+    grade: 3,
+    homeAway: 'home',
+  },
+  {
+    id: 'm014',
+    type: 'practice',
+    date: '2025-02-03',
+    opponent: '海風FC',
+    result: 'win',
+    ourScore: 2,
+    opponentScore: 0,
+    venue: '海風グラウンド',
+    grade: 3,
+    homeAway: 'away',
+  },
+
+  // 2年生の試合
+  {
+    id: 'm015',
+    type: 'official',
+    date: '2025-01-30',
+    opponent: '森林SC',
+    result: 'draw',
+    ourScore: 1,
+    opponentScore: 1,
+    venue: '森林公園グラウンド',
+    grade: 2,
+    homeAway: 'away',
+  },
+  {
+    id: 'm016',
+    type: 'practice',
+    date: '2025-02-07',
+    opponent: '川辺FC',
+    result: 'loss',
+    ourScore: 0,
+    opponentScore: 1,
+    venue: '緑ヶ丘小学校グラウンド',
+    grade: 2,
+    homeAway: 'home',
+  },
+
+  // 1年生の試合
+  {
+    id: 'm017',
+    type: 'practice',
+    date: '2025-02-14',
+    opponent: '風車SC',
+    result: 'win',
+    ourScore: 2,
+    opponentScore: 1,
+    venue: '風車グラウンド',
+    grade: 1,
+    homeAway: 'away',
+  },
+];
+
+// 学年別の戦績を取得する関数
+export function getGradeStats(grade: number) {
+  const gradeMatches = matchRecords.filter((m) => m.grade === grade);
+  const officialMatches = gradeMatches.filter((m) => m.type === 'official');
+  const practiceMatches = gradeMatches.filter((m) => m.type === 'practice');
+
+  const calculateStats = (matches: MatchRecord[]) => {
+    const wins = matches.filter((m) => m.result === 'win').length;
+    const draws = matches.filter((m) => m.result === 'draw').length;
+    const losses = matches.filter((m) => m.result === 'loss').length;
+    return { wins, draws, losses, total: matches.length };
+  };
+
+  return {
+    official: calculateStats(officialMatches),
+    practice: calculateStats(practiceMatches),
+    total: gradeMatches.length,
+  };
+}
+
+// ===========================
+// コミュニケーション機能
+// ===========================
+
+export type MemberRole = 'coach' | 'assistant' | 'guardian' | 'player';
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: MemberRole;
+  position?: string; // コーチの場合は役職、選手の場合はポジション
+  photoUrl?: string;
+  isOnline?: boolean;
+  grade?: number; // 選手の場合は学年
+}
+
+export interface CommunicationMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  content: string;
+  sentAt: string;
+  readBy: { userId: string; readAt: string }[];
+  attachments: {
+    id: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    url: string;
+  }[];
+  replyTo?: string;
+}
+
+export type ConversationType = 'direct' | 'group';
+
+export interface Conversation {
+  id: string;
+  type: ConversationType;
+  name?: string;
+  participantIds: string[];
+  participants: TeamMember[];
+  messages: CommunicationMessage[];
+  lastMessage?: CommunicationMessage;
+  lastMessageAt?: string;
+  unreadCount: number;
+  createdAt: string;
+  createdBy?: string;
+  groupPhotoUrl?: string;
+  isMuted: boolean;
+}
+
+// チームメンバーのモックデータ
+export const teamMembers: TeamMember[] = [
+  // コーチ
+  {
+    id: 'coach-1',
+    name: '田中太郎',
+    role: 'coach',
+    position: '監督',
+    isOnline: true,
+  },
+  {
+    id: 'coach-2',
+    name: '山田花子',
+    role: 'assistant',
+    position: 'アシスタントコーチ',
+    isOnline: true,
+  },
+  // 保護者
+  {
+    id: 'guardian-1',
+    name: '鈴木一郎（保護者）',
+    role: 'guardian',
+    position: '6年生 鈴木健太の父',
+    isOnline: false,
+  },
+  {
+    id: 'guardian-2',
+    name: '佐藤美咲（保護者）',
+    role: 'guardian',
+    position: '5年生 佐藤翔太の母',
+    isOnline: true,
+  },
+  {
+    id: 'guardian-3',
+    name: '高橋直人（保護者）',
+    role: 'guardian',
+    position: '4年生 高橋優の父',
+    isOnline: false,
+  },
+  {
+    id: 'guardian-4',
+    name: '伊藤恵子（保護者）',
+    role: 'guardian',
+    position: '3年生 伊藤蓮の母',
+    isOnline: true,
+  },
+  // 選手代表
+  {
+    id: 'p1',
+    name: '鈴木健太',
+    role: 'player',
+    position: 'FW',
+    grade: 6,
+    isOnline: true,
+  },
+  {
+    id: 'p2',
+    name: '佐藤翔太',
+    role: 'player',
+    position: 'MF',
+    grade: 5,
+    isOnline: false,
+  },
+];
+
+// 会話のモックデータ
+const currentUserId = 'coach-1';
+
+const getTeamMemberById = (id: string) => teamMembers.find((m) => m.id === id)!;
+
+export const conversations: Conversation[] = [
+  // コーチと保護者の1対1会話
+  {
+    id: 'conv-1',
+    type: 'direct',
+    participantIds: ['coach-1', 'guardian-1'],
+    participants: [getTeamMemberById('coach-1'), getTeamMemberById('guardian-1')],
+    messages: [
+      {
+        id: 'msg-1-1',
+        conversationId: 'conv-1',
+        senderId: 'guardian-1',
+        senderName: '鈴木一郎（保護者）',
+        content: '田中コーチ、息子の練習について相談させてください。',
+        sentAt: '2025-11-10T14:00:00Z',
+        readBy: [{ userId: 'coach-1', readAt: '2025-11-10T14:10:00Z' }],
+        attachments: [],
+      },
+      {
+        id: 'msg-1-2',
+        conversationId: 'conv-1',
+        senderId: 'coach-1',
+        senderName: '田中太郎',
+        content: 'はい、どうぞ。どのようなことでしょうか？',
+        sentAt: '2025-11-10T14:15:00Z',
+        readBy: [{ userId: 'guardian-1', readAt: '2025-11-10T14:20:00Z' }],
+        attachments: [],
+      },
+      {
+        id: 'msg-1-3',
+        conversationId: 'conv-1',
+        senderId: 'guardian-1',
+        senderName: '鈴木一郎（保護者）',
+        content: '最近、シュートの精度が落ちているようで本人も気にしています。',
+        sentAt: '2025-11-10T14:25:00Z',
+        readBy: [],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-11-10T14:25:00Z',
+    unreadCount: 1,
+    createdAt: '2025-11-10T14:00:00Z',
+    isMuted: false,
+  },
+  // コーチグループ
+  {
+    id: 'conv-2',
+    type: 'group',
+    name: 'コーチミーティング',
+    participantIds: ['coach-1', 'coach-2'],
+    participants: [getTeamMemberById('coach-1'), getTeamMemberById('coach-2')],
+    messages: [
+      {
+        id: 'msg-2-1',
+        conversationId: 'conv-2',
+        senderId: 'coach-1',
+        senderName: '田中太郎',
+        content: '明日の練習メニューですが、フィジカルを重点的にやりましょう。',
+        sentAt: '2025-11-09T18:00:00Z',
+        readBy: [{ userId: 'coach-2', readAt: '2025-11-09T18:15:00Z' }],
+        attachments: [],
+      },
+      {
+        id: 'msg-2-2',
+        conversationId: 'conv-2',
+        senderId: 'coach-2',
+        senderName: '山田花子',
+        content: '了解です。ラダートレーニングとミニゲームを組み込みます。',
+        sentAt: '2025-11-09T18:20:00Z',
+        readBy: [{ userId: 'coach-1', readAt: '2025-11-09T18:25:00Z' }],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-11-09T18:20:00Z',
+    unreadCount: 0,
+    createdAt: '2025-11-09T18:00:00Z',
+    createdBy: 'coach-1',
+    isMuted: false,
+  },
+  // 保護者グループ
+  {
+    id: 'conv-3',
+    type: 'group',
+    name: '6年生保護者グループ',
+    participantIds: ['coach-1', 'guardian-1', 'guardian-2'],
+    participants: [
+      getTeamMemberById('coach-1'),
+      getTeamMemberById('guardian-1'),
+      getTeamMemberById('guardian-2'),
+    ],
+    messages: [
+      {
+        id: 'msg-3-1',
+        conversationId: 'conv-3',
+        senderId: 'coach-1',
+        senderName: '田中太郎',
+        content: '来週の試合について、集合時間は8:30です。遅れないようお願いします。',
+        sentAt: '2025-11-08T19:00:00Z',
+        readBy: [
+          { userId: 'guardian-1', readAt: '2025-11-08T19:30:00Z' },
+          { userId: 'guardian-2', readAt: '2025-11-08T20:00:00Z' },
+        ],
+        attachments: [],
+      },
+      {
+        id: 'msg-3-2',
+        conversationId: 'conv-3',
+        senderId: 'guardian-2',
+        senderName: '佐藤美咲（保護者）',
+        content: '承知しました！当日は車で送ります。',
+        sentAt: '2025-11-08T20:05:00Z',
+        readBy: [{ userId: 'coach-1', readAt: '2025-11-08T20:10:00Z' }],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-11-08T20:05:00Z',
+    unreadCount: 0,
+    createdAt: '2025-11-08T19:00:00Z',
+    createdBy: 'coach-1',
+    isMuted: false,
+  },
+  // コーチと保護者の1対1会話（別の保護者）
+  {
+    id: 'conv-4',
+    type: 'direct',
+    participantIds: ['coach-1', 'guardian-2'],
+    participants: [getTeamMemberById('coach-1'), getTeamMemberById('guardian-2')],
+    messages: [
+      {
+        id: 'msg-4-1',
+        conversationId: 'conv-4',
+        senderId: 'guardian-2',
+        senderName: '佐藤美咲（保護者）',
+        content: '次回の試合、息子は出場できますか？',
+        sentAt: '2025-11-07T15:00:00Z',
+        readBy: [{ userId: 'coach-1', readAt: '2025-11-07T15:30:00Z' }],
+        attachments: [],
+      },
+      {
+        id: 'msg-4-2',
+        conversationId: 'conv-4',
+        senderId: 'coach-1',
+        senderName: '田中太郎',
+        content: 'はい、スタメンで考えています。',
+        sentAt: '2025-11-07T15:35:00Z',
+        readBy: [{ userId: 'guardian-2', readAt: '2025-11-07T15:40:00Z' }],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-11-07T15:35:00Z',
+    unreadCount: 0,
+    createdAt: '2025-11-07T15:00:00Z',
+    isMuted: false,
+  },
+  // 全体グループ
+  {
+    id: 'conv-5',
+    type: 'group',
+    name: '緑ヶ丘FCジュニア 全体連絡',
+    participantIds: ['coach-1', 'coach-2', 'guardian-1', 'guardian-2', 'guardian-3', 'guardian-4'],
+    participants: [
+      getTeamMemberById('coach-1'),
+      getTeamMemberById('coach-2'),
+      getTeamMemberById('guardian-1'),
+      getTeamMemberById('guardian-2'),
+      getTeamMemberById('guardian-3'),
+      getTeamMemberById('guardian-4'),
+    ],
+    messages: [
+      {
+        id: 'msg-5-1',
+        conversationId: 'conv-5',
+        senderId: 'coach-1',
+        senderName: '田中太郎',
+        content: '本日の練習は通常通り行います。よろしくお願いします。',
+        sentAt: '2025-11-06T07:00:00Z',
+        readBy: [
+          { userId: 'coach-2', readAt: '2025-11-06T07:10:00Z' },
+          { userId: 'guardian-1', readAt: '2025-11-06T07:15:00Z' },
+          { userId: 'guardian-2', readAt: '2025-11-06T07:20:00Z' },
+        ],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-11-06T07:00:00Z',
+    unreadCount: 1,
+    createdAt: '2025-11-06T07:00:00Z',
+    createdBy: 'coach-1',
+    isMuted: false,
+  },
+];
+
+// 各会話の最後のメッセージを設定
+conversations.forEach((conv) => {
+  if (conv.messages.length > 0) {
+    conv.lastMessage = conv.messages[conv.messages.length - 1];
+  }
+});
+
+// ヘルパー関数
+export function getConversationName(conversation: Conversation): string {
+  if (conversation.type === 'group') {
+    return conversation.name || 'グループ';
+  }
+  const otherMember = conversation.participants.find((p) => p.id !== currentUserId);
+  return otherMember?.name || '不明';
+}
+
+export function getConversationAvatar(conversation: Conversation): string {
+  if (conversation.type === 'group') {
+    return conversation.groupPhotoUrl || '👥';
+  }
+  const otherMember = conversation.participants.find((p) => p.id !== currentUserId);
+  if (otherMember?.role === 'coach' || otherMember?.role === 'assistant') return '👨‍🏫';
+  if (otherMember?.role === 'guardian') return '👨‍👩‍👧';
+  if (otherMember?.role === 'player') return '⚽';
+  return '👤';
+}
+
+export function formatMessageTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInHours = diffInMs / (1000 * 60 * 60);
+  const diffInDays = diffInHours / 24;
+
+  if (diffInHours < 1) {
+    const minutes = Math.floor(diffInMs / (1000 * 60));
+    return `${minutes}分前`;
+  }
+  if (diffInHours < 24) {
+    return `${Math.floor(diffInHours)}時間前`;
+  }
+  if (diffInDays < 7) {
+    return `${Math.floor(diffInDays)}日前`;
+  }
+  return date.toLocaleDateString('ja-JP', {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+export function getConversationById(id: string): Conversation | null {
+  return conversations.find((c) => c.id === id) || null;
 }
