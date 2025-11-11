@@ -11,7 +11,8 @@ import {
   TrendingUp,
   AlertCircle,
   CheckCircle2,
-  Clock
+  Clock,
+  Trophy
 } from 'lucide-react';
 
 type TabType = 'pre-call' | 'representative';
