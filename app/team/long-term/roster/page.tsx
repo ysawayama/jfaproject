@@ -101,7 +101,7 @@ export default function RosterPage() {
             </div>
             <div className="flex gap-2 flex-wrap">
               {[
-                { value: 'all', label: 'すべて' },
+                { value: 'all' as const, label: 'すべて' },
                 ...Array.from({ length: 6 }, (_, i) => ({
                   value: (i + 1) as GradeFilter,
                   label: `${i + 1}年`,
@@ -109,7 +109,7 @@ export default function RosterPage() {
               ].map((filter) => (
                 <button
                   key={filter.value}
-                  onClick={() => setGradeFilter(filter.value)}
+                  onClick={() => setGradeFilter(filter.value as GradeFilter)}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${
                     gradeFilter === filter.value
                       ? 'bg-green-600 text-white'
