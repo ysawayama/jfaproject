@@ -228,6 +228,47 @@ Code Quality Rules:
 ### Latest Learnings (Max 10 items retained)
 <!-- AI adds new learnings. Old ones are auto-patterned -->
 
+#### ⭐ モバイルファーストUIの段階的実装パターン (2025-11-11)
+**状況**: 大規模なUI改善を段階的に実装する必要がある
+**解決策**: 4段階アプローチで段階的に実装
+```typescript
+// 第1段階: 基本構造（タブ）
+const [activeTab, setActiveTab] = useState<TabType>('pre-call');
+
+// 第2段階: 階層構造（アコーディオン）
+const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
+  preCallActivities: true,
+  representativeActivities: false,
+});
+
+// 第3段階: コンテンツ実装
+{activeTab === 'representative' && <div>...</div>}
+
+// 第4段階: レスポンシブ調整
+className="p-4 sm:p-6 lg:p-8 text-sm sm:text-base"
+```
+**効果**:
+- 各段階でユーザー確認→迅速な修正
+- 段階的リファクタリングでバグ最小化
+- モバイルファーストで全デバイス対応
+
+#### ⭐ Tailwind階層構造のレスポンシブパターン (2025-11-11)
+**問題**: モバイル・タブレット・PCで異なるレイアウトが必要
+**解決**: Tailwindのブレークポイントを活用した段階的指定
+```css
+/* モバイル(base) → タブレット(sm:640px) → PC(lg:1024px) */
+p-4 sm:p-6 lg:p-8        /* パディング */
+text-sm sm:text-base     /* フォントサイズ */
+w-5 h-5 sm:w-6 sm:h-6   /* アイコンサイズ */
+flex-1 sm:flex-initial   /* タブボタン幅 */
+gap-3 sm:gap-4 sm:gap-6  /* グリッドギャップ */
+```
+**ベストプラクティス**:
+- モバイルをベースに記述（無印）
+- タブレット以上は`sm:`
+- PC以上は`lg:`
+- 必ず実機でテスト
+
 #### ⭐ 配列操作の安全パターン (2025-09-29)
 **問題**: オプショナルチェーン`?.`で配列メソッドを呼ぶとTypeError発生
 ```typescript
@@ -245,6 +286,38 @@ safeSome(content.input.edits, edit => ...)
 
 ### Established Patterns
 <!-- AI auto-registers patterns appearing 3+ times -->
+
+#### 📐 アコーディオンメニューの実装パターン
+```typescript
+// 1. 状態管理
+const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
+  section1: true,
+  section2: false,
+});
+
+// 2. トグル関数（スプレッド構文で既存状態を保持）
+const toggleSection = (section: string) => {
+  setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+};
+
+// 3. 条件付きレンダリング
+{openSections.section1 && <div>コンテンツ</div>}
+
+// 4. アイコンで開閉状態を表示
+{openSections.section1 ? <ChevronDown /> : <ChevronRight />}
+```
+
+#### 🎨 ホバーエフェクトの統一パターン
+```css
+/* デフォルト状態 */
+bg-neutral-50 border border-neutral-200
+
+/* ホバー状態 */
+hover:bg-white hover:shadow-md hover:border-samurai
+
+/* グループホバー（親のホバーで子も変化） */
+group-hover:text-samurai group-hover:scale-110
+```
 
 ---
 
