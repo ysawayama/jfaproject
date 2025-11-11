@@ -3,6 +3,15 @@
  * JFA U-17代表チームの選手評価・パフォーマンス分析
  */
 
+import {
+  type UnifiedEvaluation,
+  type UnifiedEvaluationScores,
+  type OverallGrade,
+  unifiedEvaluations,
+  calculateOverallScore as calculateUnifiedOverallScore,
+  scoreToGrade,
+} from './unified-evaluation';
+
 // ============================================================================
 // 型定義
 // ============================================================================
@@ -94,6 +103,7 @@ export interface PlayerEvaluation {
   comments: string; // 総評コメント
   potential: 'world-class' | 'excellent' | 'good' | 'average' | 'developing'; // ポテンシャル
   readiness: 'ready' | 'almost-ready' | 'needs-development' | 'long-term'; // 即戦力度
+  unifiedEvaluationId?: string; // 統一評価システムのIDへの参照
   createdAt: string;
   updatedAt: string;
 }
@@ -124,7 +134,7 @@ export interface PlayerEvaluationSummary {
 /**
  * カテゴリごとの平均スコアを計算
  */
-export function calculateCategoryAverage(category: Record<string, number>): number {
+export function calculateCategoryAverage(category: TechnicalSkills | TacticalSkills | PhysicalAttributes | MentalAttributes | Record<string, number>): number {
   const values = Object.values(category);
   const sum = values.reduce((acc, val) => acc + val, 0);
   return parseFloat((sum / values.length).toFixed(1));
@@ -210,6 +220,37 @@ export function getReadinessInfo(readiness: PlayerEvaluation['readiness']): {
     case 'long-term':
       return { label: '長期育成', color: 'text-orange-700', bgColor: 'bg-orange-100' };
   }
+}
+
+/**
+ * 詳細評価を統一評価形式に変換
+ */
+export function convertToUnifiedEvaluation(
+  detailed: PlayerEvaluation
+): UnifiedEvaluationScores {
+  // 各カテゴリの平均を計算
+  const technical = calculateCategoryAverage(detailed.categories.technical);
+  const physical = calculateCategoryAverage(detailed.categories.physical);
+  const tactical = calculateCategoryAverage(detailed.categories.tactical);
+  const mental = calculateCategoryAverage(detailed.categories.mental);
+
+  // 社会性は、コミュニケーション、チームワーク、リーダーシップから算出
+  const social = parseFloat(
+    (
+      (detailed.categories.mental.communication +
+        detailed.categories.tactical.teamwork +
+        detailed.categories.mental.leadership) /
+      3
+    ).toFixed(1)
+  );
+
+  return {
+    technical,
+    physical,
+    tactical,
+    mental,
+    social,
+  };
 }
 
 // ============================================================================
@@ -681,4 +722,49 @@ export function getEvaluationStats() {
       ? { name: topRated.playerName, rating: topRated.overallRating }
       : null,
   };
+}
+
+/**
+ * ヘルパー関数：統一評価システムとの連携
+ */
+
+/**
+ * 選手評価に紐づく統一評価を取得
+ */
+export function getUnifiedEvaluation(evaluationId: string): UnifiedEvaluation | null {
+  const evaluation = playerEvaluations.find((e) => e.id === evaluationId);
+  if (!evaluation || !evaluation.unifiedEvaluationId) return null;
+
+  return unifiedEvaluations.find((e) => e.id === evaluation.unifiedEvaluationId) || null;
+}
+
+/**
+ * 選手IDから全ての選手評価を取得
+ */
+export function getPlayerEvaluationsByPlayerId(playerId: string): PlayerEvaluation[] {
+  return playerEvaluations
+    .filter((e) => e.playerId === playerId)
+    .sort((a, b) => new Date(b.evaluationDate).getTime() - new Date(a.evaluationDate).getTime());
+}
+
+/**
+ * 選手IDから最新の選手評価を取得
+ */
+export function getLatestPlayerEvaluation(playerId: string): PlayerEvaluation | null {
+  const evaluations = getPlayerEvaluationsByPlayerId(playerId);
+  return evaluations.length > 0 ? evaluations[0] : null;
+}
+
+/**
+ * 選手IDから選手評価の履歴を統一評価形式で取得
+ */
+export function getPlayerEvaluationHistory(playerId: string): UnifiedEvaluation[] {
+  const playerEvals = getPlayerEvaluationsByPlayerId(playerId);
+  const evaluationIds = playerEvals
+    .filter((e) => e.unifiedEvaluationId)
+    .map((e) => e.unifiedEvaluationId as string);
+
+  return unifiedEvaluations
+    .filter((e) => evaluationIds.includes(e.id))
+    .sort((a, b) => new Date(b.evaluationDate).getTime() - new Date(a.evaluationDate).getTime());
 }
