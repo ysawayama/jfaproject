@@ -41,10 +41,10 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
           <div className="text-white space-y-6">
             {/* Name & Position */}
             <div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold tracking-tight mb-3">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold tracking-tight mb-3 text-white">
                 {player.name}
               </h1>
-              <p className="text-xl sm:text-2xl md:text-3xl font-medium opacity-95">
+              <p className="text-xl sm:text-2xl md:text-3xl font-medium opacity-95 text-white">
                 {player.position}
               </p>
             </div>

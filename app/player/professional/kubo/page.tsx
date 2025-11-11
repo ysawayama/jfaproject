@@ -64,29 +64,10 @@ export default function PlayerDashboard() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* ヘッダー */}
+      <PlayerHeader player={demoPlayer} />
 
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 max-w-7xl">
-        {/* ナビゲーション */}
-        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white rounded-lg shadow px-3 sm:px-4 lg:px-6 py-3">
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-            <Link href="/" className="text-primary hover:underline font-semibold text-sm sm:text-base whitespace-nowrap">
-              ← ホーム
-            </Link>
-            <span className="text-gray-300 hidden sm:inline">|</span>
-            <span className="font-bold text-gray-700 text-xs sm:text-base truncate">選手ダッシュボード</span>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-            <Link href="/coach" className="text-xs sm:text-sm text-gray-600 hover:text-primary whitespace-nowrap">
-              指導者画面へ
-            </Link>
-            <Link href="/admin" className="text-xs sm:text-sm text-gray-600 hover:text-primary whitespace-nowrap">
-              JFA管理画面へ
-            </Link>
-          </div>
-        </div>
-
-        {/* ヘッダー */}
-        <PlayerHeader player={demoPlayer} />
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 pb-4 sm:pb-6 lg:pb-8 max-w-7xl">
 
         {/* タブナビゲーション - Chelsea風 */}
         <PlayerTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
