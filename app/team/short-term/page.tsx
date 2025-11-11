@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Users,
@@ -13,8 +14,12 @@ import {
   Clock
 } from 'lucide-react';
 
+type TabType = 'pre-call' | 'representative';
+
 export default function ShortTermDashboard() {
-  // ダミーデータ
+  const [activeTab, setActiveTab] = useState<TabType>('pre-call');
+
+  // 招集前活動のダミーデータ
   const stats = {
     totalCandidates: 45,
     watchlisted: 12,
@@ -53,6 +58,53 @@ export default function ShortTermDashboard() {
       match: 'ACL準々決勝',
       date: '2025年10月26日',
       rating: '⭐⭐⭐⭐⭐',
+    },
+  ];
+
+  // 代表活動のダミーデータ
+  const matchStats = {
+    totalMatches: 12,
+    wins: 8,
+    draws: 2,
+    losses: 2,
+    winRate: 66.7,
+    totalGoals: 24,
+    totalConceded: 10,
+  };
+
+  const nextMatch = {
+    tournament: 'FIFA U-17 ワールドカップカタール2025',
+    opponent: 'ブラジル代表',
+    date: '2025年11月20日 19:00',
+    venue: 'アルトゥママスタジアム（ドーハ）',
+  };
+
+  const opponentInfo = {
+    team: 'ブラジルU-17代表',
+    formation: '4-3-3',
+    keyPlayers: ['エンドリク（FW）', 'ガブリエル（MF）', 'マルコス（DF）'],
+    recentForm: '5勝0分1敗',
+    notes: '攻撃的なスタイル。サイドからの攻撃が特徴。',
+  };
+
+  const recentMessages = [
+    {
+      id: 1,
+      sender: '監督',
+      message: '明日の練習は15:00開始です。全員時間厳守でお願いします。',
+      time: '2時間前',
+    },
+    {
+      id: 2,
+      sender: 'トレーナー',
+      message: '怪我の状況報告：田中選手、軽度の捻挫で2日間休養が必要です。',
+      time: '4時間前',
+    },
+    {
+      id: 3,
+      sender: 'コーチ',
+      message: '次の試合のビデオ分析資料をアップロードしました。各自確認をお願いします。',
+      time: '1日前',
     },
   ];
 
@@ -143,193 +195,312 @@ export default function ShortTermDashboard() {
               </div>
             </div>
           </div>
-
-          {/* キーメトリクス */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
-              <p className="text-white/70 text-sm mb-1">次回活動</p>
-              <p className="text-white text-xl font-bold">11月15日</p>
-              <p className="text-white/60 text-xs mt-1">U-23代表 合宿</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
-              <p className="text-white/70 text-sm mb-1">招集候補</p>
-              <p className="text-white text-xl font-bold">{stats.totalCandidates}名</p>
-              <p className="text-white/60 text-xs mt-1">視察対象: {stats.watchlisted}名</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
-              <p className="text-white/70 text-sm mb-1">招集確定</p>
-              <p className="text-white text-xl font-bold">{stats.confirmed}名</p>
-              <p className="text-white/60 text-xs mt-1">通知送信済み</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
-              <p className="text-white/70 text-sm mb-1">今週の視察</p>
-              <p className="text-white text-xl font-bold">{stats.upcomingScoutings}試合</p>
-              <p className="text-white/60 text-xs mt-1">スカウティング予定</p>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* 統計カード */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-samurai/10 rounded-lg flex items-center justify-center">
-              <Users className="w-6 h-6 text-samurai" />
-            </div>
-            <TrendingUp className="w-5 h-5 text-green-500" />
-          </div>
-          <p className="text-2xl font-bold text-base-dark mb-1">
-            {stats.totalCandidates}
-          </p>
-          <p className="text-sm text-neutral-600">招集候補選手</p>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Eye className="w-6 h-6 text-purple-600" />
-            </div>
-            <Clock className="w-5 h-5 text-blue-500" />
-          </div>
-          <p className="text-2xl font-bold text-base-dark mb-1">
-            {stats.watchlisted}
-          </p>
-          <p className="text-sm text-neutral-600">視察対象選手</p>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle2 className="w-6 h-6 text-green-600" />
-            </div>
-            <TrendingUp className="w-5 h-5 text-green-500" />
-          </div>
-          <p className="text-2xl font-bold text-base-dark mb-1">
-            {stats.confirmed}
-          </p>
-          <p className="text-sm text-neutral-600">招集確定選手</p>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-orange-600" />
-            </div>
-            <AlertCircle className="w-5 h-5 text-orange-500" />
-          </div>
-          <p className="text-2xl font-bold text-base-dark mb-1">
-            {stats.upcomingScoutings}
-          </p>
-          <p className="text-sm text-neutral-600">今週の視察予定</p>
-        </div>
-      </div>
-
       {/* クイックアクション */}
-      <div>
-        <h2 className="text-xl font-bold text-base-dark mb-4">
-          クイックアクション
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="group bg-white rounded-xl p-6 shadow-sm border border-neutral-200 hover:shadow-lg transition-all"
-              >
-                <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-bold text-base-dark mb-1">
-                  {action.title}
-                </h3>
-                <p className="text-sm text-neutral-600">
-                  {action.description}
-                </p>
-              </Link>
-            );
-          })}
+      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+        <div className="border-b border-neutral-200 bg-neutral-50 px-4 sm:px-6 py-3 sm:py-4">
+          <h2 className="text-lg sm:text-xl font-bold text-base-dark">
+            クイックアクション
+          </h2>
+        </div>
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="group bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all"
+                >
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <h3 className="font-bold text-base-dark mb-1 text-sm sm:text-base">
+                    {action.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-neutral-600">
+                    {action.description}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* 2カラムレイアウト */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 今後の活動予定 */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-200">
-          <h2 className="text-xl font-bold text-base-dark mb-4">
-            今後の活動予定
-          </h2>
-          <div className="space-y-4">
-            {upcomingActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="border-l-4 border-samurai pl-4 py-2"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-bold text-base-dark">
-                    {activity.title}
-                  </h3>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                    activity.status === '招集完了'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {activity.status}
-                  </span>
-                </div>
-                <p className="text-sm text-neutral-600 mb-1">
-                  📅 {activity.date}
-                </p>
-                <p className="text-sm text-neutral-600">
-                  📍 {activity.location}
-                </p>
-              </div>
-            ))}
+      {/* タブセクション */}
+      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+        {/* タブヘッダー */}
+        <div className="border-b border-neutral-200 bg-neutral-50 p-3 sm:p-4">
+          <div className="flex gap-2 bg-white p-1.5 rounded-xl shadow-sm max-w-md mx-auto sm:mx-0">
+            <button
+              onClick={() => setActiveTab('pre-call')}
+              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-sm transition-all ${
+                activeTab === 'pre-call'
+                  ? 'bg-samurai text-white shadow-md'
+                  : 'text-neutral-600 hover:text-base-dark hover:bg-neutral-50'
+              }`}
+            >
+              招集前活動
+            </button>
+            <button
+              onClick={() => setActiveTab('representative')}
+              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-sm transition-all ${
+                activeTab === 'representative'
+                  ? 'bg-samurai text-white shadow-md'
+                  : 'text-neutral-600 hover:text-base-dark hover:bg-neutral-50'
+              }`}
+            >
+              代表活動
+            </button>
           </div>
-          <Link
-            href="/team/short-term/schedule"
-            className="mt-4 inline-flex items-center text-sm font-medium text-samurai hover:underline"
-          >
-            すべてのスケジュールを見る →
-          </Link>
         </div>
 
-        {/* 最近の視察記録 */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-200">
-          <h2 className="text-xl font-bold text-base-dark mb-4">
-            最近の視察記録
-          </h2>
-          <div className="space-y-4">
-            {recentScoutings.map((scouting) => (
-              <div
-                key={scouting.id}
-                className="border-l-4 border-purple-500 pl-4 py-2"
+        {/* タブコンテンツ */}
+        <div className="p-4 sm:p-6 lg:p-8">
+          {activeTab === 'pre-call' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* 今後の活動予定 */}
+            <div className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200">
+              <h2 className="text-lg sm:text-xl font-bold text-base-dark mb-4">
+                今後の活動予定
+              </h2>
+              <div className="space-y-4">
+                {upcomingActivities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="border-l-4 border-samurai pl-4 py-2"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-bold text-base-dark">
+                        {activity.title}
+                      </h3>
+                      <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                        activity.status === '招集完了'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {activity.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-neutral-600 mb-1">
+                      📅 {activity.date}
+                    </p>
+                    <p className="text-sm text-neutral-600">
+                      📍 {activity.location}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/team/short-term/schedule"
+                className="mt-4 inline-flex items-center text-sm font-medium text-samurai hover:underline"
               >
-                <h3 className="font-bold text-base-dark mb-1">
-                  {scouting.player}
-                </h3>
-                <p className="text-sm text-neutral-600 mb-1">
-                  ⚽ {scouting.match}
-                </p>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-neutral-600">
-                    📅 {scouting.date}
-                  </p>
-                  <span className="text-sm font-medium">
-                    {scouting.rating}
-                  </span>
+                すべてのスケジュールを見る →
+              </Link>
+            </div>
+
+            {/* 最近の視察記録 */}
+            <div className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200">
+              <h2 className="text-lg sm:text-xl font-bold text-base-dark mb-4">
+                最近の視察記録
+              </h2>
+              <div className="space-y-4">
+                {recentScoutings.map((scouting) => (
+                  <div
+                    key={scouting.id}
+                    className="border-l-4 border-purple-500 pl-4 py-2"
+                  >
+                    <h3 className="font-bold text-base-dark mb-1">
+                      {scouting.player}
+                    </h3>
+                    <p className="text-sm text-neutral-600 mb-1">
+                      ⚽ {scouting.match}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-neutral-600">
+                        📅 {scouting.date}
+                      </p>
+                      <span className="text-sm font-medium">
+                        {scouting.rating}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/team/short-term/scouting"
+                className="mt-4 inline-flex items-center text-sm font-medium text-samurai hover:underline"
+              >
+                すべての視察記録を見る →
+              </Link>
+            </div>
+            </div>
+          )}
+
+          {activeTab === 'representative' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* 試合管理の概要 */}
+            <Link
+              href="/team/short-term/matches"
+              className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-base-dark group-hover:text-samurai transition-colors">
+                  試合管理の概要
+                </h2>
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">{matchStats.wins}勝</p>
+                  <p className="text-xs text-neutral-500">勝利</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-600">{matchStats.draws}分</p>
+                  <p className="text-xs text-neutral-500">引き分け</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-red-600">{matchStats.losses}敗</p>
+                  <p className="text-xs text-neutral-500">敗北</p>
                 </div>
               </div>
-            ))}
-          </div>
-          <Link
-            href="/team/short-term/scouting"
-            className="mt-4 inline-flex items-center text-sm font-medium text-samurai hover:underline"
-          >
-            すべての視察記録を見る →
-          </Link>
+
+              <div className="border-t border-neutral-200 pt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-neutral-600">勝率</span>
+                  <span className="text-sm font-bold text-base-dark">{matchStats.winRate}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-neutral-600">総得点</span>
+                  <span className="text-sm font-bold text-green-600">{matchStats.totalGoals}点</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-neutral-600">総失点</span>
+                  <span className="text-sm font-bold text-red-600">{matchStats.totalConceded}点</span>
+                </div>
+              </div>
+            </Link>
+
+            {/* 次の公式戦 */}
+            <Link
+              href="/team/short-term/schedule"
+              className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-base-dark group-hover:text-samurai transition-colors">
+                  次の公式戦
+                </h2>
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-samurai" />
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-samurai/5 rounded-lg p-3">
+                  <p className="text-xs text-samurai font-semibold mb-1">
+                    {nextMatch.tournament}
+                  </p>
+                  <p className="text-2xl font-bold text-base-dark">
+                    vs {nextMatch.opponent}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4 h-4 text-neutral-400" />
+                    <span className="text-neutral-600">{nextMatch.date}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-neutral-600">📍 {nextMatch.venue}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* 対戦相手の情報 */}
+            <Link
+              href="/team/short-term/tactics"
+              className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-base-dark group-hover:text-samurai transition-colors">
+                  対戦相手の分析
+                </h2>
+                <Target className="w-5 h-5 sm:w-6 sm:h-6 text-purple-500" />
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-neutral-500 mb-1">対戦相手</p>
+                  <p className="text-lg font-bold text-base-dark">{opponentInfo.team}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-neutral-500 mb-1">フォーメーション</p>
+                    <p className="text-sm font-semibold text-base-dark">{opponentInfo.formation}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-neutral-500 mb-1">最近の成績</p>
+                    <p className="text-sm font-semibold text-green-600">{opponentInfo.recentForm}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-neutral-500 mb-1">注目選手</p>
+                  <div className="flex flex-wrap gap-1">
+                    {opponentInfo.keyPlayers.map((player, idx) => (
+                      <span key={idx} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                        {player}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-sm text-neutral-600 italic">
+                  {opponentInfo.notes}
+                </p>
+              </div>
+            </Link>
+
+            {/* チームコミュニケーション */}
+            <Link
+              href="/team/short-term/communication"
+              className="bg-neutral-50 rounded-xl p-4 sm:p-6 border border-neutral-200 hover:bg-white hover:shadow-md hover:border-samurai transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-base-dark group-hover:text-samurai transition-colors">
+                  チーム連絡
+                </h2>
+                <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
+              </div>
+
+              <div className="space-y-3">
+                {recentMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className="border-l-4 border-blue-400 pl-3 py-2"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold text-blue-600">
+                        {msg.sender}
+                      </span>
+                      <span className="text-xs text-neutral-400">
+                        {msg.time}
+                      </span>
+                    </div>
+                    <p className="text-sm text-neutral-700 line-clamp-2">
+                      {msg.message}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
