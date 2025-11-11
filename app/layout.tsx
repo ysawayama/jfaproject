@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   description: "日本サッカー協会公式 緑プロジェクトプラットフォーム",
 };
 
+// すべてのページで動的レンダリングを強制（useSearchParams対応）
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: Readonly<{

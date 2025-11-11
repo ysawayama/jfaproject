@@ -1,8 +1,6 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, Save, Receipt, DollarSign } from 'lucide-react';
@@ -13,7 +11,8 @@ import {
 } from '@/lib/team/long-term-data';
 import type { FeeType, PaymentMethod } from '@/lib/team/long-term-data';
 
-export default function NewFeeRecordPage() {
+// useSearchParams()を使うコンポーネントを分離
+function FeeRecordForm() {
   const searchParams = useSearchParams();
   const preselectedPlayerId = searchParams.get('playerId');
 
@@ -341,5 +340,14 @@ export default function NewFeeRecordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// メインコンポーネント：SuspenseでラップしてuseSearchParams()エラーを回避
+export default function NewFeeRecordPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">読み込み中...</div>}>
+      <FeeRecordForm />
+    </Suspense>
   );
 }
