@@ -1,280 +1,268 @@
-# JFA Project 開発引き継ぎドキュメント
+# 開発引き継ぎドキュメント
 
-**最終更新日**: 2025-10-31
-**最新コミット**: d3eb014 (長期チームポータルにマッチメイクとグランド検索機能を統合)
-
----
-
-## 📋 今回の開発サマリー
-
-### 実装完了した機能
-
-#### 1. IDP（個人分析シート）のモバイルファースト化 ✅
-- **対象ページ**:
-  - `/app/team/long-term/growth/idp/[id]/page.tsx` - IDP詳細ページ
-  - `/app/team/long-term/growth/idp/[id]/reflection/[reflectionId]/page.tsx` - 振り返りシート詳細
-  - `/app/team/long-term/growth/idp/[id]/reflection/new/page.tsx` - 振り返りシート新規作成
-  - `/app/player/professional/kubo/page.tsx` - 久保選手ダッシュボード
-
-- **適用したパターン**:
-  ```tsx
-  // テキストサイズ
-  text-xs sm:text-sm lg:text-base
-
-  // パディング
-  p-3 sm:p-4 lg:p-6
-
-  // アイコンサイズ
-  w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6
-
-  // グリッド
-  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3
-
-  // Flexレイアウト
-  flex-col sm:flex-row
-  ```
-
-#### 2. マッチメイク機能の統合 ✅
-- **場所**: `/app/team/long-term/matchmaking/page.tsx`
-- **機能**:
-  - リクエスト受信タブ（練習試合の申し込み管理）
-  - チーム検索タブ（相手チーム探し）
-  - リクエスト作成タブ（新規申し込み）
-- **ナビゲーション**: 長期チームポータルのサイドバー＆モバイルナビに追加済み
-
-#### 3. グランド検索機能の統合 ✅
-- **検索ページ**: `/app/team/long-term/ground-search/page.tsx`
-  - 都道府県・市区町村選択
-  - 日付、サイズ、種類フィルター
-  - 人気エリアクイックアクセス
-
-- **検索結果ページ**: `/app/team/long-term/ground-search/search/page.tsx`
-  - 35件のグランドデータ
-  - リアルタイムフィルタリング
-  - ソート機能（おすすめ順、料金順、距離順）
-  - モバイルフィルターパネル
-
-- **データ構造**:
-  - `/lib/ground-search/prefectures.ts` - 7都道府県のデータ
-  - `/lib/ground-search/mock-grounds.ts` - 35件のグランド情報
-  - `/lib/ground-search/mock-reviews.ts` - レビューデータ
-
-- **コンポーネント**:
-  - `/components/ground-search/ground-card.tsx` - グランドカード
-  - `/components/ground-search/star-rating.tsx` - 星評価
+**作成日**: 2025-11-12
+**最終更新**: 2025-11-12 05:25 JST
 
 ---
 
-## 🏗️ プロジェクト構造
+## 📊 プロジェクト現況
+
+### デプロイ状況
+- ✅ **本番環境**: https://jfa-portal.vercel.app
+- ✅ **最新デプロイ**: 2025-11-12 05:15 JST
+- ✅ **ビルドステータス**: 成功
+- ✅ **全ページ正常動作**: 118ページ
+
+### 開発環境
+- **ローカルサーバー**: http://localhost:3000
+- **Next.js**: v15.5.6 (Turbopack)
+- **Node.js**: 推奨バージョン使用
+- **パッケージマネージャー**: npm
+
+---
+
+## 🎯 本日の開発内容（2025-11-12）
+
+### 1. マイシューズログ機能追加 ⚽
+**場所**: `/player/amateur/takahashi`
+
+**実装内容**:
+- サッカー歴3年分のスパイク3足を表示
+- シューズ画像を`public/images/shoes/`に保存
+  - `nike-mercurial-vapor-15.png` (現在使用中)
+  - `adidas-predator-edge-3.png`
+  - `puma-future-z-4.png`
+- シューズ名、使用期間、メモを表示
+- 現在使用中バッジの実装
+- アンカーナビゲーション追加
+
+**変更ファイル**:
+- `lib/player/takahashi-data.ts` - シューズデータ追加
+- `app/player/amateur/takahashi/page.tsx` - UI実装
+- `public/images/shoes/` - 画像3点追加
+
+---
+
+### 2. プロフェッショナル選手ページUI改善 🎨
+**場所**: `/player/professional/kubo`
+
+**実装内容**:
+- 上部の白いナビゲーションバーを削除
+- 選手名「久保建英」を白文字に変更（視認性向上）
+- ヘッダーのコントラスト改善
+
+**変更ファイル**:
+- `app/player/professional/kubo/page.tsx`
+- `components/PlayerHeader.tsx`
+
+---
+
+### 3. チームページ機能拡張 📋
+**場所**: `/team/long-term`, `/team/short-term`
+
+**実装内容**:
+- コミュニケーション機能
+- 試合管理機能
+- メッセージ機能
+- スケジュール編集機能
+
+**変更ファイル**:
+- `app/team/long-term/` - 複数の新規ページ
+- `app/team/short-term/` - 複数の新規ページ
+- `lib/team/long-term-data.ts` - データ拡張
+
+---
+
+## 📝 Gitコミット履歴
+
+```
+1f2536b - Improve professional player page UI
+81e618d - Fix TypeScript error in messages page attachment rendering
+fbd184a - Add player shoe log feature and enhance team portal functionality
+```
+
+---
+
+## 🚀 デプロイ情報
+
+### Vercel設定
+- **プロジェクト名**: jfaproject
+- **自動デプロイ**: main ブランチへのpush時に自動実行
+- **ビルドコマンド**: `npm run build`
+- **出力ディレクトリ**: `.next`
+
+### 環境変数
+- `.env.local` にSupabase設定あり
+- Vercelダッシュボードにも同じ環境変数を設定済み
+
+---
+
+## 🔧 開発環境の起動方法
+
+```bash
+# プロジェクトディレクトリに移動
+cd /Users/saway/ZEAMI/jfaproject
+
+# 開発サーバー起動
+npm run dev
+
+# ブラウザでアクセス
+# http://localhost:3000
+```
+
+---
+
+## 📚 重要なファイル構造
 
 ```
 jfaproject/
 ├── app/
-│   ├── team/
-│   │   ├── page.tsx                    # チームポータル入口
-│   │   ├── long-term/                  # 恒常的チーム（小学生チームなど）
-│   │   │   ├── layout.tsx              # ナビゲーション（サイドバー＆モバイル）
-│   │   │   ├── page.tsx                # ダッシュボード
-│   │   │   ├── matchmaking/            # ⭐NEW: マッチメイク
-│   │   │   ├── ground-search/          # ⭐NEW: グランド検索
-│   │   │   ├── growth/
-│   │   │   │   └── idp/                # IDP（個人分析シート）
-│   │   │   ├── roster/                 # 選手名簿
-│   │   │   ├── schedule/               # スケジュール
-│   │   │   ├── attendance/             # 出欠管理
-│   │   │   ├── messages/               # 連絡帳
-│   │   │   ├── album/                  # アルバム
-│   │   │   └── fees/                   # 会費・月謝
-│   │   └── short-term/                 # 短期プロジェクト（代表チームなど）
-│   └── player/                         # 選手ポータル
-│       ├── professional/kubo/          # プロ選手（久保建英）
-│       └── amateur/takahashi/          # アマチュア選手
-├── components/
-│   ├── ground-search/                  # ⭐NEW: グランド検索コンポーネント
-│   └── （その他共通コンポーネント）
-└── lib/
-    ├── team/
-    │   ├── long-term-data.ts           # 長期チームデータ
-    │   ├── idp-data.ts                 # IDPデータ
-    │   └── （その他データファイル）
-    └── ground-search/                  # ⭐NEW: グランド検索データ
+│   ├── player/
+│   │   ├── amateur/takahashi/        # アマチュア選手ページ
+│   │   └── professional/kubo/        # プロ選手ページ
+│   └── team/
+│       ├── long-term/                # 恒常活動型チーム
+│       └── short-term/               # 短期集中型チーム
+├── components/                       # 共通コンポーネント
+│   ├── PlayerHeader.tsx
+│   └── ...
+├── lib/
+│   ├── player/takahashi-data.ts     # 高橋選手データ
+│   └── team/long-term-data.ts       # チームデータ
+├── public/
+│   └── images/
+│       ├── players/                  # 選手画像
+│       └── shoes/                    # シューズ画像 (NEW!)
+└── ZEAMI.md                          # ナレッジベース
 ```
 
 ---
 
-## 🎯 次回の開発タスク候補
+## 🎯 次回開発の推奨タスク
 
-### 優先度：高
-1. **グランド詳細ページの作成**
-   - `/app/team/long-term/ground-search/grounds/[id]/page.tsx`
-   - 施設詳細、レビュー表示、予約フォーム
+### 優先度: 高
+- [ ] マイシューズログ機能を他の選手ページにも展開
+- [ ] プロフィール写真アップロード機能の実装
+- [ ] 動画/写真の実際のアップロード機能
 
-2. **マッチメイク機能の詳細実装**
-   - リクエスト承認・辞退のロジック
-   - チーム詳細ページ
-   - メッセージング機能
+### 優先度: 中
+- [ ] パフォーマンスグラフ・チャートの実装
+- [ ] コメント・メッセージ機能の強化
+- [ ] SNSシェア機能
 
-3. **IDP機能の拡張**
-   - 月次評価の入力UI改善
-   - グラフ・チャートでの可視化
-   - PDF出力機能
-
-### 優先度：中
-4. **連絡帳機能の強化**
-   - `/app/team/long-term/messages/`
-   - 既読管理、返信機能
-
-5. **アルバム機能の実装**
-   - `/app/team/long-term/album/`
-   - 写真アップロード、タグ付け
-
-6. **出欠管理の詳細実装**
-   - `/app/team/long-term/attendance/`
-   - 出欠集計、リマインダー
-
-### 優先度：低
-7. **短期プロジェクト（代表チーム）機能の拡張**
-   - `/app/team/short-term/`
-   - 招集リスト管理、戦術ボード詳細
-
-8. **選手ポータルの機能拡張**
-   - トレーニングメニュー詳細
-   - 食事記録、体調管理
+### 優先度: 低
+- [ ] 比較機能（他選手との比較）
+- [ ] 目標達成度の可視化
+- [ ] UIアニメーション追加
 
 ---
 
-## 🔑 重要なファイルとパス
+## ⚠️ 既知の問題・注意点
 
-### データファイル
-| ファイル | 説明 |
-|---------|------|
-| `/lib/team/long-term-data.ts` | 長期チームの基本データ（選手、イベント、メッセージ） |
-| `/lib/team/idp-data.ts` | IDP（個人分析シート）データ |
-| `/lib/ground-search/mock-grounds.ts` | グランド情報（35件） |
-| `/lib/ground-search/prefectures.ts` | 都道府県・市区町村データ |
-| `/lib/demo-data.ts` | デモ用選手データ（久保選手など） |
+### 警告（無視してOK）
+- **Supabase Edge Runtime警告**: middleware.tsでの警告は既知の問題。機能には影響なし
+- **Turbopack lockfile警告**: 複数のpackage-lock.jsonがあるが、問題なし
 
-### レイアウトファイル
-| ファイル | 説明 |
-|---------|------|
-| `/app/team/long-term/layout.tsx` | 長期チームポータルのナビゲーション |
-| `/app/team/layout.tsx` | チームポータル全体のレイアウト |
-| `/app/layout.tsx` | アプリ全体のルートレイアウト |
-
-### 主要コンポーネント
-| ファイル | 説明 |
-|---------|------|
-| `/components/ground-search/ground-card.tsx` | グランドカード表示 |
-| `/components/ground-search/star-rating.tsx` | 星評価コンポーネント |
-| `/components/PlayerHeader.tsx` | 選手ヘッダー |
-| `/components/PlayerTabNavigation.tsx` | 選手ページタブナビ |
+### 注意事項
+- **画像追加時**: `public/images/` 配下に配置すること
+- **型定義**: TypeScript型は厳密に定義すること
+- **ビルドテスト**: デプロイ前に`npm run build`でローカルビルド確認推奨
 
 ---
 
-## 🚀 開発サーバーの起動
+## 📞 トラブルシューティング
 
+### 開発サーバーが起動しない
 ```bash
-cd /Users/saway/ZEAMI/jfaproject
+# ポート3000を確認
+lsof -ti:3000
+
+# プロセスがあれば終了
+kill -9 <PID>
+
+# 再起動
 npm run dev
 ```
 
-- **URL**: http://localhost:3001 (ポート3000が使用中の場合)
-- **主要ページ**:
-  - トップ: http://localhost:3001
-  - チームポータル: http://localhost:3001/team
-  - 長期チーム: http://localhost:3001/team/long-term
-  - マッチメイク: http://localhost:3001/team/long-term/matchmaking
-  - グランド検索: http://localhost:3001/team/long-term/ground-search
-  - 久保選手: http://localhost:3001/player/professional/kubo
-
----
-
-## 📝 コーディング規約
-
-### モバイルファーストのパターン
-```tsx
-// ✅ Good: モバイルから段階的に拡大
-<div className="text-xs sm:text-sm lg:text-base">
-
-// ❌ Bad: デスクトップサイズから縮小
-<div className="text-base sm:text-sm xs:text-xs">
-```
-
-### レスポンシブグリッド
-```tsx
-// 1列（モバイル）→ 2列（タブレット）→ 3列（デスクトップ）
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-```
-
-### Flexレイアウト
-```tsx
-// 縦並び（モバイル）→ 横並び（タブレット以上）
-<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-```
-
-### パディング・マージン
-```tsx
-// 小（モバイル）→ 中（タブレット）→ 大（デスクトップ）
-<div className="p-3 sm:p-4 lg:p-6">
-<div className="space-y-3 sm:space-y-4 lg:space-y-6">
-```
-
----
-
-## 🛠️ トラブルシューティング
-
-### ポート競合
+### ビルドエラーが出る
 ```bash
-# ポート3000が使用中の場合、自動的に3001が使用される
-# 警告が出ても正常動作
+# キャッシュクリア
+rm -rf .next
+
+# 依存関係再インストール
+npm install
+
+# 再ビルド
+npm run build
 ```
 
-### 型エラー
+### Gitコンフリクト
 ```bash
-# 型定義ファイルを確認
-/lib/ground-search/validations/review.ts
-/lib/team/idp-data.ts
-```
+# 最新を取得
+git pull origin main
 
-### インポートエラー
-```tsx
-// パスエイリアスを使用
-import { ... } from '@/lib/...'
-import { ... } from '@/components/...'
+# コンフリクト解消後
+git add .
+git commit -m "Resolve conflicts"
+git push origin main
 ```
 
 ---
 
-## 📚 参考リンク
+## 🔗 重要リンク
 
-- **Next.js 15 ドキュメント**: https://nextjs.org/docs
+- **本番サイト**: https://jfa-portal.vercel.app
+- **Vercelダッシュボード**: https://vercel.com/dashboard
+- **GitHubリポジトリ**: https://github.com/ysawayama/jfaproject
+- **Next.js公式ドキュメント**: https://nextjs.org/docs
 - **Tailwind CSS**: https://tailwindcss.com/docs
-- **Lucide Icons**: https://lucide.dev/icons/
 
 ---
 
-## 💡 今後の改善案
+## 💡 開発Tips
 
-1. **地図表示機能の追加**
-   - Leaflet または Google Maps API の統合
-   - グランド検索結果のマップビュー
+### 画像の追加
+```typescript
+// 1. public/images/ に画像を配置
+// 2. データファイルに追加
+imageUrl: '/images/shoes/shoe-name.png'
 
-2. **リアルタイム通知**
-   - WebSocket または Server-Sent Events
-   - 新着メッセージ、マッチリクエストの通知
+// 3. Next.js Imageコンポーネントで使用
+<Image src={imageUrl} alt="..." fill className="object-contain" />
+```
 
-3. **画像アップロード**
-   - アルバム機能での写真管理
-   - プロフィール画像設定
+### コミット＆デプロイ
+```bash
+# 変更確認
+git status
 
-4. **データベース統合**
-   - 現在はモックデータ使用
-   - Supabase または Prisma + PostgreSQL の導入
+# ステージング
+git add .
 
-5. **認証・認可**
-   - NextAuth.js の統合
-   - 役割ベースのアクセス制御（選手、コーチ、保護者、管理者）
+# コミット
+git commit -m "feat: 新機能の説明"
+
+# プッシュ（自動デプロイ開始）
+git push origin main
+```
 
 ---
 
-**次回の開発をスムーズに開始できるよう、このドキュメントを参照してください！** 🚀
+## 📋 チェックリスト（次回開発時）
+
+開発開始前:
+- [ ] `git pull origin main` で最新を取得
+- [ ] `npm install` で依存関係更新
+- [ ] `npm run dev` で開発サーバー起動
+- [ ] `http://localhost:3000` で動作確認
+
+開発終了時:
+- [ ] ローカルで動作確認
+- [ ] `npm run build` でビルドテスト
+- [ ] Gitコミット＆プッシュ
+- [ ] Vercelデプロイ確認
+- [ ] 本番サイトで最終確認
+
+---
+
+**次回も良い開発を！🚀**

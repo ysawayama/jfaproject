@@ -228,6 +228,76 @@ Code Quality Rules:
 ### Latest Learnings (Max 10 items retained)
 <!-- AI adds new learnings. Old ones are auto-patterned -->
 
+#### ⭐ Next.js Image コンポーネントの最適な使い方 (2025-11-12)
+**状況**: 動的に画像を表示する必要があり、レスポンシブ対応も必要
+**解決策**: fill属性とobject-containで柔軟な画像表示
+```typescript
+// ✅ ベストプラクティス
+<div className="aspect-square relative overflow-hidden">
+  <Image
+    src={imageUrl}
+    alt={description}
+    fill
+    className="object-contain p-4"
+    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+  />
+</div>
+```
+**ポイント**:
+- 親要素に`relative`と`aspect-ratio`を指定
+- `fill`属性で親要素いっぱいに表示
+- `object-contain`でアスペクト比を保持
+- `sizes`属性でレスポンシブ最適化
+
+#### ⭐ 画像ファイルの配置ルールとパス指定 (2025-11-12)
+**問題**: 画像をどこに配置すべきか、パスをどう書くべきか
+**解決**: Next.jsの規則に従った配置とパス指定
+```yaml
+配置場所: public/images/配下
+  - public/images/players/    # 選手画像
+  - public/images/shoes/      # シューズ画像
+  - public/images/teams/      # チーム画像
+
+パス指定:
+  ✅ 正しい: '/images/shoes/shoe-name.png'
+  ❌ 間違い: 'public/images/...'
+  ❌ 間違い: '../public/images/...'
+```
+**重要**: `public/`は含めない。スラッシュから始める。
+
+#### ⭐ TypeScript型エラーの解決パターン (2025-11-12)
+**問題**: オブジェクト型をstring型として扱おうとしてエラー
+```typescript
+// ❌ エラー例
+interface Attachment { url: string; fileName: string; }
+<a href={file}>  // fileはAttachment型なのでエラー
+
+// ✅ 正しい修正
+<a href={file.url}>
+  {file.fileName}
+</a>
+```
+**教訓**:
+- 型定義を確認してから使用
+- オブジェクトのプロパティに正しくアクセス
+- ビルドエラーは型の不一致が多い
+
+#### ⭐ UI視認性改善のベストプラクティス (2025-11-12)
+**問題**: グラデーション背景に黒文字で見づらい
+**解決**: コントラストを意識した配色
+```css
+/* ✅ グラデーション背景には白文字 */
+background: gradient(from-blue-500 to-blue-600)
+color: text-white
+
+/* ✅ 明示的な色指定 */
+className="text-white"  /* 親のtext-colorに依存しない */
+
+/* ✅ 余白の削除 */
+不要なナビゲーションバー → 削除してすっきり
+```
+**ポイント**: ユーザビリティは視認性から
+
 #### ⭐ モバイルファーストUIの段階的実装パターン (2025-11-11)
 **状況**: 大規模なUI改善を段階的に実装する必要がある
 **解決策**: 4段階アプローチで段階的に実装
