@@ -12,7 +12,9 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
-  Trophy
+  Trophy,
+  Target,
+  MessageSquare
 } from 'lucide-react';
 
 type TabType = 'pre-call' | 'representative';
