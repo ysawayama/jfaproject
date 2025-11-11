@@ -139,10 +139,10 @@ export default function MessageDetailPage({
               {message.attachments.map((file, index) => (
                 <a
                   key={index}
-                  href={file}
+                  href={file.url}
                   className="flex items-center gap-2 p-3 bg-neutral-50 rounded-lg border border-neutral-200 hover:bg-neutral-100 transition-colors"
                 >
-                  <span className="text-sm text-neutral-700">📎 {file}</span>
+                  <span className="text-sm text-neutral-700">📎 {file.fileName}</span>
                 </a>
               ))}
             </div>
