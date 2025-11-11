@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search,
@@ -16,10 +17,21 @@ import {
 import { candidates, statusInfo, type CandidateStatus } from '@/lib/team/candidates-data';
 
 export default function CandidatesPage() {
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPosition, setSelectedPosition] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<CandidateStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'name' | 'rating' | 'lastScouted'>('rating');
+
+  // URLパラメータからステータスを読み取って初期設定
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    if (statusParam && (statusParam === 'candidate' || statusParam === 'watchlist' || statusParam === 'confirmed')) {
+      // watchlist -> scouting に変換（データ構造に合わせる）
+      const mappedStatus = statusParam === 'watchlist' ? 'scouting' : statusParam;
+      setSelectedStatus(mappedStatus as CandidateStatus);
+    }
+  }, [searchParams]);
 
   // フィルタリング
   const filteredCandidates = candidates.filter((candidate) => {

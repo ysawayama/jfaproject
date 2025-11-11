@@ -32,6 +32,8 @@ export interface TrainingMenu {
   createdAt: string;
   updatedAt: string;
   createdBy: string; // 作成者
+  // 統合メディアストレージとの連携
+  mediaIds?: string[]; // media-storage.tsのMediaItem.idの配列
 }
 
 // カテゴリ情報
@@ -148,6 +150,7 @@ export const trainingMenus: TrainingMenu[] = [
     createdAt: '2025-10-20T10:00:00Z',
     updatedAt: '2025-10-25T14:30:00Z',
     createdBy: '反町 康治',
+    mediaIds: ['media-003'],
   },
   {
     id: '2',
@@ -187,6 +190,7 @@ export const trainingMenus: TrainingMenu[] = [
     createdAt: '2025-10-18T09:00:00Z',
     updatedAt: '2025-10-22T16:00:00Z',
     createdBy: '反町 康治',
+    mediaIds: ['media-004'],
   },
   {
     id: '3',

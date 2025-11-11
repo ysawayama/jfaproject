@@ -1,3 +1,11 @@
+import {
+  type UnifiedEvaluation,
+  type UnifiedEvaluationScores,
+  type OverallGrade,
+  unifiedEvaluations,
+  getPlayerEvaluationHistory,
+} from './unified-evaluation';
+
 // 視察ステータス
 export type ScoutingStatus =
   | 'scheduled'   // 予定
@@ -19,25 +27,19 @@ export interface ScoutingReport {
     venue: string;
   };
   status: ScoutingStatus;
-  rating: number; // 1-5
   attendance?: boolean; // 選手が出場したか
   minutesPlayed?: number; // 出場時間
   position?: string; // 試合でのポジション
-
-  // 評価項目
-  evaluation: {
-    technical: number; // 技術力 1-10
-    physical: number; // フィジカル 1-10
-    tactical: number; // 戦術理解 1-10
-    mental: number; // メンタル 1-10
-  };
 
   // テキストメモ
   notes: string;
   strengths: string[]; // 強み
   weaknesses: string[]; // 弱み
 
-  // 音声・動画・画像
+  // 統一評価システムとの連携
+  evaluationId?: string; // unified-evaluation.tsのIDを参照（completedの場合のみ）
+
+  // 音声・動画・画像（レガシー）
   voiceMemos?: {
     id: string;
     duration: number; // 秒
@@ -58,6 +60,9 @@ export interface ScoutingReport {
     url: string;
     caption?: string;
   }[];
+
+  // 統合メディアストレージとの連携
+  mediaIds?: string[]; // media-storage.tsのMediaItem.idの配列
 
   createdAt: string;
   updatedAt: string;
@@ -106,16 +111,9 @@ export const scoutingReports: ScoutingReport[] = [
       venue: 'カシマスタジアム',
     },
     status: 'completed',
-    rating: 5,
     attendance: true,
     minutesPlayed: 90,
     position: 'FW',
-    evaluation: {
-      technical: 9,
-      physical: 7,
-      tactical: 8,
-      mental: 9,
-    },
     notes: '非常に高いレベルのパフォーマンス。マリノス相手に2ゴールの活躍。ゴール前での落ち着きと決定力が際立っていた。ポジショニングの良さとボールを受ける動きが優れている。',
     strengths: [
       '得点感覚が抜群',
@@ -126,6 +124,7 @@ export const scoutingReports: ScoutingReport[] = [
     weaknesses: [
       'フィジカルコンタクトでやや押し込まれる場面あり',
     ],
+    evaluationId: 'eval-u-001', // 統一評価システムのID
     voiceMemos: [
       {
         id: 'vm1',
@@ -155,6 +154,8 @@ export const scoutingReports: ScoutingReport[] = [
         caption: 'ゴールシーンの瞬間',
       },
     ],
+    // 統合メディアストレージとの連携
+    mediaIds: ['media-001', 'media-002'],
     createdAt: '2025-10-28T18:00:00Z',
     updatedAt: '2025-10-28T20:30:00Z',
   },
@@ -171,16 +172,9 @@ export const scoutingReports: ScoutingReport[] = [
       venue: '日産スタジアム',
       },
     status: 'completed',
-    rating: 5,
     attendance: true,
     minutesPlayed: 65,
     position: 'FW',
-    evaluation: {
-      technical: 9,
-      physical: 7,
-      tactical: 8,
-      mental: 9,
-    },
     notes: 'トップチームでの出場機会を得ており、プロレベルでも通用する実力を証明。ドリブル突破とスピードが武器。若さゆえの勢いが良い方向に出ている。',
     strengths: [
       '圧倒的なスピード',
@@ -192,6 +186,7 @@ export const scoutingReports: ScoutingReport[] = [
       'フィジカル面の強化が必要',
       '守備時の貢献度',
     ],
+    evaluationId: 'eval-u-003', // 統一評価システムのID
     voiceMemos: [
       {
         id: 'vm3',
@@ -216,16 +211,9 @@ export const scoutingReports: ScoutingReport[] = [
       venue: 'エディオンスタジアム',
     },
     status: 'completed',
-    rating: 5,
     attendance: true,
     minutesPlayed: 90,
     position: 'MF',
-    evaluation: {
-      technical: 9,
-      physical: 6,
-      tactical: 9,
-      mental: 8,
-    },
     notes: 'チームの攻撃を組み立てる司令塔としての役割を完璧にこなした。パスセンスと視野の広さが際立っている。セットプレーのキッカーとしても優れた精度を見せた。',
     strengths: [
       'パスの精度とセンスが抜群',
@@ -237,6 +225,7 @@ export const scoutingReports: ScoutingReport[] = [
       'フィジカルコンタクトに弱さ',
       '守備での貢献が少ない',
     ],
+    evaluationId: 'eval-u-006', // 統一評価システムのID
     createdAt: '2025-10-20T18:00:00Z',
     updatedAt: '2025-10-20T20:00:00Z',
   },
@@ -253,18 +242,11 @@ export const scoutingReports: ScoutingReport[] = [
       venue: '大分銀行ドーム',
     },
     status: 'scheduled',
-    rating: 0,
-    createdAt: '2025-10-25T10:00:00Z',
-    updatedAt: '2025-10-25T10:00:00Z',
     notes: '',
     strengths: [],
     weaknesses: [],
-    evaluation: {
-      technical: 0,
-      physical: 0,
-      tactical: 0,
-      mental: 0,
-    },
+    createdAt: '2025-10-25T10:00:00Z',
+    updatedAt: '2025-10-25T10:00:00Z',
   },
   {
     id: '5',
@@ -279,18 +261,11 @@ export const scoutingReports: ScoutingReport[] = [
       venue: '三協フロンテア柏スタジアム',
     },
     status: 'scheduled',
-    rating: 0,
-    createdAt: '2025-10-26T14:00:00Z',
-    updatedAt: '2025-10-26T14:00:00Z',
     notes: '',
     strengths: [],
     weaknesses: [],
-    evaluation: {
-      technical: 0,
-      physical: 0,
-      tactical: 0,
-      mental: 0,
-    },
+    createdAt: '2025-10-26T14:00:00Z',
+    updatedAt: '2025-10-26T14:00:00Z',
   },
   {
     id: '6',
@@ -305,20 +280,68 @@ export const scoutingReports: ScoutingReport[] = [
       venue: 'ニッパツ三ツ沢球技場',
     },
     status: 'completed',
-    rating: 4,
     attendance: true,
     minutesPlayed: 90,
     position: 'FW',
-    evaluation: {
-      technical: 7,
-      physical: 8,
-      tactical: 7,
-      mental: 8,
-    },
     notes: '高校サッカーのトップレベルで圧倒的な存在感。フィジカルの強さとシュート力が武器。空中戦での強さも光る。プロユース出身選手と比べると技術面で若干粗さがあるが、潜在能力は高い。',
     strengths: ['フィジカルの強さ', 'シュート力', '空中戦', '得点嗅覚'],
     weaknesses: ['足元の技術の粗さ', 'スピード不足'],
+    evaluationId: 'eval-u-007', // 統一評価システムのID
     createdAt: '2025-10-15T17:00:00Z',
     updatedAt: '2025-10-15T19:00:00Z',
   },
 ];
+
+/**
+ * ヘルパー関数：統一評価システムとの連携
+ */
+
+/**
+ * 視察レポートに紐づく評価を取得
+ */
+export function getScoutingEvaluation(reportId: string): UnifiedEvaluation | null {
+  const report = scoutingReports.find((r) => r.id === reportId);
+  if (!report || !report.evaluationId) return null;
+
+  return unifiedEvaluations.find((e) => e.id === report.evaluationId) || null;
+}
+
+/**
+ * 選手IDから全ての視察レポートを取得
+ */
+export function getScoutingReportsByPlayer(playerId: string): ScoutingReport[] {
+  return scoutingReports
+    .filter((r) => r.candidateId === playerId)
+    .sort((a, b) => new Date(b.matchInfo.date).getTime() - new Date(a.matchInfo.date).getTime());
+}
+
+/**
+ * 選手IDから完了済みの視察レポート数を取得
+ */
+export function getCompletedScoutingCount(playerId: string): number {
+  return scoutingReports.filter(
+    (r) => r.candidateId === playerId && r.status === 'completed'
+  ).length;
+}
+
+/**
+ * 選手IDから最新の視察レポートを取得
+ */
+export function getLatestScoutingReport(playerId: string): ScoutingReport | null {
+  const reports = getScoutingReportsByPlayer(playerId);
+  return reports.length > 0 ? reports[0] : null;
+}
+
+/**
+ * 選手IDから視察評価履歴を取得（統一評価システムから）
+ */
+export function getScoutingEvaluationHistory(playerId: string): UnifiedEvaluation[] {
+  const playerReports = getScoutingReportsByPlayer(playerId);
+  const evaluationIds = playerReports
+    .filter((r) => r.evaluationId)
+    .map((r) => r.evaluationId as string);
+
+  return unifiedEvaluations
+    .filter((e) => evaluationIds.includes(e.id))
+    .sort((a, b) => new Date(b.evaluationDate).getTime() - new Date(a.evaluationDate).getTime());
+}

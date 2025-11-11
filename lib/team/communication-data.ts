@@ -32,37 +32,59 @@ export interface Announcement {
 }
 
 // ===========================
+// チームメンバー（TeamMember）
+// ===========================
+
+export type MemberRole = 'player' | 'staff' | 'coach';
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: MemberRole;
+  position?: string; // 選手の場合はポジション、スタッフの場合は役職
+  photoUrl?: string;
+  isOnline?: boolean;
+}
+
+// ===========================
 // メッセージ（Message）
 // ===========================
 
-export type MessageType = 'direct' | 'group' | 'broadcast';
+export type MessageType = 'direct' | 'group';
 export type MessageStatus = 'sent' | 'delivered' | 'read';
 
 export interface Message {
   id: string;
-  type: MessageType;
-  threadId?: string; // スレッドID（返信の場合）
+  conversationId: string; // 会話ID
   senderId: string;
   senderName: string;
-  recipientIds: string[];
-  recipientNames: string[];
-  subject?: string;
   content: string;
   sentAt: string;
-  status: MessageStatus;
   readBy: { userId: string; readAt: string }[];
   attachments: Attachment[];
-  isImportant: boolean;
+  replyTo?: string; // 返信先メッセージID
 }
 
-export interface MessageThread {
+// ===========================
+// 会話（Conversation）
+// ===========================
+
+export type ConversationType = 'direct' | 'group';
+
+export interface Conversation {
   id: string;
-  subject: string;
+  type: ConversationType;
+  name?: string; // グループの場合はグループ名
   participantIds: string[];
-  participantNames: string[];
+  participants: TeamMember[];
   messages: Message[];
-  lastMessageAt: string;
-  unreadCount: number;
+  lastMessage?: Message;
+  lastMessageAt?: string;
+  unreadCount: number; // 現在のユーザーの未読数
+  createdAt: string;
+  createdBy?: string; // グループの場合は作成者ID
+  groupPhotoUrl?: string; // グループアイコン
+  isMuted: boolean; // 通知ミュート設定
 }
 
 // ===========================
@@ -136,6 +158,99 @@ export interface NotificationSettings {
 
 const currentUserId = 'staff-1';
 const currentUserName = '反町康治';
+
+// ===========================
+// チームメンバー モックデータ
+// ===========================
+
+export const mockTeamMembers: TeamMember[] = [
+  // スタッフ
+  {
+    id: 'staff-1',
+    name: '反町康治',
+    role: 'coach',
+    position: '監督',
+    isOnline: true,
+  },
+  {
+    id: 'staff-2',
+    name: '田中大輔',
+    role: 'staff',
+    position: 'フィジカルコーチ',
+    isOnline: true,
+  },
+  {
+    id: 'staff-3',
+    name: '佐藤健太',
+    role: 'staff',
+    position: 'メディカルスタッフ',
+    isOnline: false,
+  },
+  {
+    id: 'staff-4',
+    name: '山本裕子',
+    role: 'staff',
+    position: '栄養士',
+    isOnline: true,
+  },
+  // 選手
+  {
+    id: 'player-1',
+    name: '藤田譲瑠チマ',
+    role: 'player',
+    position: 'FW',
+    isOnline: true,
+  },
+  {
+    id: 'player-2',
+    name: '宮原慧汰',
+    role: 'player',
+    position: 'MF',
+    isOnline: false,
+  },
+  {
+    id: 'player-3',
+    name: '佐野海舟',
+    role: 'player',
+    position: 'MF',
+    isOnline: true,
+  },
+  {
+    id: 'player-4',
+    name: '石塚慶悟',
+    role: 'player',
+    position: 'DF',
+    isOnline: false,
+  },
+  {
+    id: 'player-5',
+    name: '石田健人',
+    role: 'player',
+    position: 'GK',
+    isOnline: true,
+  },
+  {
+    id: 'player-6',
+    name: '前田春紀',
+    role: 'player',
+    position: 'FW',
+    isOnline: true,
+  },
+  {
+    id: 'player-7',
+    name: '中山健吾',
+    role: 'player',
+    position: 'DF',
+    isOnline: false,
+  },
+  {
+    id: 'player-8',
+    name: '佐藤光太',
+    role: 'player',
+    position: 'MF',
+    isOnline: true,
+  },
+];
 
 export const mockAnnouncements: Announcement[] = [
   {
@@ -377,38 +492,270 @@ JFA技術委員会
   },
 ];
 
-export const mockMessages: Message[] = [
+// ===========================
+// 会話（Conversation）モックデータ
+// ===========================
+
+const getTeamMemberById = (id: string) => mockTeamMembers.find((m) => m.id === id)!;
+
+export const mockConversations: Conversation[] = [
+  // 1対1の会話: 反町監督 ⇔ 藤田譲瑠チマ
   {
-    id: 'msg-1',
+    id: 'conv-1',
     type: 'direct',
-    senderId: 'staff-1',
-    senderName: '反町康治',
-    recipientIds: ['player-1'],
-    recipientNames: ['藤田譲瑠チマ'],
-    subject: '次回試合での役割について',
-    content: '藤田選手、次回の試合ではキャプテンを任せたいと考えています。詳しくは練習後に話しましょう。',
-    sentAt: '2025-10-28T18:00:00Z',
-    status: 'read',
-    readBy: [{ userId: 'player-1', readAt: '2025-10-28T18:30:00Z' }],
-    attachments: [],
-    isImportant: true,
+    participantIds: ['staff-1', 'player-1'],
+    participants: [getTeamMemberById('staff-1'), getTeamMemberById('player-1')],
+    messages: [
+      {
+        id: 'msg-1-1',
+        conversationId: 'conv-1',
+        senderId: 'staff-1',
+        senderName: '反町康治',
+        content: '藤田選手、次回の試合ではキャプテンを任せたいと考えています。',
+        sentAt: '2025-10-28T18:00:00Z',
+        readBy: [{ userId: 'player-1', readAt: '2025-10-28T18:30:00Z' }],
+        attachments: [],
+      },
+      {
+        id: 'msg-1-2',
+        conversationId: 'conv-1',
+        senderId: 'player-1',
+        senderName: '藤田譲瑠チマ',
+        content: 'ありがとうございます！責任を持って務めます。',
+        sentAt: '2025-10-28T18:35:00Z',
+        readBy: [{ userId: 'staff-1', readAt: '2025-10-28T18:36:00Z' }],
+        attachments: [],
+      },
+      {
+        id: 'msg-1-3',
+        conversationId: 'conv-1',
+        senderId: 'staff-1',
+        senderName: '反町康治',
+        content: '期待しています。詳しくは明日の練習後に話しましょう。',
+        sentAt: '2025-10-28T18:40:00Z',
+        readBy: [],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-10-28T18:40:00Z',
+    unreadCount: 1,
+    createdAt: '2025-10-28T18:00:00Z',
+    isMuted: false,
   },
+  // グループ会話: FW陣グループ
   {
-    id: 'msg-2',
+    id: 'conv-2',
     type: 'group',
-    senderId: 'staff-2',
-    senderName: '田中大輔',
-    recipientIds: ['player-1', 'player-2', 'player-3'],
-    recipientNames: ['藤田譲瑠チマ', '宮原慧汰', '佐野海舟'],
-    subject: '追加トレーニングセッション',
-    content: '明日の午後、希望者向けの追加フィジカルトレーニングを実施します。参加希望者は返信してください。',
-    sentAt: '2025-10-27T12:00:00Z',
-    status: 'delivered',
-    readBy: [{ userId: 'player-1', readAt: '2025-10-27T13:00:00Z' }],
-    attachments: [],
-    isImportant: false,
+    name: 'FW陣グループ',
+    participantIds: ['staff-1', 'player-1', 'player-6'],
+    participants: [
+      getTeamMemberById('staff-1'),
+      getTeamMemberById('player-1'),
+      getTeamMemberById('player-6'),
+    ],
+    messages: [
+      {
+        id: 'msg-2-1',
+        conversationId: 'conv-2',
+        senderId: 'staff-1',
+        senderName: '反町康治',
+        content: '次回の試合では両名をトップで起用します。コンビネーションの確認を明日行いましょう。',
+        sentAt: '2025-10-28T15:00:00Z',
+        readBy: [
+          { userId: 'player-1', readAt: '2025-10-28T15:10:00Z' },
+          { userId: 'player-6', readAt: '2025-10-28T15:15:00Z' },
+        ],
+        attachments: [],
+      },
+      {
+        id: 'msg-2-2',
+        conversationId: 'conv-2',
+        senderId: 'player-1',
+        senderName: '藤田譲瑠チマ',
+        content: '了解しました！楽しみです。',
+        sentAt: '2025-10-28T15:12:00Z',
+        readBy: [
+          { userId: 'staff-1', readAt: '2025-10-28T15:13:00Z' },
+          { userId: 'player-6', readAt: '2025-10-28T15:16:00Z' },
+        ],
+        attachments: [],
+      },
+      {
+        id: 'msg-2-3',
+        conversationId: 'conv-2',
+        senderId: 'player-6',
+        senderName: '前田春紀',
+        content: '前田です。よろしくお願いします！',
+        sentAt: '2025-10-28T15:20:00Z',
+        readBy: [{ userId: 'staff-1', readAt: '2025-10-28T15:21:00Z' }],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-10-28T15:20:00Z',
+    unreadCount: 0,
+    createdAt: '2025-10-28T15:00:00Z',
+    createdBy: 'staff-1',
+    isMuted: false,
+  },
+  // グループ会話: MF陣
+  {
+    id: 'conv-3',
+    type: 'group',
+    name: 'MF陣',
+    participantIds: ['staff-2', 'player-2', 'player-3', 'player-8'],
+    participants: [
+      getTeamMemberById('staff-2'),
+      getTeamMemberById('player-2'),
+      getTeamMemberById('player-3'),
+      getTeamMemberById('player-8'),
+    ],
+    messages: [
+      {
+        id: 'msg-3-1',
+        conversationId: 'conv-3',
+        senderId: 'staff-2',
+        senderName: '田中大輔',
+        content: '明日の午後、MF向けの追加フィジカルトレーニングを実施します。',
+        sentAt: '2025-10-27T12:00:00Z',
+        readBy: [
+          { userId: 'player-2', readAt: '2025-10-27T12:30:00Z' },
+          { userId: 'player-3', readAt: '2025-10-27T13:00:00Z' },
+        ],
+        attachments: [],
+      },
+      {
+        id: 'msg-3-2',
+        conversationId: 'conv-3',
+        senderId: 'player-3',
+        senderName: '佐野海舟',
+        content: '参加します！',
+        sentAt: '2025-10-27T13:05:00Z',
+        readBy: [{ userId: 'staff-2', readAt: '2025-10-27T13:10:00Z' }],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-10-27T13:05:00Z',
+    unreadCount: 1,
+    createdAt: '2025-10-27T12:00:00Z',
+    createdBy: 'staff-2',
+    isMuted: false,
+  },
+  // 1対1: 反町監督 ⇔ 田中コーチ
+  {
+    id: 'conv-4',
+    type: 'direct',
+    participantIds: ['staff-1', 'staff-2'],
+    participants: [getTeamMemberById('staff-1'), getTeamMemberById('staff-2')],
+    messages: [
+      {
+        id: 'msg-4-1',
+        conversationId: 'conv-4',
+        senderId: 'staff-1',
+        senderName: '反町康治',
+        content: '明日のトレーニングメニュー、確認させてください。',
+        sentAt: '2025-10-28T10:00:00Z',
+        readBy: [{ userId: 'staff-2', readAt: '2025-10-28T10:05:00Z' }],
+        attachments: [],
+      },
+      {
+        id: 'msg-4-2',
+        conversationId: 'conv-4',
+        senderId: 'staff-2',
+        senderName: '田中大輔',
+        content: 'はい、お送りします。',
+        sentAt: '2025-10-28T10:10:00Z',
+        readBy: [{ userId: 'staff-1', readAt: '2025-10-28T10:11:00Z' }],
+        attachments: [
+          {
+            id: 'att-msg-1',
+            fileName: 'トレーニングメニュー.pdf',
+            fileSize: 524288,
+            fileType: 'application/pdf',
+            url: '/mock/training-menu.pdf',
+          },
+        ],
+      },
+    ],
+    lastMessageAt: '2025-10-28T10:10:00Z',
+    unreadCount: 0,
+    createdAt: '2025-10-28T10:00:00Z',
+    isMuted: false,
+  },
+  // 1対1: 反町監督 ⇔ 宮原選手
+  {
+    id: 'conv-5',
+    type: 'direct',
+    participantIds: ['staff-1', 'player-2'],
+    participants: [getTeamMemberById('staff-1'), getTeamMemberById('player-2')],
+    messages: [
+      {
+        id: 'msg-5-1',
+        conversationId: 'conv-5',
+        senderId: 'staff-1',
+        senderName: '反町康治',
+        content: '宮原選手、体調は大丈夫ですか？',
+        sentAt: '2025-10-26T16:00:00Z',
+        readBy: [{ userId: 'player-2', readAt: '2025-10-26T16:30:00Z' }],
+        attachments: [],
+      },
+      {
+        id: 'msg-5-2',
+        conversationId: 'conv-5',
+        senderId: 'player-2',
+        senderName: '宮原慧汰',
+        content: 'はい、問題ありません。ご心配ありがとうございます。',
+        sentAt: '2025-10-26T16:35:00Z',
+        readBy: [{ userId: 'staff-1', readAt: '2025-10-26T16:40:00Z' }],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-10-26T16:35:00Z',
+    unreadCount: 0,
+    createdAt: '2025-10-26T16:00:00Z',
+    isMuted: false,
+  },
+  // グループ: スタッフミーティング
+  {
+    id: 'conv-6',
+    type: 'group',
+    name: 'スタッフミーティング',
+    participantIds: ['staff-1', 'staff-2', 'staff-3', 'staff-4'],
+    participants: [
+      getTeamMemberById('staff-1'),
+      getTeamMemberById('staff-2'),
+      getTeamMemberById('staff-3'),
+      getTeamMemberById('staff-4'),
+    ],
+    messages: [
+      {
+        id: 'msg-6-1',
+        conversationId: 'conv-6',
+        senderId: 'staff-1',
+        senderName: '反町康治',
+        content: '明日の15時からスタッフミーティングを行います。',
+        sentAt: '2025-10-27T09:00:00Z',
+        readBy: [
+          { userId: 'staff-2', readAt: '2025-10-27T09:10:00Z' },
+          { userId: 'staff-3', readAt: '2025-10-27T09:15:00Z' },
+          { userId: 'staff-4', readAt: '2025-10-27T09:20:00Z' },
+        ],
+        attachments: [],
+      },
+    ],
+    lastMessageAt: '2025-10-27T09:00:00Z',
+    unreadCount: 0,
+    createdAt: '2025-10-27T09:00:00Z',
+    createdBy: 'staff-1',
+    isMuted: true,
   },
 ];
+
+// 最後のメッセージをセット
+mockConversations.forEach((conv) => {
+  if (conv.messages.length > 0) {
+    conv.lastMessage = conv.messages[conv.messages.length - 1];
+  }
+});
 
 export const mockSharedFiles: SharedFile[] = [
   {
@@ -548,8 +895,9 @@ export function getCommunicationStats() {
     (a) => !a.readBy.includes(currentUserId)
   );
 
-  const unreadMessages = mockMessages.filter(
-    (m) => m.recipientIds.includes(currentUserId) && m.status !== 'read'
+  const totalUnreadConversations = mockConversations.reduce(
+    (sum, conv) => sum + conv.unreadCount,
+    0
   );
 
   const totalComments = mockAnnouncements.reduce(
@@ -560,9 +908,10 @@ export function getCommunicationStats() {
   return {
     totalAnnouncements: publishedAnnouncements.length,
     unreadAnnouncements: unreadAnnouncements.length,
-    unreadMessages: unreadMessages.length,
+    unreadMessages: totalUnreadConversations,
     totalSharedFiles: mockSharedFiles.length,
     totalComments,
+    totalConversations: mockConversations.length,
   };
 }
 
@@ -570,12 +919,63 @@ export function getAnnouncementById(id: string): Announcement | null {
   return mockAnnouncements.find((a) => a.id === id) || null;
 }
 
-export function getMessageById(id: string): Message | null {
-  return mockMessages.find((m) => m.id === id) || null;
+export function getConversationById(id: string): Conversation | null {
+  return mockConversations.find((c) => c.id === id) || null;
 }
 
 export function getSharedFileById(id: string): SharedFile | null {
   return mockSharedFiles.find((f) => f.id === id) || null;
+}
+
+export function getTeamMembersByIds(ids: string[]): TeamMember[] {
+  return mockTeamMembers.filter((m) => ids.includes(m.id));
+}
+
+export function getConversationName(conversation: Conversation): string {
+  if (conversation.type === 'group') {
+    return conversation.name || 'グループ';
+  }
+  // 1対1の場合は相手の名前を返す
+  const otherMember = conversation.participants.find(
+    (p) => p.id !== currentUserId
+  );
+  return otherMember?.name || '不明';
+}
+
+export function getConversationAvatar(conversation: Conversation): string {
+  if (conversation.type === 'group') {
+    return conversation.groupPhotoUrl || '👥';
+  }
+  // 1対1の場合は相手のアバターを返す（今は絵文字）
+  const otherMember = conversation.participants.find(
+    (p) => p.id !== currentUserId
+  );
+  if (otherMember?.role === 'player') return '⚽';
+  if (otherMember?.role === 'coach') return '👨‍🏫';
+  return '👤';
+}
+
+export function formatMessageTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInHours = diffInMs / (1000 * 60 * 60);
+  const diffInDays = diffInHours / 24;
+
+  if (diffInHours < 1) {
+    const minutes = Math.floor(diffInMs / (1000 * 60));
+    return `${minutes}分前`;
+  }
+  if (diffInHours < 24) {
+    return `${Math.floor(diffInHours)}時間前`;
+  }
+  if (diffInDays < 7) {
+    return `${Math.floor(diffInDays)}日前`;
+  }
+  return date.toLocaleDateString('ja-JP', {
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export function isAnnouncementRead(announcement: Announcement): boolean {

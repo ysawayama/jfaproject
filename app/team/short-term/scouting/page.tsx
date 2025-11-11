@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Plus,
@@ -22,8 +23,17 @@ import {
 } from '@/lib/team/scouting-data';
 
 export default function ScoutingPage() {
+  const searchParams = useSearchParams();
   const [selectedStatus, setSelectedStatus] = useState<ScoutingStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // URLパラメータからステータスを読み取って初期設定
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    if (statusParam && (statusParam === 'scheduled' || statusParam === 'in_progress' || statusParam === 'completed')) {
+      setSelectedStatus(statusParam as ScoutingStatus);
+    }
+  }, [searchParams]);
 
   // フィルタリング
   const filteredReports = scoutingReports.filter((report) => {
@@ -220,17 +230,6 @@ export default function ScoutingPage() {
                       <User className="w-4 h-4" />
                       {report.scoutName}
                     </span>
-
-                    {/* 完了した視察の場合、評価を表示 */}
-                    {report.status === 'completed' && report.rating > 0 && (
-                      <>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          評価: {report.rating}/5
-                        </span>
-                      </>
-                    )}
 
                     {/* 出場情報 */}
                     {report.attendance !== undefined && (

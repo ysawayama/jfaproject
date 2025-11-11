@@ -18,9 +18,19 @@ import {
   FileText,
   Edit,
   Trash2,
-  Play
+  Play,
+  Clock,
+  User2,
+  History,
+  Activity,
 } from 'lucide-react';
-import { scoutingReports, scoutingStatusInfo } from '@/lib/team/scouting-data';
+import {
+  scoutingReports,
+  scoutingStatusInfo,
+  getScoutingEvaluation,
+} from '@/lib/team/scouting-data';
+import { mockMediaItems, getMediaIcon, formatFileSize, formatDuration } from '@/lib/team/media-storage';
+import { getEvaluationTypeInfo, getGradeInfo } from '@/lib/team/unified-evaluation';
 
 export default function ScoutingDetailPage({
   params,
@@ -30,6 +40,9 @@ export default function ScoutingDetailPage({
   const { id } = use(params);
   const report = scoutingReports.find((r) => r.id === id);
   const [activeTab, setActiveTab] = useState<'overview' | 'evaluation' | 'media'>('overview');
+
+  // 統一評価システムから評価データを取得
+  const evaluation = report ? getScoutingEvaluation(report.id) : null;
 
   if (!report) {
     return (
@@ -89,12 +102,6 @@ export default function ScoutingDetailPage({
           >
             {status.label}
           </span>
-          {report.rating > 0 && (
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-              <Star className="w-5 h-5 fill-yellow-300 text-yellow-300" />
-              <span className="font-bold text-xl">{report.rating}/5</span>
-            </div>
-          )}
         </div>
 
         {/* 試合対戦カード */}
@@ -293,98 +300,104 @@ export default function ScoutingDetailPage({
           {/* 評価タブ */}
           {activeTab === 'evaluation' && (
             <div className="space-y-6">
-              {report.status === 'completed' && report.rating > 0 ? (
+              {evaluation ? (
                 <>
-                  {/* 総合評価 */}
-                  <div className="text-center bg-neutral-50 rounded-xl p-8">
-                    <p className="text-sm text-neutral-600 mb-2">総合評価</p>
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-10 h-10 ${
-                            i < report.rating
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-neutral-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-4xl font-bold text-samurai">{report.rating}/5</p>
-                  </div>
-
-                  {/* 詳細評価 */}
-                  <div>
-                    <h3 className="font-bold text-base-dark mb-4">詳細評価</h3>
-                    <div className="space-y-4">
-                      {/* 技術力 */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-neutral-700">技術力</span>
-                          <span className="font-bold text-samurai">
-                            {report.evaluation.technical}/10
-                          </span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-3">
-                          <div
-                            className="bg-gradient-to-r from-samurai to-samurai-dark h-3 rounded-full transition-all"
-                            style={{ width: `${report.evaluation.technical * 10}%` }}
-                          ></div>
+                  {/* 評価情報 */}
+                  <div className="bg-white rounded-xl p-6 border border-neutral-200">
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="flex items-center gap-2">
+                        <User2 className="w-5 h-5 text-neutral-400" />
+                        <div>
+                          <p className="text-xs text-neutral-500">評価者</p>
+                          <p className="font-semibold text-neutral-700">
+                            {evaluation.evaluator.name}
+                            <span className="text-xs text-neutral-500 ml-1">
+                              ({evaluation.evaluator.role})
+                            </span>
+                          </p>
                         </div>
                       </div>
-
-                      {/* フィジカル */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-neutral-700">フィジカル</span>
-                          <span className="font-bold text-samurai">
-                            {report.evaluation.physical}/10
-                          </span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-3">
-                          <div
-                            className="bg-gradient-to-r from-green-500 to-green-700 h-3 rounded-full transition-all"
-                            style={{ width: `${report.evaluation.physical * 10}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      {/* 戦術理解 */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-neutral-700">戦術理解</span>
-                          <span className="font-bold text-samurai">
-                            {report.evaluation.tactical}/10
-                          </span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-3">
-                          <div
-                            className="bg-gradient-to-r from-purple-500 to-purple-700 h-3 rounded-full transition-all"
-                            style={{ width: `${report.evaluation.tactical * 10}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      {/* メンタル */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-neutral-700">メンタル</span>
-                          <span className="font-bold text-samurai">
-                            {report.evaluation.mental}/10
-                          </span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-3">
-                          <div
-                            className="bg-gradient-to-r from-orange-500 to-orange-700 h-3 rounded-full transition-all"
-                            style={{ width: `${report.evaluation.mental * 10}%` }}
-                          ></div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-neutral-400" />
+                        <div>
+                          <p className="text-xs text-neutral-500">評価日</p>
+                          <p className="font-semibold text-neutral-700">
+                            {new Date(evaluation.evaluationDate).toLocaleDateString('ja-JP', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </p>
                         </div>
                       </div>
                     </div>
+
+                    {/* 総合評価グレード */}
+                    {evaluation.overallGrade && (
+                      <div className="text-center bg-neutral-50 rounded-xl p-6 mb-6">
+                        <p className="text-sm text-neutral-600 mb-2">総合評価</p>
+                        <div className="flex items-center justify-center gap-3">
+                          <span
+                            className={`text-5xl font-bold px-6 py-3 rounded-lg ${
+                              getGradeInfo(evaluation.overallGrade).bgColor
+                            } ${getGradeInfo(evaluation.overallGrade).color}`}
+                          >
+                            {evaluation.overallGrade}
+                          </span>
+                          <div className="text-left">
+                            <p className="text-sm text-neutral-500">スコア</p>
+                            <p className="text-3xl font-bold text-samurai">
+                              {evaluation.overallScore}
+                              <span className="text-lg text-neutral-400">/10</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 詳細評価 */}
+                    <div>
+                      <h3 className="font-bold text-base-dark mb-4 flex items-center gap-2">
+                        <Activity className="w-5 h-5" />
+                        詳細評価
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { label: '技術', value: evaluation.scores.technical, color: 'samurai' },
+                          { label: 'フィジカル', value: evaluation.scores.physical, color: 'green' },
+                          { label: '戦術', value: evaluation.scores.tactical, color: 'purple' },
+                          { label: 'メンタル', value: evaluation.scores.mental, color: 'orange' },
+                          { label: '社会性', value: evaluation.scores.social, color: 'blue' },
+                        ].map(({ label, value, color }) => (
+                          <div key={label}>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-neutral-700">{label}</span>
+                              <span className="font-bold text-samurai">{value}/10</span>
+                            </div>
+                            <div className="w-full bg-neutral-200 rounded-full h-3">
+                              <div
+                                className={`bg-gradient-to-r from-${color}-500 to-${color}-700 h-3 rounded-full transition-all`}
+                                style={{ width: `${value * 10}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 評価コメント */}
+                    {evaluation.notes && (
+                      <div className="mt-6">
+                        <h3 className="font-bold text-base-dark mb-2">総評</h3>
+                        <div className="bg-neutral-50 rounded-lg p-4">
+                          <p className="text-sm text-neutral-700">{evaluation.notes}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
-                <div className="text-center py-12">
+                <div className="text-center py-12 bg-white rounded-xl border border-neutral-200">
                   <p className="text-neutral-500">まだ評価が記入されていません</p>
                 </div>
               )}
@@ -394,104 +407,158 @@ export default function ScoutingDetailPage({
           {/* メディアタブ */}
           {activeTab === 'media' && (
             <div className="space-y-6">
-              {/* 音声メモ */}
-              <div>
-                <h3 className="font-bold text-base-dark mb-4 flex items-center gap-2">
-                  <Mic className="w-5 h-5" />
-                  音声メモ
-                </h3>
-                {report.voiceMemos && report.voiceMemos.length > 0 ? (
-                  <div className="space-y-3">
-                    {report.voiceMemos.map((memo) => (
-                      <div
-                        key={memo.id}
-                        className="bg-neutral-50 rounded-lg p-4 border border-neutral-200"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <button className="w-10 h-10 bg-samurai text-white rounded-full flex items-center justify-center hover:bg-samurai-dark transition-colors">
-                            <Play className="w-5 h-5" />
-                          </button>
-                          <div>
-                            <p className="text-sm font-semibold text-base-dark">
-                              音声メモ {memo.duration}秒
-                            </p>
-                            <p className="text-xs text-neutral-600">
-                              {new Date(memo.timestamp).toLocaleString('ja-JP')}
-                            </p>
-                          </div>
-                        </div>
-                        {memo.transcript && (
-                          <div className="bg-white rounded-lg p-3 border border-neutral-200">
-                            <p className="text-sm text-neutral-700">{memo.transcript}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-neutral-200 rounded-lg p-8 text-center">
-                    <Mic className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                    <p className="text-sm text-neutral-500">音声メモがありません</p>
-                  </div>
-                )}
-              </div>
+              {(() => {
+                // 統合メディアストレージからメディアを取得
+                const linkedMedia = report.mediaIds
+                  ? mockMediaItems.filter(item => report.mediaIds?.includes(item.id))
+                  : [];
 
-              {/* 動画 */}
-              <div>
-                <h3 className="font-bold text-base-dark mb-4 flex items-center gap-2">
-                  <Video className="w-5 h-5" />
-                  動画
-                </h3>
-                {report.videos && report.videos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {report.videos.map((video) => (
-                      <div
-                        key={video.id}
-                        className="bg-neutral-50 rounded-lg p-4 border border-neutral-200"
-                      >
-                        <div className="aspect-video bg-neutral-200 rounded-lg mb-3 flex items-center justify-center">
-                          <Play className="w-12 h-12 text-neutral-400" />
-                        </div>
-                        <p className="font-semibold text-base-dark mb-1">{video.title}</p>
-                        <p className="text-xs text-neutral-600">{video.duration}秒</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-neutral-200 rounded-lg p-8 text-center">
-                    <Video className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                    <p className="text-sm text-neutral-500">動画がありません</p>
-                  </div>
-                )}
-              </div>
+                const hasLegacyMedia =
+                  (report.voiceMemos && report.voiceMemos.length > 0) ||
+                  (report.videos && report.videos.length > 0) ||
+                  (report.images && report.images.length > 0);
 
-              {/* 画像 */}
-              <div>
-                <h3 className="font-bold text-base-dark mb-4 flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5" />
-                  画像
-                </h3>
-                {report.images && report.images.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {report.images.map((image) => (
-                      <div
-                        key={image.id}
-                        className="bg-neutral-50 rounded-lg p-2 border border-neutral-200"
-                      >
-                        <div className="aspect-square bg-neutral-200 rounded-lg mb-2"></div>
-                        {image.caption && (
-                          <p className="text-xs text-neutral-600">{image.caption}</p>
-                        )}
+                const hasMedia = linkedMedia.length > 0 || hasLegacyMedia;
+
+                return (
+                  <>
+                    {/* 統合メディアストレージのメディア */}
+                    {linkedMedia.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-bold text-base-dark flex items-center gap-2">
+                            <FileText className="w-5 h-5" />
+                            関連メディア
+                          </h3>
+                          <Link
+                            href="/team/short-term/resources"
+                            className="text-sm text-samurai hover:text-samurai-dark flex items-center gap-1"
+                          >
+                            資料共有で全て見る →
+                          </Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {linkedMedia.map((media) => (
+                            <Link
+                              key={media.id}
+                              href={`/team/short-term/resources/${media.id}`}
+                              className="bg-white rounded-lg border border-neutral-200 hover:border-samurai hover:shadow-md transition-all overflow-hidden group"
+                            >
+                              {/* サムネイル */}
+                              <div className="relative h-32 bg-neutral-100 flex items-center justify-center">
+                                {media.thumbnail ? (
+                                  <img
+                                    src={media.thumbnail}
+                                    alt={media.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <span className="text-4xl">{getMediaIcon(media.type)}</span>
+                                )}
+                                {media.duration && (
+                                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-0.5 rounded">
+                                    {formatDuration(media.duration)}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* コンテンツ */}
+                              <div className="p-3">
+                                <div className="flex items-start gap-2 mb-2">
+                                  <span className="text-xl flex-shrink-0">{getMediaIcon(media.type)}</span>
+                                  <p className="text-sm font-medium text-base-dark group-hover:text-samurai line-clamp-2 flex-1">
+                                    {media.name}
+                                  </p>
+                                </div>
+                                {media.description && (
+                                  <p className="text-xs text-neutral-600 mb-2 line-clamp-2">
+                                    {media.description}
+                                  </p>
+                                )}
+                                <div className="flex items-center justify-between text-xs text-neutral-500">
+                                  <span>{formatFileSize(media.size)}</span>
+                                  <span>👁️ {media.viewCount}</span>
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+
+                        {/* アップロードボタン */}
+                        <div className="mt-4 border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center">
+                          <Link
+                            href="/team/short-term/resources/upload"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors"
+                          >
+                            <Video className="w-4 h-4" />
+                            <span>新しいメディアをアップロード</span>
+                          </Link>
+                          <p className="text-xs text-neutral-500 mt-2">
+                            動画・画像・音声メモを追加できます
+                          </p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-neutral-200 rounded-lg p-8 text-center">
-                    <ImageIcon className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                    <p className="text-sm text-neutral-500">画像がありません</p>
-                  </div>
-                )}
-              </div>
+                    )}
+
+                    {/* レガシーメディア（互換性のため残す） */}
+                    {report.voiceMemos && report.voiceMemos.length > 0 && (
+                      <div>
+                        <h3 className="font-bold text-base-dark mb-4 flex items-center gap-2">
+                          <Mic className="w-5 h-5" />
+                          音声メモ（レガシー）
+                        </h3>
+                        <div className="space-y-3">
+                          {report.voiceMemos.map((memo) => (
+                            <div
+                              key={memo.id}
+                              className="bg-neutral-50 rounded-lg p-4 border border-neutral-200"
+                            >
+                              <div className="flex items-center gap-3 mb-3">
+                                <button className="w-10 h-10 bg-samurai text-white rounded-full flex items-center justify-center hover:bg-samurai-dark transition-colors">
+                                  <Play className="w-5 h-5" />
+                                </button>
+                                <div>
+                                  <p className="text-sm font-semibold text-base-dark">
+                                    音声メモ {memo.duration}秒
+                                  </p>
+                                  <p className="text-xs text-neutral-600">
+                                    {new Date(memo.timestamp).toLocaleString('ja-JP')}
+                                  </p>
+                                </div>
+                              </div>
+                              {memo.transcript && (
+                                <div className="bg-white rounded-lg p-3 border border-neutral-200">
+                                  <p className="text-sm text-neutral-700">{memo.transcript}</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* メディアがない場合 */}
+                    {!hasMedia && (
+                      <div className="border-2 border-dashed border-neutral-200 rounded-lg p-12 text-center">
+                        <Video className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+                        <p className="text-base font-medium text-neutral-700 mb-2">
+                          メディアがまだありません
+                        </p>
+                        <p className="text-sm text-neutral-500 mb-4">
+                          動画や音声メモを追加して視察内容を記録しましょう
+                        </p>
+                        <Link
+                          href="/team/short-term/resources/upload"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors"
+                        >
+                          <Video className="w-4 h-4" />
+                          <span>メディアをアップロード</span>
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>

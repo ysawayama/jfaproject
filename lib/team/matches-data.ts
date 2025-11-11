@@ -37,6 +37,8 @@ export interface Match {
   notes?: string; // メモ
   createdAt: string;
   updatedAt: string;
+  // 統合メディアストレージとの連携
+  mediaIds?: string[]; // media-storage.tsのMediaItem.idの配列
 }
 
 /**
@@ -181,6 +183,7 @@ export const matches: Match[] = [
     notes: '劇的な逆転勝利。後半の選手交代が功を奏した。',
     createdAt: '2025-10-15T17:30:00',
     updatedAt: '2025-10-15T17:30:00',
+    mediaIds: ['media-007', 'media-008'],
   },
   {
     id: 'match-002',

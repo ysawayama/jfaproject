@@ -8,7 +8,6 @@ import {
   Filter,
   Clock,
   Users,
-  Tag,
   TrendingUp,
 } from 'lucide-react';
 import {
@@ -35,14 +34,6 @@ export default function TrainingMenuPage() {
     return matchesSearch && matchesCategory && matchesDifficulty;
   });
 
-  // カテゴリごとの件数
-  const stats = {
-    total: trainingMenus.length,
-    technical: trainingMenus.filter((m) => m.category === 'technical').length,
-    tactical: trainingMenus.filter((m) => m.category === 'tactical').length,
-    physical: trainingMenus.filter((m) => m.category === 'physical').length,
-  };
-
   // 使用回数でソート
   const sortedMenus = [...filteredMenus].sort((a, b) => b.usageCount - a.usageCount);
 
@@ -63,54 +54,6 @@ export default function TrainingMenuPage() {
           <Plus className="w-5 h-5" />
           <span className="font-semibold">新規作成</span>
         </Link>
-      </div>
-
-      {/* 統計カード */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center">
-              <Tag className="w-5 h-5 text-neutral-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-base-dark">{stats.total}</p>
-              <p className="text-sm text-neutral-600">総メニュー数</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-xl">⚽</span>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-blue-600">{stats.technical}</p>
-              <p className="text-sm text-neutral-600">技術</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <span className="text-xl">🎯</span>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-purple-600">{stats.tactical}</p>
-              <p className="text-sm text-neutral-600">戦術</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-              <span className="text-xl">💪</span>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-red-600">{stats.physical}</p>
-              <p className="text-sm text-neutral-600">フィジカル</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* 検索・フィルター */}

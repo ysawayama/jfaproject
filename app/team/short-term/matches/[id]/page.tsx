@@ -16,6 +16,11 @@ import {
   Activity,
   FileText,
   Clock,
+  Video,
+  Plus,
+  Upload,
+  Tag,
+  X,
 } from 'lucide-react';
 import {
   matches,
@@ -23,6 +28,7 @@ import {
   goals,
   matchReports,
 } from '@/lib/team/matches-data';
+import { mockMediaItems, getMediaIcon, formatFileSize, formatDuration } from '@/lib/team/media-storage';
 
 type TabType = 'overview' | 'stats' | 'goals' | 'report';
 
@@ -38,6 +44,13 @@ export default function MatchDetailPage({
   const report = matchReports.find((r) => r.matchId === id);
 
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [videoFormData, setVideoFormData] = useState({
+    title: '',
+    description: '',
+    tags: '',
+    file: null as File | null,
+  });
 
   if (!match) {
     return (
@@ -58,6 +71,30 @@ export default function MatchDetailPage({
   }
 
   const isCompleted = match.status === 'completed';
+
+  // 映像アップロード処理
+  const handleVideoUpload = () => {
+    if (!videoFormData.title || !videoFormData.file) {
+      alert('タイトルとファイルは必須です');
+      return;
+    }
+    // TODO: 実際のアップロード処理
+    alert(`シーン映像「${videoFormData.title}」をアップロードしました（デモ）`);
+    setIsVideoModalOpen(false);
+    setVideoFormData({
+      title: '',
+      description: '',
+      tags: '',
+      file: null,
+    });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setVideoFormData({ ...videoFormData, file });
+    }
+  };
 
   // 結果バッジスタイル
   const getResultBadgeStyle = () => {
@@ -313,6 +350,112 @@ export default function MatchDetailPage({
                   <p className="text-neutral-700">{match.notes}</p>
                 </div>
               )}
+
+              {/* 試合映像・ハイライト */}
+              {(() => {
+                const linkedMedia = match.mediaIds
+                  ? mockMediaItems.filter(item => match.mediaIds?.includes(item.id))
+                  : [];
+
+                return (
+                  <div className="bg-white rounded-xl p-6 border border-neutral-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-base-dark flex items-center gap-2">
+                        <Video className="w-5 h-5" />
+                        試合映像・ハイライト
+                      </h3>
+                      <Link
+                        href="/team/short-term/resources"
+                        className="text-sm text-samurai hover:text-samurai-dark flex items-center gap-1"
+                      >
+                        資料共有で全て見る →
+                      </Link>
+                    </div>
+
+                    {linkedMedia.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {linkedMedia.map((media) => (
+                          <Link
+                            key={media.id}
+                            href={`/team/short-term/resources/${media.id}`}
+                            className="bg-neutral-50 rounded-lg border border-neutral-200 hover:border-samurai hover:shadow-md transition-all overflow-hidden group"
+                          >
+                            {/* サムネイル */}
+                            <div className="relative bg-neutral-200 aspect-video flex items-center justify-center">
+                              {media.thumbnail ? (
+                                <img
+                                  src={media.thumbnail}
+                                  alt={media.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-5xl">{getMediaIcon(media.type)}</span>
+                              )}
+                              {media.duration && (
+                                <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-0.5 rounded">
+                                  {formatDuration(media.duration)}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* コンテンツ */}
+                            <div className="p-4">
+                              <h4 className="font-semibold text-base-dark mb-2 group-hover:text-samurai transition-colors">
+                                {media.name}
+                              </h4>
+                              {media.description && (
+                                <p className="text-xs text-neutral-600 mb-3 line-clamp-2">
+                                  {media.description}
+                                </p>
+                              )}
+                              {/* タグ表示 */}
+                              {media.tags && media.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-3">
+                                  {media.tags.slice(0, 3).map((tag, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="px-2 py-0.5 bg-samurai/10 text-samurai rounded-full text-xs"
+                                    >
+                                      #{tag}
+                                    </span>
+                                  ))}
+                                  {media.tags.length > 3 && (
+                                    <span className="text-xs text-neutral-500">
+                                      +{media.tags.length - 3}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              <div className="flex items-center justify-between text-xs text-neutral-500">
+                                <span>{formatFileSize(media.size)}</span>
+                                <span>👁️ {media.viewCount}</span>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-neutral-500">
+                        まだ試合映像が添付されていません
+                      </div>
+                    )}
+
+                    {/* アップロードボタン */}
+                    <div className="mt-4 border-2 border-dashed border-neutral-200 rounded-lg p-4 text-center">
+                      <button
+                        onClick={() => setIsVideoModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors text-sm"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>シーン映像を追加</span>
+                      </button>
+                      <p className="text-xs text-neutral-500 mt-2">
+                        ゴールシーン、ハイライトなど複数の映像を追加できます
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -747,6 +890,84 @@ export default function MatchDetailPage({
                       </p>
                     </div>
                   )}
+
+                  {/* 関連メディア */}
+                  {(() => {
+                    const linkedMedia = match.mediaIds
+                      ? mockMediaItems.filter(item => match.mediaIds?.includes(item.id))
+                      : [];
+
+                    return linkedMedia.length > 0 ? (
+                      <div className="bg-white rounded-xl p-6 border border-neutral-200">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xl font-bold text-base-dark flex items-center gap-2">
+                            <Video className="w-5 h-5" />
+                            試合映像・ハイライト
+                          </h3>
+                          <Link
+                            href="/team/short-term/resources"
+                            className="text-sm text-samurai hover:text-samurai-dark flex items-center gap-1"
+                          >
+                            資料共有で全て見る →
+                          </Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {linkedMedia.map((media) => (
+                            <Link
+                              key={media.id}
+                              href={`/team/short-term/resources/${media.id}`}
+                              className="bg-neutral-50 rounded-lg border border-neutral-200 hover:border-samurai hover:shadow-md transition-all overflow-hidden group"
+                            >
+                              {/* サムネイル */}
+                              <div className="relative bg-neutral-200 aspect-video flex items-center justify-center">
+                                {media.thumbnail ? (
+                                  <img
+                                    src={media.thumbnail}
+                                    alt={media.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <span className="text-5xl">{getMediaIcon(media.type)}</span>
+                                )}
+                                {media.duration && (
+                                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-0.5 rounded">
+                                    {formatDuration(media.duration)}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* コンテンツ */}
+                              <div className="p-4">
+                                <h4 className="font-semibold text-base-dark mb-2 group-hover:text-samurai transition-colors">
+                                  {media.name}
+                                </h4>
+                                {media.description && (
+                                  <p className="text-xs text-neutral-600 mb-3 line-clamp-2">
+                                    {media.description}
+                                  </p>
+                                )}
+                                <div className="flex items-center justify-between text-xs text-neutral-500">
+                                  <span>{formatFileSize(media.size)}</span>
+                                  <span>👁️ {media.viewCount}</span>
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+
+                        {/* アップロードボタン */}
+                        <div className="mt-4 border-2 border-dashed border-neutral-200 rounded-lg p-4 text-center">
+                          <Link
+                            href="/team/short-term/resources/upload"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors text-sm"
+                          >
+                            <Video className="w-4 h-4" />
+                            <span>試合映像を追加</span>
+                          </Link>
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
                 </>
               ) : (
                 <div className="text-center py-12 text-neutral-500">
@@ -757,6 +978,180 @@ export default function MatchDetailPage({
           )}
         </div>
       </div>
+
+      {/* 映像アップロードモーダル */}
+      {isVideoModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setIsVideoModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-base-dark flex items-center gap-2">
+                <Video className="w-6 h-6 text-samurai" />
+                試合シーン映像の追加
+              </h2>
+              <button
+                onClick={() => setIsVideoModalOpen(false)}
+                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-neutral-600" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* シーンタイトル */}
+              <div>
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  シーンタイトル <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={videoFormData.title}
+                  onChange={(e) =>
+                    setVideoFormData({ ...videoFormData, title: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
+                  placeholder="例: 前半15分 久保建英のゴール"
+                  required
+                />
+              </div>
+
+              {/* ファイル選択 */}
+              <div>
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  映像ファイル <span className="text-red-500">*</span>
+                </label>
+                <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center hover:border-samurai transition-colors">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="video-upload"
+                  />
+                  <label
+                    htmlFor="video-upload"
+                    className="cursor-pointer flex flex-col items-center gap-3"
+                  >
+                    <Upload className="w-12 h-12 text-neutral-400" />
+                    {videoFormData.file ? (
+                      <div className="space-y-1">
+                        <p className="font-semibold text-samurai">
+                          {videoFormData.file.name}
+                        </p>
+                        <p className="text-sm text-neutral-500">
+                          {(videoFormData.file.size / (1024 * 1024)).toFixed(2)} MB
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className="font-semibold text-neutral-700">
+                          クリックしてファイルを選択
+                        </p>
+                        <p className="text-sm text-neutral-500">
+                          MP4, MOV, AVI など
+                        </p>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              {/* メモ・説明 */}
+              <div>
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  メモ・説明
+                </label>
+                <textarea
+                  value={videoFormData.description}
+                  onChange={(e) =>
+                    setVideoFormData({ ...videoFormData, description: e.target.value })
+                  }
+                  rows={4}
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
+                  placeholder="このシーンについてのメモや詳細な説明を記入してください"
+                />
+              </div>
+
+              {/* タグ */}
+              <div>
+                <label className="block text-sm font-semibold text-neutral-700 mb-2 flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  タグ
+                </label>
+                <input
+                  type="text"
+                  value={videoFormData.tags}
+                  onChange={(e) =>
+                    setVideoFormData({ ...videoFormData, tags: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
+                  placeholder="例: ゴール, ハイライト, 久保建英 (カンマ区切り)"
+                />
+                <p className="text-xs text-neutral-500 mt-1">
+                  複数のタグはカンマ（,）で区切ってください
+                </p>
+              </div>
+
+              {/* タグ候補 */}
+              <div>
+                <p className="text-sm font-semibold text-neutral-700 mb-2">
+                  よく使うタグ
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {['ゴール', 'ハイライト', 'チャンス', 'セーブ', '戦術', 'パス', 'ドリブル', 'シュート', 'ファウル', 'コーナーキック'].map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        const currentTags = videoFormData.tags ? videoFormData.tags.split(',').map(t => t.trim()) : [];
+                        if (!currentTags.includes(tag)) {
+                          const newTags = [...currentTags, tag].join(', ');
+                          setVideoFormData({ ...videoFormData, tags: newTags });
+                        }
+                      }}
+                      className="px-3 py-1 bg-neutral-100 text-neutral-700 rounded-full text-xs hover:bg-samurai/10 hover:text-samurai transition-colors"
+                    >
+                      #{tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 注意事項 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+              <p className="text-sm text-blue-800 flex items-start gap-2">
+                <span className="font-bold">ℹ️</span>
+                <span>
+                  映像は試合に紐づいて保存され、チーム内で共有されます。重要なシーンごとに分けてアップロードすると、後から検索しやすくなります。
+                </span>
+              </p>
+            </div>
+
+            {/* アクションボタン */}
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <button
+                onClick={() => setIsVideoModalOpen(false)}
+                className="px-6 py-3 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors font-semibold"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleVideoUpload}
+                className="px-6 py-3 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors font-semibold flex items-center gap-2"
+              >
+                <Upload className="w-5 h-5" />
+                アップロード
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

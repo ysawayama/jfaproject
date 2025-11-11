@@ -4,12 +4,21 @@ import { useState } from 'react';
 import { candidates } from '@/lib/team/candidates-data';
 import { formations, getFormation, getFormationNames } from '@/lib/team/formations';
 import { FormationPlayer } from '@/lib/team/formation-types';
-import { Save, Download, Trash2, Plus, X } from 'lucide-react';
+import { Save, Download, Trash2, Plus, X, RefreshCw } from 'lucide-react';
+
+// ポジションスロット型定義（先発 + 交代選手）
+type PositionSlot = {
+  starter: FormationPlayer | null;
+  substitutes: FormationPlayer[];
+};
 
 export default function FormationPage() {
   const [selectedFormation, setSelectedFormation] = useState('4-3-3');
-  const [lineup, setLineup] = useState<(FormationPlayer | null)[]>(Array(11).fill(null));
+  const [lineup, setLineup] = useState<PositionSlot[]>(
+    Array(11).fill(null).map(() => ({ starter: null, substitutes: [] }))
+  );
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [selectionMode, setSelectionMode] = useState<'starter' | 'substitute'>('starter');
 
   const formation = getFormation(selectedFormation);
 
@@ -24,20 +33,44 @@ export default function FormationPage() {
     }));
 
   // 既に配置されている選手IDのセット
-  const usedPlayerIds = new Set(lineup.filter((p) => p !== null).map((p) => p!.id));
+  const usedPlayerIds = new Set<string>();
+  lineup.forEach((slot) => {
+    if (slot.starter) usedPlayerIds.add(slot.starter.id);
+    slot.substitutes.forEach((sub) => usedPlayerIds.add(sub.id));
+  });
 
   // 選手をスロットに配置
   const handlePlayerSelect = (player: FormationPlayer, slotIndex: number) => {
     const newLineup = [...lineup];
-    newLineup[slotIndex] = player;
+
+    if (selectionMode === 'starter') {
+      newLineup[slotIndex] = { ...newLineup[slotIndex], starter: player };
+    } else {
+      // 交代選手として追加
+      newLineup[slotIndex] = {
+        ...newLineup[slotIndex],
+        substitutes: [...newLineup[slotIndex].substitutes, player],
+      };
+    }
+
     setLineup(newLineup);
     setSelectedSlot(null);
   };
 
-  // 選手を削除
-  const handlePlayerRemove = (slotIndex: number) => {
+  // 先発選手を削除
+  const handleStarterRemove = (slotIndex: number) => {
     const newLineup = [...lineup];
-    newLineup[slotIndex] = null;
+    newLineup[slotIndex] = { ...newLineup[slotIndex], starter: null };
+    setLineup(newLineup);
+  };
+
+  // 交代選手を削除
+  const handleSubstituteRemove = (slotIndex: number, subIndex: number) => {
+    const newLineup = [...lineup];
+    newLineup[slotIndex] = {
+      ...newLineup[slotIndex],
+      substitutes: newLineup[slotIndex].substitutes.filter((_, i) => i !== subIndex),
+    };
     setLineup(newLineup);
   };
 
@@ -45,9 +78,10 @@ export default function FormationPage() {
   const handleFormationChange = (formationName: string) => {
     setSelectedFormation(formationName);
     // フォーメーションを変更した際、配置をリセットするか確認
-    if (lineup.some((p) => p !== null)) {
+    const hasPlayers = lineup.some((slot) => slot.starter || slot.substitutes.length > 0);
+    if (hasPlayers) {
       if (confirm('フォーメーションを変更すると、配置がリセットされます。よろしいですか？')) {
-        setLineup(Array(11).fill(null));
+        setLineup(Array(11).fill(null).map(() => ({ starter: null, substitutes: [] })));
       }
     }
   };
@@ -61,7 +95,7 @@ export default function FormationPage() {
   // 配置をクリア
   const handleClear = () => {
     if (confirm('配置をクリアしますか？')) {
-      setLineup(Array(11).fill(null));
+      setLineup(Array(11).fill(null).map(() => ({ starter: null, substitutes: [] })));
     }
   };
 
@@ -193,7 +227,7 @@ export default function FormationPage() {
 
                 {/* 選手配置 */}
                 {formation.positions.map((pos, index) => {
-                  const player = lineup[index];
+                  const slot = lineup[index];
                   const isSelected = selectedSlot === index;
 
                   return (
@@ -206,55 +240,106 @@ export default function FormationPage() {
                         transform: 'translate(-50%, -50%)',
                       }}
                     >
-                      <button
-                        onClick={() => {
-                          if (player) {
-                            // 選手が配置されている場合
-                            if (confirm(`${player.name}を外しますか？`)) {
-                              handlePlayerRemove(index);
+                      <div className="flex flex-col items-center gap-1">
+                        {/* 先発選手 */}
+                        <button
+                          onClick={() => {
+                            if (slot.starter) {
+                              // 選手が配置されている場合
+                              if (confirm(`${slot.starter.name}を外しますか？`)) {
+                                handleStarterRemove(index);
+                              }
+                            } else {
+                              // 空きスロットの場合
+                              setSelectedSlot(isSelected && selectionMode === 'starter' ? null : index);
+                              setSelectionMode('starter');
                             }
-                          } else {
-                            // 空きスロットの場合
-                            setSelectedSlot(isSelected ? null : index);
-                          }
-                        }}
-                        className={`relative transition-all ${
-                          isSelected
-                            ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-green-500'
-                            : ''
-                        }`}
-                      >
-                        {player ? (
-                          // 選手カード
-                          <div className="w-16 h-16 bg-samurai rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform">
-                            <div className="text-center">
-                              <p className="text-xs font-bold leading-tight">
-                                {player.name.split(' ')[0]}
-                              </p>
-                              <p className="text-[10px] opacity-80">
-                                {pos.position}
-                              </p>
+                          }}
+                          className={`relative transition-all ${
+                            isSelected && selectionMode === 'starter'
+                              ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-green-500'
+                              : ''
+                          }`}
+                        >
+                          {slot.starter ? (
+                            // 選手カード
+                            <div className="w-16 h-16 bg-samurai rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform">
+                              <div className="text-center">
+                                <p className="text-xs font-bold leading-tight">
+                                  {slot.starter.name.split(' ')[0]}
+                                </p>
+                                <p className="text-[10px] opacity-80">
+                                  {pos.position}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          // 空きスロット
-                          <div
-                            className={`w-16 h-16 rounded-full flex items-center justify-center border-2 border-dashed transition-all ${
-                              isSelected
-                                ? 'bg-yellow-400 border-yellow-500'
-                                : 'bg-white/20 border-white/50 hover:bg-white/30'
-                            }`}
-                          >
-                            {isSelected ? (
-                              <Plus className="w-8 h-8 text-yellow-900" />
-                            ) : (
-                              <span className="text-xs text-white/70 font-semibold">
-                                {pos.position}
-                              </span>
-                            )}
+                          ) : (
+                            // 空きスロット
+                            <div
+                              className={`w-16 h-16 rounded-full flex items-center justify-center border-2 border-dashed transition-all ${
+                                isSelected && selectionMode === 'starter'
+                                  ? 'bg-yellow-400 border-yellow-500'
+                                  : 'bg-white/20 border-white/50 hover:bg-white/30'
+                              }`}
+                            >
+                              {isSelected && selectionMode === 'starter' ? (
+                                <Plus className="w-8 h-8 text-yellow-900" />
+                              ) : (
+                                <span className="text-xs text-white/70 font-semibold">
+                                  {pos.position}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </button>
+
+                        {/* 交代選手表示 */}
+                        {slot.substitutes.length > 0 && (
+                          <div className="flex flex-col gap-0.5">
+                            {slot.substitutes.map((sub, subIndex) => (
+                              <button
+                                key={subIndex}
+                                onClick={() => {
+                                  if (confirm(`交代選手 ${sub.name}を外しますか？`)) {
+                                    handleSubstituteRemove(index, subIndex);
+                                  }
+                                }}
+                                className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-samurai shadow hover:scale-110 transition-transform"
+                                title={`交代: ${sub.name}`}
+                              >
+                                <div className="text-center">
+                                  <p className="text-[9px] font-bold leading-tight">
+                                    {sub.name.split(' ')[0]}
+                                  </p>
+                                  <p className="text-[8px] opacity-60">交代</p>
+                                </div>
+                              </button>
+                            ))}
                           </div>
                         )}
-                      </button>
+
+                        {/* 交代選手追加ボタン */}
+                        {slot.starter && (
+                          <button
+                            onClick={() => {
+                              setSelectedSlot(index);
+                              setSelectionMode('substitute');
+                            }}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center border-2 border-dashed transition-all ${
+                              isSelected && selectionMode === 'substitute'
+                                ? 'bg-blue-400 border-blue-500 ring-4 ring-blue-400 ring-offset-2 ring-offset-green-500'
+                                : 'bg-white/20 border-white/50 hover:bg-white/30'
+                            }`}
+                            title="交代選手を追加"
+                          >
+                            {isSelected && selectionMode === 'substitute' ? (
+                              <RefreshCw className="w-5 h-5 text-blue-900" />
+                            ) : (
+                              <Plus className="w-4 h-4 text-white" />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -266,10 +351,16 @@ export default function FormationPage() {
               <p className="text-white/80 text-sm">
                 {selectedSlot !== null ? (
                   <span className="font-semibold">
-                    左側の選手リストから選手を選択してください
+                    {selectionMode === 'starter'
+                      ? '左側の選手リストから先発選手を選択してください'
+                      : '左側の選手リストから交代選手を選択してください'
+                    }
                   </span>
                 ) : (
-                  '空きスロットをクリックして選手を配置'
+                  <>
+                    空きスロットをクリックして先発選手を配置 /
+                    <span className="text-blue-200 font-semibold ml-1">+ボタンで交代選手を追加</span>
+                  </>
                 )}
               </p>
             </div>

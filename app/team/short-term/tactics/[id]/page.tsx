@@ -23,7 +23,9 @@ import {
   tacticalAnalyses,
   tacticalBoards,
   threatLevelInfo,
+  categoryInfo,
 } from '@/lib/team/tactics-data';
+import { mockMediaItems, getMediaIcon, formatFileSize, formatDuration } from '@/lib/team/media-storage';
 
 type TabType = 'overview' | 'players' | 'videos' | 'tactics';
 
@@ -404,42 +406,149 @@ export default function TacticsDetailPage({
 
           {/* ビデオ分析タブ */}
           {activeTab === 'videos' && (
-            <div className="space-y-4">
-              {analysis?.videos.length ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {analysis.videos.map((video) => (
-                    <div
-                      key={video.id}
-                      className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-all group cursor-pointer"
-                    >
-                      <div className="bg-neutral-200 aspect-video flex items-center justify-center">
-                        <Video className="w-12 h-12 text-neutral-400" />
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-base-dark mb-2 group-hover:text-samurai transition-colors">
-                          {video.title}
-                        </h4>
-                        <div className="flex items-center justify-between text-sm text-neutral-600">
-                          <span>{video.duration}</span>
-                          <span className="px-2 py-1 bg-neutral-100 rounded text-xs">
-                            {video.category === 'full-match'
-                              ? 'フルマッチ'
-                              : video.category === 'highlights'
-                              ? 'ハイライト'
-                              : video.category === 'tactical-analysis'
-                              ? '戦術分析'
-                              : '選手分析'}
-                          </span>
+            <div className="space-y-6">
+              {(() => {
+                // 統合メディアストレージからメディアを取得
+                const linkedMedia = analysis?.mediaIds
+                  ? mockMediaItems.filter(item => analysis.mediaIds?.includes(item.id))
+                  : [];
+
+                const hasLegacyVideos = analysis?.videos && analysis.videos.length > 0;
+                const hasMedia = linkedMedia.length > 0 || hasLegacyVideos;
+
+                return (
+                  <>
+                    {/* 統合メディアストレージのメディア */}
+                    {linkedMedia.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xl font-bold text-base-dark">関連ビデオ分析</h3>
+                          <Link
+                            href="/team/short-term/resources"
+                            className="text-sm text-samurai hover:text-samurai-dark flex items-center gap-1"
+                          >
+                            資料共有で全て見る →
+                          </Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {linkedMedia.map((media) => (
+                            <Link
+                              key={media.id}
+                              href={`/team/short-term/resources/${media.id}`}
+                              className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-all group"
+                            >
+                              {/* サムネイル */}
+                              <div className="relative bg-neutral-200 aspect-video flex items-center justify-center">
+                                {media.thumbnail ? (
+                                  <img
+                                    src={media.thumbnail}
+                                    alt={media.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <span className="text-5xl">{getMediaIcon(media.type)}</span>
+                                )}
+                                {media.duration && (
+                                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-0.5 rounded">
+                                    {formatDuration(media.duration)}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* コンテンツ */}
+                              <div className="p-4">
+                                <h4 className="font-semibold text-base-dark mb-2 group-hover:text-samurai transition-colors">
+                                  {media.name}
+                                </h4>
+                                {media.description && (
+                                  <p className="text-xs text-neutral-600 mb-3 line-clamp-2">
+                                    {media.description}
+                                  </p>
+                                )}
+                                <div className="flex items-center justify-between text-xs text-neutral-500">
+                                  <span>{formatFileSize(media.size)}</span>
+                                  <span>👁️ {media.viewCount}</span>
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+
+                        {/* アップロードボタン */}
+                        <div className="mt-4 border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center">
+                          <Link
+                            href="/team/short-term/resources/upload"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors"
+                          >
+                            <Video className="w-4 h-4" />
+                            <span>新しいビデオ分析を追加</span>
+                          </Link>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-neutral-500">
-                  ビデオ分析データがありません
-                </div>
-              )}
+                    )}
+
+                    {/* レガシービデオ（互換性のため残す） */}
+                    {hasLegacyVideos && linkedMedia.length > 0 && (
+                      <div className="border-t border-neutral-200 pt-6">
+                        <h3 className="text-lg font-bold text-base-dark mb-4">
+                          その他のビデオ（レガシー）
+                        </h3>
+                      </div>
+                    )}
+                    {hasLegacyVideos && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {analysis.videos.map((video) => (
+                          <div
+                            key={video.id}
+                            className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-all group cursor-pointer"
+                          >
+                            <div className="bg-neutral-200 aspect-video flex items-center justify-center">
+                              <Video className="w-12 h-12 text-neutral-400" />
+                            </div>
+                            <div className="p-4">
+                              <h4 className="font-semibold text-base-dark mb-2 group-hover:text-samurai transition-colors">
+                                {video.title}
+                              </h4>
+                              <div className="flex items-center justify-between text-sm text-neutral-600">
+                                <span>{video.duration}</span>
+                                <span className="px-2 py-1 bg-neutral-100 rounded text-xs">
+                                  {video.category === 'full-match'
+                                    ? 'フルマッチ'
+                                    : video.category === 'highlights'
+                                    ? 'ハイライト'
+                                    : video.category === 'tactical-analysis'
+                                    ? '戦術分析'
+                                    : '選手分析'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* メディアがない場合 */}
+                    {!hasMedia && (
+                      <div className="border-2 border-dashed border-neutral-200 rounded-lg p-12 text-center">
+                        <Video className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
+                        <p className="text-lg font-medium text-neutral-700 mb-2">
+                          ビデオ分析データがまだありません
+                        </p>
+                        <p className="text-sm text-neutral-500 mb-4">
+                          対戦相手の試合映像や分析動画を追加しましょう
+                        </p>
+                        <Link
+                          href="/team/short-term/resources/upload"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors"
+                        >
+                          <Video className="w-4 h-4" />
+                          <span>ビデオをアップロード</span>
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
 

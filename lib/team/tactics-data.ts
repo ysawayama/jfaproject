@@ -87,6 +87,9 @@ export interface TacticalAnalysis {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+
+  // 統合メディアストレージとの連携
+  mediaIds?: string[]; // media-storage.tsのMediaItem.idの配列
 }
 
 // 戦術ボード
@@ -343,6 +346,7 @@ export const tacticalAnalyses: TacticalAnalysis[] = [
     createdBy: '反町 康治',
     createdAt: '2025-10-28T10:00:00Z',
     updatedAt: '2025-10-30T14:00:00Z',
+    mediaIds: ['media-005', 'media-006'],
   },
 ];
 

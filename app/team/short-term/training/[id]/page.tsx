@@ -14,8 +14,11 @@ import {
   Copy,
   Trash2,
   TrendingUp,
+  Video,
+  FileText,
 } from 'lucide-react';
 import { trainingMenus, categoryInfo, difficultyInfo } from '@/lib/team/training-menu-data';
+import { mockMediaItems, getMediaIcon, formatFileSize, formatDuration } from '@/lib/team/media-storage';
 
 export default function TrainingMenuDetailPage({
   params,
@@ -231,6 +234,87 @@ export default function TrainingMenuDetailPage({
               ))}
             </div>
           </div>
+
+          {/* 関連メディア */}
+          {(() => {
+            const linkedMedia = menu.mediaIds
+              ? mockMediaItems.filter(item => menu.mediaIds?.includes(item.id))
+              : [];
+
+            return linkedMedia.length > 0 ? (
+              <div className="bg-white rounded-xl p-6 border border-neutral-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-base-dark flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    関連メディア
+                  </h3>
+                  <Link
+                    href="/team/short-term/resources"
+                    className="text-sm text-samurai hover:text-samurai-dark flex items-center gap-1"
+                  >
+                    資料共有で全て見る →
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {linkedMedia.map((media) => (
+                    <Link
+                      key={media.id}
+                      href={`/team/short-term/resources/${media.id}`}
+                      className="bg-neutral-50 rounded-lg border border-neutral-200 hover:border-samurai hover:shadow-md transition-all overflow-hidden group"
+                    >
+                      {/* サムネイル */}
+                      <div className="relative h-32 bg-neutral-100 flex items-center justify-center">
+                        {media.thumbnail ? (
+                          <img
+                            src={media.thumbnail}
+                            alt={media.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-4xl">{getMediaIcon(media.type)}</span>
+                        )}
+                        {media.duration && (
+                          <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-0.5 rounded">
+                            {formatDuration(media.duration)}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* コンテンツ */}
+                      <div className="p-3">
+                        <div className="flex items-start gap-2 mb-2">
+                          <span className="text-xl flex-shrink-0">{getMediaIcon(media.type)}</span>
+                          <p className="text-sm font-medium text-base-dark group-hover:text-samurai line-clamp-2 flex-1">
+                            {media.name}
+                          </p>
+                        </div>
+                        {media.description && (
+                          <p className="text-xs text-neutral-600 mb-2 line-clamp-2">
+                            {media.description}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between text-xs text-neutral-500">
+                          <span>{formatFileSize(media.size)}</span>
+                          <span>👁️ {media.viewCount}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* アップロードボタン */}
+                <div className="mt-4 border-2 border-dashed border-neutral-200 rounded-lg p-4 text-center">
+                  <Link
+                    href="/team/short-term/resources/upload"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors text-sm"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>解説動画や図解を追加</span>
+                  </Link>
+                </div>
+              </div>
+            ) : null;
+          })()}
 
           {/* メタデータ */}
           <div className="bg-white rounded-xl p-6 border border-neutral-200">

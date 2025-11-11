@@ -3,68 +3,49 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
+  MessageSquare,
   Plus,
   Search,
-  Filter,
+  Users,
   Bell,
-  MessageSquare,
-  FileText,
-  Pin,
-  Paperclip,
-  MessageCircle,
-  Eye,
-  EyeOff,
-  Mail,
-  Inbox,
+  BellOff,
+  Settings,
+  Check,
 } from 'lucide-react';
 import {
-  mockAnnouncements,
-  getCommunicationStats,
-  getCategoryInfo,
-  getPriorityInfo,
-  getTargetAudienceInfo,
-  isAnnouncementRead,
+  mockConversations,
+  mockTeamMembers,
+  getConversationName,
+  getConversationAvatar,
+  formatMessageTime,
 } from '@/lib/team/communication-data';
-import type {
-  AnnouncementCategory,
-  AnnouncementStatus,
-} from '@/lib/team/communication-data';
+import type { Conversation } from '@/lib/team/communication-data';
 
-type CategoryFilter = 'all' | AnnouncementCategory;
-type StatusFilterType = 'all' | AnnouncementStatus;
+const currentUserId = 'staff-1';
 
 export default function CommunicationPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
-  const [statusFilter, setStatusFilter] = useState<StatusFilterType>('all');
-  const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
 
-  const stats = getCommunicationStats();
-
-  // フィルタリング
-  const filteredAnnouncements = mockAnnouncements.filter((announcement) => {
-    const matchesSearch =
-      announcement.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      announcement.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      announcement.authorName.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesCategory =
-      categoryFilter === 'all' || announcement.category === categoryFilter;
-
-    const matchesStatus =
-      statusFilter === 'all' || announcement.status === statusFilter;
-
-    const matchesUnread = !showUnreadOnly || !isAnnouncementRead(announcement);
-
-    return matchesSearch && matchesCategory && matchesStatus && matchesUnread;
+  // 検索フィルター
+  const filteredConversations = mockConversations.filter((conv) => {
+    const name = getConversationName(conv);
+    return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  // ソート: ピン留め > 日付降順
-  const sortedAnnouncements = [...filteredAnnouncements].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  // 最新メッセージ順にソート
+  const sortedConversations = [...filteredConversations].sort((a, b) => {
+    const timeA = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+    const timeB = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+    return timeB - timeA;
   });
+
+  // 未読数の合計
+  const totalUnread = mockConversations.reduce(
+    (sum, conv) => sum + conv.unreadCount,
+    0
+  );
 
   return (
     <div className="space-y-6">
@@ -75,288 +56,403 @@ export default function CommunicationPage() {
             コミュニケーション
           </h1>
           <p className="text-neutral-600">
-            お知らせ・メッセージ・ファイル共有
+            チームメンバーとのメッセージ
+            {totalUnread > 0 && (
+              <span className="ml-2 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs font-semibold">
+                {totalUnread}件の未読
+              </span>
+            )}
           </p>
         </div>
-        <Link
-          href="/team/short-term/communication/new"
-          className="flex items-center gap-2 bg-samurai text-white px-6 py-3 rounded-lg hover:bg-samurai-dark transition-all shadow-md hover:shadow-lg"
+        <div className="flex items-center gap-3">
+          <Link
+            href="/team/short-term/communication/settings"
+            className="w-10 h-10 bg-white rounded-lg border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 transition-colors"
+          >
+            <Settings className="w-5 h-5 text-neutral-600" />
+          </Link>
+        </div>
+      </div>
+
+      {/* アクションボタン */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button
+          onClick={() => setShowNewMessageModal(true)}
+          className="flex items-center justify-center gap-3 bg-samurai text-white px-6 py-4 rounded-xl hover:bg-samurai-dark transition-all shadow-md hover:shadow-lg"
         >
-          <Plus className="w-5 h-5" />
-          <span className="font-semibold">新規お知らせ</span>
-        </Link>
+          <MessageSquare className="w-5 h-5" />
+          <span className="font-semibold">新しいメッセージ</span>
+        </button>
+        <button
+          onClick={() => setShowGroupModal(true)}
+          className="flex items-center justify-center gap-3 bg-white text-samurai border-2 border-samurai px-6 py-4 rounded-xl hover:bg-samurai/10 transition-all"
+        >
+          <Users className="w-5 h-5" />
+          <span className="font-semibold">グループ作成</span>
+        </button>
       </div>
 
-      {/* 統計カード */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Bell className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-blue-600">
-                {stats.totalAnnouncements}
-              </p>
-              <p className="text-sm text-neutral-600">お知らせ</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-              <Mail className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-red-600">
-                {stats.unreadAnnouncements}
-              </p>
-              <p className="text-sm text-neutral-600">未読</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-green-600">
-                {stats.unreadMessages}
-              </p>
-              <p className="text-sm text-neutral-600">未読メッセージ</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-purple-600">
-                {stats.totalSharedFiles}
-              </p>
-              <p className="text-sm text-neutral-600">共有ファイル</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 検索・フィルター */}
-      <div className="bg-white rounded-xl p-6 border border-neutral-200 space-y-4">
-        {/* 検索バー */}
+      {/* 検索バー */}
+      <div className="bg-white rounded-xl p-4 border border-neutral-200">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="お知らせを検索..."
+            placeholder="メッセージを検索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
           />
         </div>
+      </div>
 
-        {/* フィルター */}
-        <div className="space-y-3">
-          {/* カテゴリフィルター */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Filter className="w-4 h-4 text-neutral-600" />
-              <span className="text-sm font-semibold text-neutral-700">
-                カテゴリ:
-              </span>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {[
-                { value: 'all', label: 'すべて' },
-                { value: 'important', label: '重要' },
-                { value: 'general', label: '一般' },
-                { value: 'schedule', label: '予定' },
-                { value: 'change', label: '変更' },
-                { value: 'emergency', label: '緊急' },
-              ].map((filter) => (
-                <button
-                  key={filter.value}
-                  onClick={() =>
-                    setCategoryFilter(filter.value as CategoryFilter)
-                  }
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                    categoryFilter === filter.value
-                      ? 'bg-samurai text-white'
-                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
+      {/* 会話リスト */}
+      <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-200">
+        {sortedConversations.length === 0 ? (
+          <div className="p-12 text-center">
+            <MessageSquare className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+            <p className="text-neutral-500 mb-2">
+              {searchQuery
+                ? '該当するメッセージがありません'
+                : 'まだメッセージがありません'}
+            </p>
+            <p className="text-sm text-neutral-400">
+              {!searchQuery && '「新しいメッセージ」からメッセージを始めましょう'}
+            </p>
           </div>
+        ) : (
+          sortedConversations.map((conversation) => {
+            const name = getConversationName(conversation);
+            const avatar = getConversationAvatar(conversation);
+            const lastMessage = conversation.lastMessage;
+            const isUnread = conversation.unreadCount > 0;
 
-          {/* ステータス・その他フィルター */}
-          <div className="flex gap-2 flex-wrap">
-            {[
-              { value: 'all', label: 'すべて' },
-              { value: 'published', label: '公開中' },
-              { value: 'draft', label: '下書き' },
-            ].map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() =>
-                  setStatusFilter(filter.value as StatusFilterType)
-                }
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  statusFilter === filter.value
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+            return (
+              <Link
+                key={conversation.id}
+                href={`/team/short-term/communication/${conversation.id}`}
+                className={`flex items-center gap-4 p-4 hover:bg-neutral-50 transition-colors group ${
+                  isUnread ? 'bg-blue-50/30' : ''
                 }`}
               >
-                {filter.label}
-              </button>
-            ))}
-            <button
-              onClick={() => setShowUnreadOnly(!showUnreadOnly)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1 ${
-                showUnreadOnly
-                  ? 'bg-red-600 text-white'
-                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-              }`}
-            >
-              {showUnreadOnly ? (
-                <EyeOff className="w-4 h-4" />
-              ) : (
-                <Eye className="w-4 h-4" />
-              )}
-              未読のみ
-            </button>
-          </div>
-        </div>
-      </div>
+                {/* アバター */}
+                <div
+                  className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl flex-shrink-0 ${
+                    conversation.type === 'group'
+                      ? 'bg-purple-100'
+                      : 'bg-blue-100'
+                  }`}
+                >
+                  {avatar}
+                </div>
 
-      {/* お知らせリスト */}
-      <div className="space-y-4">
-        {sortedAnnouncements.map((announcement) => {
-          const categoryInfo = getCategoryInfo(announcement.category);
-          const priorityInfo = getPriorityInfo(announcement.priority);
-          const targetInfo = getTargetAudienceInfo(announcement.targetAudience);
-          const isRead = isAnnouncementRead(announcement);
-
-          return (
-            <Link
-              key={announcement.id}
-              href={`/team/short-term/communication/${announcement.id}`}
-              className={`block bg-white rounded-xl p-6 border hover:shadow-lg transition-all group ${
-                isRead ? 'border-neutral-200' : 'border-samurai/30 bg-blue-50/30'
-              }`}
-            >
-              {/* ヘッダー */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    {/* ピン留めバッジ */}
-                    {announcement.isPinned && (
-                      <span className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
-                        <Pin className="w-3 h-3" />
-                        ピン留め
-                      </span>
-                    )}
-
-                    {/* カテゴリバッジ */}
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${categoryInfo.bgColor} ${categoryInfo.color}`}
-                    >
-                      {categoryInfo.icon} {categoryInfo.label}
+                {/* 会話情報 */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <h3
+                        className={`font-bold ${
+                          isUnread ? 'text-base-dark' : 'text-neutral-700'
+                        }`}
+                      >
+                        {name}
+                      </h3>
+                      {conversation.type === 'group' && (
+                        <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
+                          {conversation.participantIds.length}人
+                        </span>
+                      )}
+                      {conversation.isMuted && (
+                        <BellOff className="w-4 h-4 text-neutral-400" />
+                      )}
+                    </div>
+                    <span className="text-xs text-neutral-500 flex-shrink-0">
+                      {lastMessage && formatMessageTime(lastMessage.sentAt)}
                     </span>
-
-                    {/* 優先度バッジ */}
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${priorityInfo.bgColor} ${priorityInfo.color}`}
-                    >
-                      {priorityInfo.label}
-                    </span>
-
-                    {/* 対象者バッジ */}
-                    <span className="px-2 py-1 bg-neutral-100 text-neutral-700 rounded-full text-xs font-semibold">
-                      {targetInfo.icon} {targetInfo.label}
-                    </span>
-
-                    {/* 未読バッジ */}
-                    {!isRead && (
-                      <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
-                        未読
-                      </span>
-                    )}
-
-                    {/* 下書きバッジ */}
-                    {announcement.status === 'draft' && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">
-                        下書き
-                      </span>
-                    )}
                   </div>
 
-                  <h3 className="text-xl font-bold text-base-dark group-hover:text-samurai transition-colors mb-1">
-                    {announcement.title}
-                  </h3>
-
-                  <p className="text-sm text-neutral-600 line-clamp-2 mb-3">
-                    {announcement.content}
-                  </p>
-
-                  {/* メタ情報 */}
-                  <div className="flex items-center gap-4 text-xs text-neutral-500">
-                    <span className="flex items-center gap-1">
-                      <Inbox className="w-3 h-3" />
-                      {announcement.authorName}
-                    </span>
-                    <span>
-                      {new Date(announcement.createdAt).toLocaleDateString(
-                        'ja-JP',
-                        {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        }
+                  <div className="flex items-center justify-between">
+                    <p
+                      className={`text-sm truncate ${
+                        isUnread ? 'text-neutral-700 font-medium' : 'text-neutral-500'
+                      }`}
+                    >
+                      {lastMessage ? (
+                        <>
+                          {lastMessage.senderId === currentUserId && (
+                            <span className="text-neutral-400 mr-1">あなた:</span>
+                          )}
+                          {lastMessage.content}
+                        </>
+                      ) : (
+                        <span className="text-neutral-400">メッセージがありません</span>
                       )}
-                    </span>
-                    {announcement.attachments.length > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Paperclip className="w-3 h-3" />
-                        {announcement.attachments.length}
+                    </p>
+                    {isUnread && (
+                      <span className="ml-2 px-2 py-0.5 bg-samurai text-white rounded-full text-xs font-semibold flex-shrink-0">
+                        {conversation.unreadCount}
                       </span>
                     )}
-                    {announcement.comments.length > 0 && (
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" />
-                        {announcement.comments.length}
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" />
-                      {announcement.readBy.length}人が既読
-                    </span>
                   </div>
                 </div>
-              </div>
-            </Link>
-          );
-        })}
+              </Link>
+            );
+          })
+        )}
       </div>
 
-      {/* 結果なし */}
-      {sortedAnnouncements.length === 0 && (
-        <div className="bg-white rounded-xl p-12 text-center border border-neutral-200">
-          <p className="text-neutral-500 mb-2">該当するお知らせがありません</p>
-          <p className="text-sm text-neutral-400">
-            検索条件を変更してお試しください
-          </p>
+      {/* 新しいメッセージモーダル */}
+      {showNewMessageModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowNewMessageModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl max-w-2xl w-full p-8 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-base-dark">
+                新しいメッセージ
+              </h2>
+              <button
+                onClick={() => setShowNewMessageModal(false)}
+                className="text-neutral-400 hover:text-neutral-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 検索 */}
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="メンバーを検索..."
+                  className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
+                />
+              </div>
+            </div>
+
+            {/* メンバーリスト */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-neutral-600 mb-3">
+                チームメンバー
+              </h3>
+              {mockTeamMembers
+                .filter((member) => member.id !== currentUserId)
+                .map((member) => (
+                  <Link
+                    key={member.id}
+                    href={`/team/short-term/communication/new?userId=${member.id}`}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl">
+                      {member.role === 'player'
+                        ? '⚽'
+                        : member.role === 'coach'
+                        ? '👨‍🏫'
+                        : '👤'}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-base-dark">
+                        {member.name}
+                      </p>
+                      <p className="text-sm text-neutral-500">
+                        {member.position}
+                      </p>
+                    </div>
+                    {member.isOnline && (
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    )}
+                  </Link>
+                ))}
+            </div>
+          </div>
         </div>
       )}
+
+      {/* グループ作成モーダル */}
+      {showGroupModal && <GroupCreateModal onClose={() => setShowGroupModal(false)} />}
+    </div>
+  );
+}
+
+// グループ作成モーダルコンポーネント
+function GroupCreateModal({ onClose }: { onClose: () => void }) {
+  const [groupName, setGroupName] = useState('');
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredMembers = mockTeamMembers
+    .filter((member) => member.id !== currentUserId)
+    .filter((member) =>
+      member.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  const toggleMember = (memberId: string) => {
+    if (selectedMembers.includes(memberId)) {
+      setSelectedMembers(selectedMembers.filter((id) => id !== memberId));
+    } else {
+      setSelectedMembers([...selectedMembers, memberId]);
+    }
+  };
+
+  const handleCreate = () => {
+    if (!groupName.trim()) {
+      alert('グループ名を入力してください');
+      return;
+    }
+    if (selectedMembers.length === 0) {
+      alert('メンバーを選択してください');
+      return;
+    }
+    alert(
+      `グループ「${groupName}」を作成しました（デモ）\nメンバー: ${selectedMembers.length}人`
+    );
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-base-dark">グループ作成</h2>
+          <button
+            onClick={onClose}
+            className="text-neutral-400 hover:text-neutral-600 text-2xl"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* グループ名 */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            グループ名 <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="例: FW陣、スタッフミーティング"
+            className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
+          />
+        </div>
+
+        {/* メンバー選択 */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            メンバーを追加 <span className="text-red-500">*</span>
+          </label>
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="メンバーを検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
+            />
+          </div>
+
+          {/* 選択済みメンバー */}
+          {selectedMembers.length > 0 && (
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm font-semibold text-blue-800 mb-2">
+                選択済み ({selectedMembers.length}人)
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {selectedMembers.map((memberId) => {
+                  const member = mockTeamMembers.find((m) => m.id === memberId);
+                  if (!member) return null;
+                  return (
+                    <span
+                      key={memberId}
+                      className="px-3 py-1 bg-white rounded-full text-sm flex items-center gap-2 border border-blue-300"
+                    >
+                      {member.name}
+                      <button
+                        onClick={() => toggleMember(memberId)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* メンバーリスト */}
+          <div className="space-y-2 max-h-64 overflow-y-auto border border-neutral-200 rounded-lg">
+            {filteredMembers.map((member) => {
+              const isSelected = selectedMembers.includes(member.id);
+              return (
+                <button
+                  key={member.id}
+                  onClick={() => toggleMember(member.id)}
+                  className={`w-full flex items-center gap-3 p-3 hover:bg-neutral-50 transition-colors ${
+                    isSelected ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl flex-shrink-0">
+                    {member.role === 'player'
+                      ? '⚽'
+                      : member.role === 'coach'
+                      ? '👨‍🏫'
+                      : '👤'}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-base-dark">{member.name}</p>
+                    <p className="text-sm text-neutral-500">{member.position}</p>
+                  </div>
+                  <div
+                    className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+                      isSelected
+                        ? 'bg-samurai border-samurai'
+                        : 'border-neutral-300'
+                    }`}
+                  >
+                    {isSelected && (
+                      <Check className="w-4 h-4 text-white" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ボタン */}
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-6 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors font-semibold"
+          >
+            キャンセル
+          </button>
+          <button
+            onClick={handleCreate}
+            disabled={!groupName.trim() || selectedMembers.length === 0}
+            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-colors ${
+              groupName.trim() && selectedMembers.length > 0
+                ? 'bg-samurai text-white hover:bg-samurai-dark'
+                : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
+            }`}
+          >
+            グループ作成
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -132,50 +132,96 @@ export default function SchedulePage() {
 
       {/* 統計カード */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
+        <button
+          onClick={() => setSelectedType('all')}
+          className={`bg-white rounded-xl p-4 border-2 transition-all hover:shadow-md ${
+            selectedType === 'all'
+              ? 'border-samurai shadow-md'
+              : 'border-neutral-200'
+          }`}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-neutral-600" />
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+              selectedType === 'all' ? 'bg-samurai/20' : 'bg-neutral-100'
+            }`}>
+              <Calendar className={`w-5 h-5 ${
+                selectedType === 'all' ? 'text-samurai' : 'text-neutral-600'
+              }`} />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-base-dark">{stats.total}</p>
+            <div className="text-left">
+              <p className={`text-2xl font-bold ${
+                selectedType === 'all' ? 'text-samurai' : 'text-base-dark'
+              }`}>{stats.total}</p>
               <p className="text-sm text-neutral-600">総イベント数</p>
             </div>
           </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
+        </button>
+        <button
+          onClick={() => setSelectedType('training')}
+          className={`bg-white rounded-xl p-4 border-2 transition-all hover:shadow-md ${
+            selectedType === 'training'
+              ? 'border-green-500 shadow-md'
+              : 'border-neutral-200'
+          }`}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+              selectedType === 'training' ? 'bg-green-200' : 'bg-green-100'
+            }`}>
               <span className="text-xl">⚽</span>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-green-600">{stats.training}</p>
+            <div className="text-left">
+              <p className={`text-2xl font-bold ${
+                selectedType === 'training' ? 'text-green-700' : 'text-green-600'
+              }`}>{stats.training}</p>
               <p className="text-sm text-neutral-600">練習</p>
             </div>
           </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
+        </button>
+        <button
+          onClick={() => setSelectedType('match')}
+          className={`bg-white rounded-xl p-4 border-2 transition-all hover:shadow-md ${
+            selectedType === 'match'
+              ? 'border-red-500 shadow-md'
+              : 'border-neutral-200'
+          }`}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+              selectedType === 'match' ? 'bg-red-200' : 'bg-red-100'
+            }`}>
               <span className="text-xl">🏆</span>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-red-600">{stats.match}</p>
+            <div className="text-left">
+              <p className={`text-2xl font-bold ${
+                selectedType === 'match' ? 'text-red-700' : 'text-red-600'
+              }`}>{stats.match}</p>
               <p className="text-sm text-neutral-600">試合</p>
             </div>
           </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-neutral-200">
+        </button>
+        <button
+          onClick={() => setSelectedType('meeting')}
+          className={`bg-white rounded-xl p-4 border-2 transition-all hover:shadow-md ${
+            selectedType === 'meeting'
+              ? 'border-blue-500 shadow-md'
+              : 'border-neutral-200'
+          }`}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+              selectedType === 'meeting' ? 'bg-blue-200' : 'bg-blue-100'
+            }`}>
               <span className="text-xl">💬</span>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-blue-600">{stats.meeting}</p>
+            <div className="text-left">
+              <p className={`text-2xl font-bold ${
+                selectedType === 'meeting' ? 'text-blue-700' : 'text-blue-600'
+              }`}>{stats.meeting}</p>
               <p className="text-sm text-neutral-600">ミーティング</p>
             </div>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* フィルター */}

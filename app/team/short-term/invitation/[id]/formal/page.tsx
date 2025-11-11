@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Download, Edit, Save, Eye } from 'lucide-react';
 import { invitations } from '@/lib/team/invitation-data';
 import { candidates } from '@/lib/team/candidates-data';
+import { getClubContactByName } from '@/lib/team/club-contacts-data';
 
 export default function FormalInvitationPage({
   params,
@@ -128,20 +129,28 @@ export default function FormalInvitationPage({
           {/* 日付と宛先 */}
           <div className="flex items-start justify-between mb-12">
             <div className="space-y-1">
-              {/* 各選手に対して通知書を生成 */}
-              {selectedPlayersList[0] && (
-                <>
-                  <p className="text-base">{selectedPlayersList[0].club}</p>
-                  <p className="text-lg font-semibold">{selectedPlayersList[0].name} 店</p>
-                </>
-              )}
+              {/* チーム連絡窓口の担当者宛 */}
+              {selectedPlayersList[0] && (() => {
+                const clubContact = getClubContactByName(selectedPlayersList[0].club);
+                return clubContact ? (
+                  <>
+                    <p className="text-base">{clubContact.clubName}</p>
+                    <p className="text-lg font-semibold">{clubContact.contactPerson} 様</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-base">{selectedPlayersList[0].club}</p>
+                    <p className="text-lg font-semibold">ご担当者 様</p>
+                  </>
+                );
+              })()}
             </div>
             <div className="text-right space-y-2">
               <p className="text-base">
                 {today.getFullYear()}年{today.getMonth() + 1}月{today.getDate()}日
               </p>
-              <div className="bg-yellow-100 px-4 py-2 inline-block">
-                <span className="font-semibold">選手宛</span>
+              <div className="bg-blue-100 px-4 py-2 inline-block">
+                <span className="font-semibold">チーム宛</span>
               </div>
             </div>
           </div>
@@ -149,7 +158,7 @@ export default function FormalInvitationPage({
           {/* 差出人 */}
           <div className="text-right mb-8">
             <p className="text-base">公益財団法人日本サッカー協会</p>
-            <p className="text-base">技術委員長 反町 康治</p>
+            <p className="text-base">技術委員長 山本 昌邦</p>
             <p className="text-sm text-neutral-600">（公印省略）</p>
           </div>
 
