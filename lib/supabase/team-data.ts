@@ -262,7 +262,7 @@ export async function fetchPlayerById(id: string): Promise<LargeListPlayer | nul
     .from('large_list_players')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching player:', error);
@@ -331,9 +331,9 @@ export async function fetchCandidateById(id: string): Promise<Candidate | null> 
     .from('candidates')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+  if (error) {
     console.error('Error fetching candidate:', error);
     return null;
   }
@@ -343,20 +343,74 @@ export async function fetchCandidateById(id: string): Promise<Candidate | null> 
 
 export async function upsertCandidate(candidate: Candidate): Promise<boolean> {
   const supabase = createClient();
-  const supabaseData = toSupabaseCandidate(candidate);
 
+  // 名前で既存のレコードを検索（すべてのカラムを取得）
+  const { data: existingRecords, error: searchError } = await supabase
+    .from('candidates')
+    .select('*')
+    .eq('name', candidate.name);
+
+  if (searchError) {
+    console.error('Error searching candidate:', searchError);
+    return false;
+  }
+
+  // 既存のレコードがある場合は、すべてのレコードを更新
+  if (existingRecords && existingRecords.length > 0) {
+    console.log(`[upsertCandidate] Found ${existingRecords.length} existing records for ${candidate.name}`);
+
+    for (const record of existingRecords) {
+      console.log(`[upsertCandidate] Updating record id=${record.id} from status=${record.status} to status=${candidate.status}`);
+
+      const { data: updatedData, error: updateError } = await supabase
+        .from('candidates')
+        .update({
+          status: candidate.status,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', record.id)
+        .select();
+
+      if (updateError) {
+        console.error('Error updating candidate:', updateError);
+        return false;
+      }
+
+      // 更新結果を確認
+      console.log(`[upsertCandidate] Update result for id=${record.id}:`, updatedData);
+      if (!updatedData || updatedData.length === 0) {
+        console.warn(`[upsertCandidate] WARNING: No rows updated for id=${record.id}`);
+      } else {
+        console.log(`[upsertCandidate] Verified: id=${record.id} now has status=${updatedData[0].status}`);
+      }
+    }
+
+    // 更新後に再度取得して確認
+    const { data: verifyData } = await supabase
+      .from('candidates')
+      .select('id, name, status')
+      .eq('name', candidate.name);
+    console.log(`[upsertCandidate] Final verification for ${candidate.name}:`, verifyData);
+
+    return true;
+  }
+
+  // 新規の場合のみinsert（既存がない場合）
+  console.log(`[upsertCandidate] No existing records found for ${candidate.name}, inserting new record`);
+  const supabaseData = toSupabaseCandidate(candidate);
   const { error } = await supabase
     .from('candidates')
-    .upsert({
+    .insert({
       ...supabaseData,
       updated_at: new Date().toISOString(),
     });
 
   if (error) {
-    console.error('Error upserting candidate:', error);
+    console.error('Error inserting candidate:', error);
     return false;
   }
 
+  console.log(`[upsertCandidate] Successfully inserted new record for ${candidate.name}`);
   return true;
 }
 
@@ -405,9 +459,9 @@ export async function fetchEvaluationByPlayerId(playerId: string): Promise<Playe
     .from('player_evaluations')
     .select('*')
     .eq('player_id', playerId)
-    .single();
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') {
+  if (error) {
     console.error('Error fetching evaluation:', error);
     return null;
   }

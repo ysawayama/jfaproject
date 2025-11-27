@@ -25,8 +25,16 @@ export default function LargeListPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPosition, setSelectedPosition] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'name' | 'age' | 'callUps'>('name');
+  const [sortBy, setSortBy] = useState<'name' | 'age' | 'callUps' | 'position'>('position');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // ポジション順序定義（GK→DF→MF→FW）
+  const positionOrder: Record<string, number> = {
+    'GK': 1,
+    'DF': 2,
+    'MF': 3,
+    'FW': 4,
+  };
   const [isLoading, setIsLoading] = useState(true);
 
   // Supabaseからデータを読み込む
@@ -63,7 +71,16 @@ export default function LargeListPage() {
   const sortedPlayers = [...filteredPlayers].sort((a, b) => {
     let comparison = 0;
 
-    if (sortBy === 'name') {
+    if (sortBy === 'position') {
+      // ポジション順でソート（GK→DF→MF→FW）
+      const posA = positionOrder[a.position] || 99;
+      const posB = positionOrder[b.position] || 99;
+      comparison = posA - posB;
+      // 同じポジション内は名前順
+      if (comparison === 0) {
+        comparison = a.name.localeCompare(b.name);
+      }
+    } else if (sortBy === 'name') {
       comparison = a.name.localeCompare(b.name);
     } else if (sortBy === 'age') {
       comparison = calculateAge(a.dateOfBirth) - calculateAge(b.dateOfBirth);
@@ -74,7 +91,7 @@ export default function LargeListPage() {
     return sortOrder === 'asc' ? comparison : -comparison;
   });
 
-  const handleSort = (column: 'name' | 'age' | 'callUps') => {
+  const handleSort = (column: 'name' | 'age' | 'callUps' | 'position') => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -279,7 +296,18 @@ export default function LargeListPage() {
                   </button>
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-neutral-600 uppercase tracking-wider">
-                  POS
+                  <button
+                    onClick={() => handleSort('position')}
+                    className="flex items-center gap-1 hover:text-samurai transition-colors mx-auto"
+                  >
+                    POS
+                    {sortBy === 'position' &&
+                      (sortOrder === 'asc' ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      ))}
+                  </button>
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
                   所属チーム

@@ -85,7 +85,39 @@ export default function LargeListDetailPage({
         fetchEvaluationByPlayerId(id),
       ]);
 
-      setPlayer(playerData);
+      // 選手データがない場合、候補データから選手情報を生成
+      if (!playerData && candidateData) {
+        const playerFromCandidate: LargeListPlayer = {
+          id: candidateData.id,
+          name: candidateData.name,
+          nameEn: candidateData.nameEn,
+          dateOfBirth: new Date(new Date().getFullYear() - candidateData.age, 0, 1).toISOString().split('T')[0],
+          position: candidateData.position,
+          height: candidateData.height,
+          weight: candidateData.weight,
+          photoUrl: candidateData.photoUrl,
+          currentClub: candidateData.club,
+          currentLeague: candidateData.league,
+          currentCountry: '日本',
+          clubHistory: [],
+          callUpHistory: {
+            u15: [], u16: [], u17: [], u18: [], u19: [], u20: [],
+            u21: [], u22: [], u23: [], u24: [], seniorA: [],
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        setPlayer(playerFromCandidate);
+      } else if (playerData) {
+        // 選手データがあるが、photoUrlがない場合は候補データから補完
+        if (!playerData.photoUrl && candidateData?.photoUrl) {
+          playerData.photoUrl = candidateData.photoUrl;
+        }
+        setPlayer(playerData);
+      } else {
+        setPlayer(null);
+      }
+
       setCandidate(candidateData);
       setPlayerEvaluation(evaluationData);
       setIsLoading(false);
@@ -219,12 +251,14 @@ export default function LargeListDetailPage({
   ];
 
   // フォームステータスのアイコンと色（候補選手用）
-  const formConfig = {
+  const formConfig: Record<string, { icon: string; label: string; color: string; bgColor: string }> = {
     excellent: { icon: '🔥', label: '絶好調', color: 'text-green-600', bgColor: 'bg-green-100' },
     good: { icon: '👍', label: '好調', color: 'text-blue-600', bgColor: 'bg-blue-100' },
     average: { icon: '😐', label: '平均的', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
     poor: { icon: '😰', label: '不調', color: 'text-red-600', bgColor: 'bg-red-100' },
   };
+  // デフォルト値を取得するヘルパー
+  const getFormConfig = (form: string) => formConfig[form] || formConfig['average'];
 
   return (
     <div className="space-y-6">
@@ -792,9 +826,9 @@ export default function LargeListDetailPage({
                 {/* 最近のフォーム */}
                 <div className="mb-4">
                   <p className="text-sm text-neutral-600 mb-2">フォーム</p>
-                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${formConfig[evalData.recentForm].bgColor}`}>
-                    <span className="text-2xl">{formConfig[evalData.recentForm].icon}</span>
-                    <span className={`font-semibold ${formConfig[evalData.recentForm].color}`}>{formConfig[evalData.recentForm].label}</span>
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${getFormConfig(evalData.recentForm).bgColor}`}>
+                    <span className="text-2xl">{getFormConfig(evalData.recentForm).icon}</span>
+                    <span className={`font-semibold ${getFormConfig(evalData.recentForm).color}`}>{getFormConfig(evalData.recentForm).label}</span>
                   </div>
                 </div>
 

@@ -48,6 +48,8 @@ export interface Candidate {
   radarEvaluation?: RadarEvaluation;
   // 総合評価グレード（S/A/B/C/D）
   overallGrade?: OverallGrade;
+  // ラージリストのID（詳細ページへのリンク用）
+  largeListId?: string;
 }
 
 // ステータスの表示情報

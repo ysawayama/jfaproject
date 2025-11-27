@@ -20,6 +20,7 @@ import {
   Clock,
   Plus,
   ChevronRight,
+  ClipboardList,
 } from 'lucide-react';
 import {
   getNationalTeamById,
@@ -33,6 +34,7 @@ import {
   type IntelligenceSource,
   type QualifierHistory,
 } from '@/lib/team/opponent-intelligence';
+import { getTacticsId } from '@/lib/team/tactics-data';
 
 type TabType = 'overview' | 'players' | 'qualifiers' | 'sources' | 'h2h';
 
@@ -45,6 +47,7 @@ export default function OpponentDetailPage() {
   const players = getPlayersByNationalTeam(teamId);
   const sources = getSourcesByNationalTeam(teamId);
   const qualifiers = getQualifierHistoryByNationalTeam(teamId);
+  const tacticsId = getTacticsId(teamId);
 
   if (!team) {
     return (
@@ -84,36 +87,46 @@ export default function OpponentDetailPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
       {/* ヘッダー */}
-      <div className="flex items-center gap-4">
-        <Link
-          href="/team/short-term/opponents"
-          className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-neutral-600" />
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <span className="text-5xl">{team.flagEmoji}</span>
-            <div>
-              <h1 className="text-2xl font-bold text-base-dark">{team.country}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${confInfo.color}`}>
-                  {confInfo.name} - {confInfo.nameJa}
-                </span>
-                <span className="text-sm text-neutral-500">{team.countryCode}</span>
-              </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/team/short-term/opponents"
+            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors flex-shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5 text-neutral-600" />
+          </Link>
+          <span className="text-4xl sm:text-5xl">{team.flagEmoji}</span>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-base-dark truncate">{team.country}</h1>
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${confInfo.color}`}>
+                {confInfo.name}
+              </span>
+              <span className="text-xs sm:text-sm text-neutral-500">{team.countryCode}</span>
             </div>
           </div>
         </div>
 
-        {category?.fifaRankingCurrent && (
-          <div className="text-right bg-neutral-100 px-4 py-2 rounded-xl">
-            <p className="text-xs text-neutral-500">FIFA U-17W ランキング</p>
-            <p className="text-3xl font-bold text-base-dark">#{category.fifaRankingCurrent}</p>
-          </div>
-        )}
+        <div className="flex items-center gap-2 sm:gap-3 sm:ml-auto flex-wrap">
+          {tacticsId && (
+            <Link
+              href={`/team/short-term/tactics/${tacticsId}`}
+              className="px-3 sm:px-4 py-2 bg-samurai text-white rounded-lg hover:bg-samurai-dark transition-colors flex items-center gap-2 text-sm"
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span className="hidden sm:inline">現在の大会分析</span>
+              <span className="sm:hidden">分析</span>
+            </Link>
+          )}
+          {category?.fifaRankingCurrent && (
+            <div className="text-right bg-neutral-100 px-3 sm:px-4 py-2 rounded-xl">
+              <p className="text-[10px] sm:text-xs text-neutral-500">FIFA U-17W</p>
+              <p className="text-2xl sm:text-3xl font-bold text-base-dark">#{category.fifaRankingCurrent}</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* クイック情報 */}
@@ -155,7 +168,31 @@ export default function OpponentDetailPage() {
 
       {/* タブ */}
       <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        <div className="border-b border-neutral-200 overflow-x-auto">
+        {/* モバイル用タブ - 縦並び */}
+        <div className="sm:hidden border-b border-neutral-200">
+          <div className="grid grid-cols-2 gap-1 p-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as TabType)}
+                  className={`flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium rounded-lg transition-colors touch-manipulation ${
+                    activeTab === tab.id
+                      ? 'bg-samurai text-white'
+                      : 'bg-neutral-100 text-neutral-600 active:bg-neutral-200'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate text-xs">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* PC用タブ - 横並び */}
+        <div className="hidden sm:block border-b border-neutral-200 overflow-x-auto">
           <div className="flex">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -177,7 +214,7 @@ export default function OpponentDetailPage() {
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {activeTab === 'overview' && (
             <OverviewTab team={team} category={category} />
           )}
@@ -341,35 +378,35 @@ function PlayersTab({
             <h3 className="text-sm font-bold text-neutral-500 mb-3">
               {pos === 'GK' ? 'ゴールキーパー' : pos === 'DF' ? 'ディフェンダー' : pos === 'MF' ? 'ミッドフィールダー' : 'フォワード'}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {posPlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-samurai transition-colors"
+                  className="bg-white border border-neutral-200 rounded-lg p-3 sm:p-4 hover:border-samurai transition-colors"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="font-bold text-base-dark">{player.nameJapanese || player.name}</h4>
+                  <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-bold text-base-dark text-sm sm:text-base truncate">{player.nameJapanese || player.name}</h4>
                       {player.nameJapanese && (
-                        <p className="text-xs text-neutral-500">{player.name}</p>
+                        <p className="text-[10px] sm:text-xs text-neutral-500 truncate">{player.name}</p>
                       )}
                     </div>
-                    <span className={`text-xs px-2 py-0.5 rounded ${threatLevelInfo[player.analysis.threatLevel].color}`}>
+                    <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 ${threatLevelInfo[player.analysis.threatLevel].color}`}>
                       {threatLevelInfo[player.analysis.threatLevel].label}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 text-sm mb-3">
+                  <div className="grid grid-cols-3 gap-1 sm:gap-2 text-xs sm:text-sm mb-2 sm:mb-3">
                     <div>
-                      <p className="text-xs text-neutral-500">ポジション</p>
-                      <p className="font-medium">{player.detailedPosition || player.position}</p>
+                      <p className="text-[10px] sm:text-xs text-neutral-500">ポジション</p>
+                      <p className="font-medium truncate">{player.detailedPosition || player.position}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-neutral-500">年齢</p>
+                      <p className="text-[10px] sm:text-xs text-neutral-500">年齢</p>
                       <p className="font-medium">{player.age || '-'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-neutral-500">身長</p>
+                      <p className="text-[10px] sm:text-xs text-neutral-500">身長</p>
                       <p className="font-medium">{player.height ? `${player.height}cm` : '-'}</p>
                     </div>
                   </div>
@@ -463,46 +500,46 @@ function QualifiersTab({ qualifiers }: { qualifiers: QualifierHistory[] }) {
           </div>
 
           {/* 統計 */}
-          <div className="grid grid-cols-6 gap-2 p-4 bg-white border-b border-neutral-100">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 p-3 sm:p-4 bg-white border-b border-neutral-100">
             <div className="text-center">
-              <p className="text-xs text-neutral-500">試合</p>
-              <p className="font-bold text-base-dark">{qualifier.stats.played}</p>
+              <p className="text-[10px] sm:text-xs text-neutral-500">試合</p>
+              <p className="font-bold text-base-dark text-sm sm:text-base">{qualifier.stats.played}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-neutral-500">勝</p>
-              <p className="font-bold text-green-600">{qualifier.stats.won}</p>
+              <p className="text-[10px] sm:text-xs text-neutral-500">勝</p>
+              <p className="font-bold text-green-600 text-sm sm:text-base">{qualifier.stats.won}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-neutral-500">分</p>
-              <p className="font-bold text-blue-600">{qualifier.stats.drawn}</p>
+              <p className="text-[10px] sm:text-xs text-neutral-500">分</p>
+              <p className="font-bold text-blue-600 text-sm sm:text-base">{qualifier.stats.drawn}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-neutral-500">敗</p>
-              <p className="font-bold text-red-600">{qualifier.stats.lost}</p>
+              <p className="text-[10px] sm:text-xs text-neutral-500">敗</p>
+              <p className="font-bold text-red-600 text-sm sm:text-base">{qualifier.stats.lost}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-neutral-500">得点</p>
-              <p className="font-bold text-base-dark">{qualifier.stats.goalsFor}</p>
+              <p className="text-[10px] sm:text-xs text-neutral-500">得点</p>
+              <p className="font-bold text-base-dark text-sm sm:text-base">{qualifier.stats.goalsFor}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-neutral-500">失点</p>
-              <p className="font-bold text-base-dark">{qualifier.stats.goalsAgainst}</p>
+              <p className="text-[10px] sm:text-xs text-neutral-500">失点</p>
+              <p className="font-bold text-base-dark text-sm sm:text-base">{qualifier.stats.goalsAgainst}</p>
             </div>
           </div>
 
           {/* 試合一覧 */}
           <div className="divide-y divide-neutral-100">
             {qualifier.matches.map((match, idx) => (
-              <div key={idx} className="px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{match.opponentFlag}</span>
-                  <div>
-                    <p className="font-medium text-base-dark">vs {match.opponent}</p>
-                    <p className="text-xs text-neutral-500">{match.date}</p>
+              <div key={idx} className="px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <span className="text-lg sm:text-xl flex-shrink-0">{match.opponentFlag}</span>
+                  <div className="min-w-0">
+                    <p className="font-medium text-base-dark text-sm sm:text-base truncate">vs {match.opponent}</p>
+                    <p className="text-[10px] sm:text-xs text-neutral-500">{match.date}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-lg font-bold ${
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  <span className={`text-base sm:text-lg font-bold ${
                     match.result === 'win'
                       ? 'text-green-600'
                       : match.result === 'loss'
@@ -511,7 +548,7 @@ function QualifiersTab({ qualifiers }: { qualifiers: QualifierHistory[] }) {
                   }`}>
                     {match.score}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded ${
+                  <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded ${
                     match.result === 'win'
                       ? 'bg-green-100 text-green-700'
                       : match.result === 'loss'
@@ -658,28 +695,28 @@ function H2HTab({
     <div className="space-y-6">
       {/* 統計サマリー */}
       {stats && (
-        <div className="bg-gradient-to-r from-samurai to-samurai-dark rounded-xl p-6 text-white">
-          <h3 className="text-lg font-bold mb-4">日本 vs この国 ({h2h.category})</h3>
-          <div className="grid grid-cols-5 gap-4">
+        <div className="bg-gradient-to-r from-samurai to-samurai-dark rounded-xl p-4 sm:p-6 text-white">
+          <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">日本 vs この国 ({h2h.category})</h3>
+          <div className="grid grid-cols-5 gap-2 sm:gap-4">
             <div className="text-center">
-              <p className="text-3xl font-bold">{h2h.matches.length}</p>
-              <p className="text-sm opacity-80">対戦</p>
+              <p className="text-xl sm:text-3xl font-bold">{h2h.matches.length}</p>
+              <p className="text-[10px] sm:text-sm opacity-80">対戦</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-green-300">{stats.wins}</p>
-              <p className="text-sm opacity-80">勝利</p>
+              <p className="text-xl sm:text-3xl font-bold text-green-300">{stats.wins}</p>
+              <p className="text-[10px] sm:text-sm opacity-80">勝利</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-blue-300">{stats.draws}</p>
-              <p className="text-sm opacity-80">引分</p>
+              <p className="text-xl sm:text-3xl font-bold text-blue-300">{stats.draws}</p>
+              <p className="text-[10px] sm:text-sm opacity-80">引分</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-red-300">{stats.losses}</p>
-              <p className="text-sm opacity-80">敗北</p>
+              <p className="text-xl sm:text-3xl font-bold text-red-300">{stats.losses}</p>
+              <p className="text-[10px] sm:text-sm opacity-80">敗北</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold">{stats.goalsFor}-{stats.goalsAgainst}</p>
-              <p className="text-sm opacity-80">得失点</p>
+              <p className="text-lg sm:text-3xl font-bold">{stats.goalsFor}-{stats.goalsAgainst}</p>
+              <p className="text-[10px] sm:text-sm opacity-80">得失点</p>
             </div>
           </div>
         </div>
@@ -690,11 +727,11 @@ function H2HTab({
         {h2h.matches.map((match, idx) => (
           <div
             key={idx}
-            className="bg-white border border-neutral-200 rounded-lg p-4"
+            className="bg-white border border-neutral-200 rounded-lg p-3 sm:p-4"
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 gap-2">
               <div>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium ${
                   match.result === 'win'
                     ? 'bg-green-100 text-green-700'
                     : match.result === 'loss'
@@ -704,22 +741,22 @@ function H2HTab({
                   {match.result === 'win' ? '勝利' : match.result === 'loss' ? '敗北' : '引分'}
                 </span>
               </div>
-              <p className="text-2xl font-bold text-base-dark">
+              <p className="text-xl sm:text-2xl font-bold text-base-dark">
                 {match.japanScore} - {match.opponentScore}
               </p>
             </div>
 
-            <p className="font-medium text-base-dark">{match.competition}</p>
-            <div className="flex items-center gap-4 mt-2 text-sm text-neutral-600">
+            <p className="font-medium text-base-dark text-sm sm:text-base">{match.competition}</p>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-neutral-600">
               <span className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                 {match.date}
               </span>
-              <span>{match.venue}</span>
+              <span className="truncate">{match.venue}</span>
             </div>
 
             {match.notes && (
-              <p className="text-sm text-neutral-500 mt-2 italic">{match.notes}</p>
+              <p className="text-xs sm:text-sm text-neutral-500 mt-2 italic">{match.notes}</p>
             )}
           </div>
         ))}

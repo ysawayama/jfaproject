@@ -191,12 +191,13 @@ export interface OpponentPlayer {
 // 情報ソース
 // ===========================
 export type IntelligenceSourceType =
-  | 'wyscout'    // Wyscout
-  | 'youtube'    // YouTube動画
-  | 'fifa_plus'  // FIFA+
-  | 'website'    // 公式Webサイト等
-  | 'exchange'   // 他協会との情報交換
-  | 'manual';    // 手動入力
+  | 'wyscout'          // Wyscout
+  | 'youtube'          // YouTube動画
+  | 'fifa_plus'        // FIFA+
+  | 'website'          // 公式Webサイト等
+  | 'exchange'         // 他協会との情報交換
+  | 'manual'           // 手動入力
+  | 'tactics_sync';    // 戦術・スカウトからの同期
 
 export interface IntelligenceSource {
   id: string;
@@ -324,6 +325,12 @@ export const sourceTypeInfo: Record<IntelligenceSourceType, {
     icon: '✏️',
     color: 'text-neutral-700',
     bgColor: 'bg-neutral-100',
+  },
+  tactics_sync: {
+    label: '戦術分析同期',
+    icon: '🎯',
+    color: 'text-samurai',
+    bgColor: 'bg-samurai/10',
   },
 };
 

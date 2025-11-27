@@ -11,6 +11,8 @@ import {
   BellOff,
   Settings,
   Check,
+  Newspaper,
+  ChevronRight,
 } from 'lucide-react';
 import {
   mockConversations,
@@ -18,6 +20,7 @@ import {
   getConversationName,
   getConversationAvatar,
   formatMessageTime,
+  getBulletinStats,
 } from '@/lib/team/communication-data';
 import type { Conversation } from '@/lib/team/communication-data';
 
@@ -47,15 +50,18 @@ export default function CommunicationPage() {
     0
   );
 
+  // 掲示板統計
+  const bulletinStats = getBulletinStats();
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-base-dark mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-base-dark mb-1 sm:mb-2">
             コミュニケーション
           </h1>
-          <p className="text-neutral-600">
+          <p className="text-sm sm:text-base text-neutral-600">
             チームメンバーとのメッセージ
             {totalUnread > 0 && (
               <span className="ml-2 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs font-semibold">
@@ -74,18 +80,70 @@ export default function CommunicationPage() {
         </div>
       </div>
 
+      {/* 掲示板リンク */}
+      <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-samurai/10 rounded-xl flex items-center justify-center">
+              <Newspaper className="w-5 h-5 sm:w-6 sm:h-6 text-samurai" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-base-dark">掲示板</h2>
+              <p className="text-xs sm:text-sm text-neutral-500">スタッフから選手への連絡</p>
+            </div>
+          </div>
+          {bulletinStats.unreadReplies > 0 && (
+            <span className="px-2 sm:px-3 py-1 bg-red-500 text-white rounded-full text-xs sm:text-sm font-semibold">
+              {bulletinStats.unreadReplies}件の未読返信
+            </span>
+          )}
+        </div>
+
+        {/* 統計 */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4">
+          <div className="bg-neutral-50 rounded-lg p-2 sm:p-3">
+            <p className="text-lg sm:text-2xl font-bold text-base-dark">{bulletinStats.totalPosts}</p>
+            <p className="text-[10px] sm:text-xs text-neutral-500">投稿数</p>
+          </div>
+          <div className="bg-neutral-50 rounded-lg p-2 sm:p-3">
+            <p className="text-lg sm:text-2xl font-bold text-base-dark">{bulletinStats.totalPlayers}</p>
+            <p className="text-[10px] sm:text-xs text-neutral-500">選手数</p>
+          </div>
+          <div className="bg-neutral-50 rounded-lg p-2 sm:p-3">
+            <p className="text-lg sm:text-2xl font-bold text-base-dark">{bulletinStats.unreadReplies}</p>
+            <p className="text-[10px] sm:text-xs text-neutral-500">未読返信</p>
+          </div>
+        </div>
+
+        {/* 掲示板を見るボタン */}
+        <Link
+          href="/team/short-term/communication/bulletin"
+          className="flex items-center justify-center gap-2 w-full bg-samurai text-white py-3 rounded-lg font-semibold hover:bg-samurai-dark transition-colors touch-manipulation"
+        >
+          <Newspaper className="w-5 h-5" />
+          掲示板を見る
+          <ChevronRight className="w-5 h-5" />
+        </Link>
+      </div>
+
+      {/* メッセージセクションヘッダー */}
+      <div className="flex items-center gap-2 pt-2">
+        <MessageSquare className="w-5 h-5 text-samurai" />
+        <h2 className="text-lg sm:text-xl font-bold text-base-dark">ダイレクトメッセージ</h2>
+      </div>
+
       {/* アクションボタン */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <button
           onClick={() => setShowNewMessageModal(true)}
-          className="flex items-center justify-center gap-3 bg-samurai text-white px-6 py-4 rounded-xl hover:bg-samurai-dark transition-all shadow-md hover:shadow-lg"
+          className="flex items-center justify-center gap-3 bg-samurai text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl hover:bg-samurai-dark transition-all shadow-md hover:shadow-lg touch-manipulation"
         >
           <MessageSquare className="w-5 h-5" />
           <span className="font-semibold">新しいメッセージ</span>
         </button>
         <button
           onClick={() => setShowGroupModal(true)}
-          className="flex items-center justify-center gap-3 bg-white text-samurai border-2 border-samurai px-6 py-4 rounded-xl hover:bg-samurai/10 transition-all"
+          className="flex items-center justify-center gap-3 bg-white text-samurai border-2 border-samurai px-4 sm:px-6 py-3 sm:py-4 rounded-xl hover:bg-samurai/10 transition-all touch-manipulation"
         >
           <Users className="w-5 h-5" />
           <span className="font-semibold">グループ作成</span>

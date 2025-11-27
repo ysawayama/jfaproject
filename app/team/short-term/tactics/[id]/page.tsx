@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  Database,
 } from 'lucide-react';
 import {
   opponentTeams,
@@ -24,6 +25,7 @@ import {
   tacticalBoards,
   threatLevelInfo,
   categoryInfo,
+  getOpponentDbId,
 } from '@/lib/team/tactics-data';
 import { mockMediaItems, getMediaIcon, formatFileSize, formatDuration } from '@/lib/team/media-storage';
 
@@ -38,6 +40,7 @@ export default function TacticsDetailPage({
   const team = opponentTeams.find((t) => t.id === id);
   const analysis = tacticalAnalyses.find((a) => a.opponentId === id);
   const relatedBoards = tacticalBoards.filter((b) => b.relatedOpponent === id);
+  const opponentDbId = getOpponentDbId(id);
 
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
@@ -86,6 +89,15 @@ export default function TacticsDetailPage({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {opponentDbId && (
+            <Link
+              href={`/team/short-term/opponents/${opponentDbId}`}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <Database className="w-4 h-4" />
+              <span>過去データベース</span>
+            </Link>
+          )}
           <Link
             href={`/team/short-term/tactics/${id}/edit`}
             className="px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-2"

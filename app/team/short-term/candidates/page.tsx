@@ -19,17 +19,27 @@ import {
   X,
   UserPlus,
   Check,
+  MoreVertical,
+  RefreshCw,
 } from 'lucide-react';
 import { statusInfo, type CandidateStatus, type Candidate } from '@/lib/team/candidates-data';
 import { type LargeListPlayer, calculateAge } from '@/lib/team/large-list-data';
-import { fetchAllCandidates, fetchAllPlayers, bulkUpsertCandidates } from '@/lib/supabase/team-data';
+import { fetchAllCandidates, fetchAllPlayers, bulkUpsertCandidates, upsertCandidate, deleteCandidate } from '@/lib/supabase/team-data';
 
 export default function CandidatesPage() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPosition, setSelectedPosition] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<CandidateStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'name' | 'rating' | 'lastScouted'>('rating');
+  const [sortBy, setSortBy] = useState<'name' | 'rating' | 'lastScouted' | 'position'>('position');
+
+  // ポジション順序定義（GK→DF→MF→FW）
+  const positionOrder: Record<string, number> = {
+    'GK': 1,
+    'DF': 2,
+    'MF': 3,
+    'FW': 4,
+  };
 
   // 候補リスト（状態管理）- Supabaseから取得
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -42,6 +52,9 @@ export default function CandidatesPage() {
   const [modalSelectedPosition, setModalSelectedPosition] = useState<string>('all');
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
 
+  // ステータス変更モーダル
+  const [statusModalCandidate, setStatusModalCandidate] = useState<Candidate | null>(null);
+
   // Supabaseからデータを取得
   useEffect(() => {
     const loadData = async () => {
@@ -50,7 +63,49 @@ export default function CandidatesPage() {
         fetchAllCandidates(),
         fetchAllPlayers(),
       ]);
-      setCandidates(candidatesData);
+
+      // ラージリストの選手をマップ化（名前でアクセス）
+      const playerByName = new Map(playersData.map(p => [p.name, p]));
+
+      // ラージリストに存在する選手のみをフィルタリングし、情報を最新化
+      // ただし、IDは元のまま保持（DB更新で使用するため）
+      const validCandidates = candidatesData
+        .filter(c => playerByName.has(c.name))
+        .map(c => {
+          const player = playerByName.get(c.name)!;
+          const age = calculateAge(player.dateOfBirth);
+          return {
+            ...c, // IDは元のまま保持
+            // ラージリストの最新情報で上書き（表示用）
+            nameEn: player.nameEn,
+            position: player.position,
+            age,
+            height: player.height || c.height,
+            weight: player.weight || c.weight,
+            club: player.currentClub,
+            league: player.currentLeague,
+            photoUrl: player.photoUrl,
+            // リンク用にラージリストIDを保持
+            largeListId: player.id,
+          };
+        });
+
+      // 重複を除外（名前が同じものは confirmed ステータスを優先）
+      const uniqueCandidates: Candidate[] = [];
+      const candidateByName = new Map<string, Candidate>();
+      for (const candidate of validCandidates) {
+        const existing = candidateByName.get(candidate.name);
+        if (!existing) {
+          // 初めて見た名前
+          candidateByName.set(candidate.name, candidate);
+        } else if (candidate.status === 'confirmed' && existing.status !== 'confirmed') {
+          // 新しい方が confirmed で既存が confirmed じゃない場合は上書き
+          candidateByName.set(candidate.name, candidate);
+        }
+      }
+      uniqueCandidates.push(...candidateByName.values());
+
+      setCandidates(uniqueCandidates);
       setLargeListPlayers(playersData);
       setIsLoading(false);
     };
@@ -65,23 +120,35 @@ export default function CandidatesPage() {
     }
   }, [searchParams]);
 
-  // ラージリストから既に候補に追加済みの選手を除外
+  // ラージリストから既に候補に追加済みの選手を除外（IDと名前の両方でチェック）
   const availablePlayers = largeListPlayers.filter(
-    (player) => !candidates.some((c) => c.id === player.id)
+    (player) => !candidates.some((c) => c.id === player.id || c.name === player.name)
   );
 
   // モーダル内のフィルタリング
-  const filteredAvailablePlayers = availablePlayers.filter((player) => {
-    const matchesSearch =
-      player.name.toLowerCase().includes(modalSearchQuery.toLowerCase()) ||
-      player.nameEn.toLowerCase().includes(modalSearchQuery.toLowerCase()) ||
-      player.currentClub.toLowerCase().includes(modalSearchQuery.toLowerCase());
+  const filteredAvailablePlayers = availablePlayers
+    .filter((player) => {
+      const matchesSearch =
+        player.name.toLowerCase().includes(modalSearchQuery.toLowerCase()) ||
+        player.nameEn.toLowerCase().includes(modalSearchQuery.toLowerCase()) ||
+        player.currentClub.toLowerCase().includes(modalSearchQuery.toLowerCase());
 
-    const matchesPosition =
-      modalSelectedPosition === 'all' || player.position === modalSelectedPosition;
+      const matchesPosition =
+        modalSelectedPosition === 'all' || player.position === modalSelectedPosition;
 
-    return matchesSearch && matchesPosition;
-  });
+      return matchesSearch && matchesPosition;
+    })
+    .sort((a, b) => {
+      // ポジション順でソート（GK→DF→MF→FW）
+      const posA = positionOrder[a.position] || 99;
+      const posB = positionOrder[b.position] || 99;
+      const comparison = posA - posB;
+      // 同じポジション内は名前順
+      if (comparison === 0) {
+        return a.name.localeCompare(b.name);
+      }
+      return comparison;
+    });
 
   // 選手を候補に追加
   const handleAddCandidates = async () => {
@@ -135,6 +202,20 @@ export default function CandidatesPage() {
     );
   };
 
+  // ステータス変更
+  const handleStatusChange = async (candidate: Candidate, newStatus: CandidateStatus) => {
+    const updatedCandidate = { ...candidate, status: newStatus };
+    const success = await upsertCandidate(updatedCandidate);
+    if (success) {
+      setCandidates((prev) =>
+        prev.map((c) => (c.id === candidate.id ? updatedCandidate : c))
+      );
+      setStatusModalCandidate(null);
+    } else {
+      alert('ステータスの変更に失敗しました');
+    }
+  };
+
   // フィルタリング
   const filteredCandidates = candidates.filter((candidate) => {
     const matchesSearch =
@@ -153,6 +234,17 @@ export default function CandidatesPage() {
 
   // ソート
   const sortedCandidates = [...filteredCandidates].sort((a, b) => {
+    if (sortBy === 'position') {
+      // ポジション順でソート（GK→DF→MF→FW）
+      const posA = positionOrder[a.position] || 99;
+      const posB = positionOrder[b.position] || 99;
+      const comparison = posA - posB;
+      // 同じポジション内は名前順
+      if (comparison === 0) {
+        return a.name.localeCompare(b.name);
+      }
+      return comparison;
+    }
     if (sortBy === 'rating') return b.rating - a.rating;
     if (sortBy === 'lastScouted')
       return new Date(b.lastScouted).getTime() - new Date(a.lastScouted).getTime();
@@ -179,20 +271,20 @@ export default function CandidatesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-base-dark mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-base-dark mb-1 sm:mb-2">
             招集候補リスト
           </h1>
-          <p className="text-neutral-600">
+          <p className="text-sm sm:text-base text-neutral-600">
             視察対象選手の管理・ステータス更新
           </p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-samurai text-white px-6 py-3 rounded-lg hover:bg-samurai-dark transition-all shadow-md hover:shadow-lg"
+          className="flex items-center justify-center gap-2 bg-samurai text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-samurai-dark transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
         >
           <Plus className="w-5 h-5" />
           <span className="font-semibold">新規候補を追加</span>
@@ -237,54 +329,58 @@ export default function CandidatesPage() {
       </div>
 
       {/* 検索・フィルター */}
-      <div className="bg-white rounded-xl p-6 border border-neutral-200">
-        <div className="flex flex-col lg:flex-row gap-4">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-neutral-200">
+        <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap lg:flex-nowrap sm:gap-3 lg:gap-4">
           {/* 検索 */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+          <div className="flex-1 relative min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
             <input
               type="text"
               placeholder="選手名、クラブ名で検索..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
+              className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50"
             />
           </div>
 
-          {/* ポジションフィルター */}
-          <select
-            value={selectedPosition}
-            onChange={(e) => setSelectedPosition(e.target.value)}
-            className="px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50 bg-white"
-          >
-            <option value="all">全ポジション</option>
-            <option value="GK">GK</option>
-            <option value="DF">DF</option>
-            <option value="MF">MF</option>
-            <option value="FW">FW</option>
-          </select>
+          {/* フィルター群 - モバイルでは2列 */}
+          <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+            {/* ポジションフィルター */}
+            <select
+              value={selectedPosition}
+              onChange={(e) => setSelectedPosition(e.target.value)}
+              className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50 bg-white"
+            >
+              <option value="all">全ポジション</option>
+              <option value="GK">GK</option>
+              <option value="DF">DF</option>
+              <option value="MF">MF</option>
+              <option value="FW">FW</option>
+            </select>
 
-          {/* ステータスフィルター */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value as CandidateStatus | 'all')}
-            className="px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50 bg-white"
-          >
-            <option value="all">全ステータス</option>
-            <option value="candidate">招集候補</option>
-            <option value="confirmed">招集確定</option>
-          </select>
+            {/* ステータスフィルター */}
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value as CandidateStatus | 'all')}
+              className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50 bg-white"
+            >
+              <option value="all">全ステータス</option>
+              <option value="candidate">招集候補</option>
+              <option value="confirmed">招集確定</option>
+            </select>
 
-          {/* ソート */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'name' | 'rating' | 'lastScouted')}
-            className="px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50 bg-white"
-          >
-            <option value="rating">評価順</option>
-            <option value="lastScouted">視察日順</option>
-            <option value="name">名前順</option>
-          </select>
+            {/* ソート */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'name' | 'rating' | 'lastScouted' | 'position')}
+              className="col-span-2 sm:col-span-1 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-samurai/50 bg-white"
+            >
+              <option value="position">ポジション順</option>
+              <option value="rating">評価順</option>
+              <option value="lastScouted">視察日順</option>
+              <option value="name">名前順</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -294,53 +390,75 @@ export default function CandidatesPage() {
           // 古いステータスが残っている場合は「招集候補」として表示
           const status = statusInfo[candidate.status] || statusInfo['candidate'];
           return (
-            <Link
+            <div
               key={candidate.id}
-              href={`/team/short-term/large-list/${candidate.id}?tab=evaluation`}
-              className="block bg-white rounded-xl p-6 border border-neutral-200 hover:shadow-lg transition-all group"
+              className="bg-white rounded-xl p-4 sm:p-6 border border-neutral-200 hover:shadow-lg transition-all group"
             >
-              <div className="flex items-center gap-6">
+              <div className="flex items-start sm:items-center gap-3 sm:gap-6">
                 {/* 選手写真 */}
-                <div className="w-20 h-20 bg-gradient-to-br from-samurai/20 to-samurai-dark/20 rounded-xl flex items-center justify-center text-2xl font-bold text-samurai border-2 border-samurai/30">
-                  {candidate.name.charAt(0)}
-                </div>
+                <Link
+                  href={`/team/short-term/large-list/${candidate.largeListId || candidate.id}?tab=evaluation`}
+                  className="w-14 h-14 sm:w-20 sm:h-20 bg-gradient-to-br from-samurai/20 to-samurai-dark/20 rounded-xl flex items-center justify-center text-xl sm:text-2xl font-bold text-samurai border-2 border-samurai/30 hover:border-samurai transition-colors overflow-hidden relative flex-shrink-0"
+                >
+                  {candidate.photoUrl ? (
+                    <Image
+                      src={candidate.photoUrl}
+                      alt={candidate.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 56px, 80px"
+                      unoptimized
+                    />
+                  ) : (
+                    candidate.name.charAt(0)
+                  )}
+                </Link>
 
                 {/* 基本情報 */}
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="text-xl font-bold text-base-dark group-hover:text-samurai transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2 mb-2">
+                    <div className="min-w-0">
+                      <Link
+                        href={`/team/short-term/large-list/${candidate.largeListId || candidate.id}?tab=evaluation`}
+                        className="text-base sm:text-xl font-bold text-base-dark hover:text-samurai transition-colors block truncate"
+                      >
                         {candidate.name}
-                      </h3>
-                      <p className="text-sm text-neutral-600">{candidate.nameEn}</p>
+                      </Link>
+                      <p className="text-xs sm:text-sm text-neutral-600 truncate">{candidate.nameEn}</p>
                     </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${status.bgColor} ${status.color}`}
-                    >
-                      {status.label}
-                    </span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span
+                        className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold ${status.bgColor} ${status.color}`}
+                      >
+                        {status.label}
+                      </span>
+                      <button
+                        onClick={() => setStatusModalCandidate(candidate)}
+                        className="p-1.5 sm:p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                        title="ステータスを変更"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-500" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-600 mb-3">
-                    <span className="flex items-center gap-1">
-                      <span className="font-semibold text-base-dark">{candidate.position}</span>
-                    </span>
-                    <span>•</span>
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-4 text-xs sm:text-sm text-neutral-600 mb-2 sm:mb-3">
+                    <span className="font-semibold text-base-dark">{candidate.position}</span>
+                    <span className="hidden sm:inline">•</span>
                     <span>{candidate.age}歳</span>
-                    <span>•</span>
-                    <span>{candidate.height}cm / {candidate.weight}kg</span>
-                    <span>•</span>
-                    <span className="font-medium">{candidate.club}</span>
-                    <span className="text-neutral-400">({candidate.league})</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="hidden sm:inline">{candidate.height}cm / {candidate.weight}kg</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="font-medium truncate max-w-[120px] sm:max-w-none">{candidate.club}</span>
                   </div>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                     {/* 評価 */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${
+                          className={`w-3 h-3 sm:w-4 sm:h-4 ${
                             i < candidate.rating
                               ? 'fill-yellow-400 text-yellow-400'
                               : 'text-neutral-300'
@@ -350,32 +468,35 @@ export default function CandidatesPage() {
                     </div>
 
                     {/* 視察回数 */}
-                    <span className="flex items-center gap-1 text-sm text-neutral-600">
-                      <Eye className="w-4 h-4" />
-                      {candidate.scoutingCount}回視察
-                    </span>
-
-                    {/* 最終視察日 */}
-                    <span className="text-sm text-neutral-600">
-                      最終視察: {new Date(candidate.lastScouted).toLocaleDateString('ja-JP')}
+                    <span className="flex items-center gap-1 text-xs sm:text-sm text-neutral-600">
+                      <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{candidate.scoutingCount}回視察</span>
+                      <span className="sm:hidden">{candidate.scoutingCount}回</span>
                     </span>
 
                     {/* コンディション警告 */}
                     {candidate.injuryStatus !== 'healthy' && (
-                      <span className="flex items-center gap-1 text-sm text-orange-600">
-                        <AlertCircle className="w-4 h-4" />
-                        {candidate.injuryStatus === 'injured' && '負傷中'}
-                        {candidate.injuryStatus === 'recovering' && '回復中'}
-                        {candidate.injuryStatus === 'minor' && '軽傷'}
+                      <span className="flex items-center gap-1 text-xs sm:text-sm text-orange-600">
+                        <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">
+                          {candidate.injuryStatus === 'injured' && '負傷中'}
+                          {candidate.injuryStatus === 'recovering' && '回復中'}
+                          {candidate.injuryStatus === 'minor' && '軽傷'}
+                        </span>
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* 矢印アイコン */}
-                <ChevronDown className="w-5 h-5 text-neutral-400 -rotate-90 group-hover:translate-x-1 transition-transform" />
+                {/* 詳細リンク - モバイルでは非表示 */}
+                <Link
+                  href={`/team/short-term/large-list/${candidate.largeListId || candidate.id}?tab=evaluation`}
+                  className="hidden sm:block p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                >
+                  <ChevronDown className="w-5 h-5 text-neutral-400 -rotate-90" />
+                </Link>
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>
@@ -553,6 +674,75 @@ export default function CandidatesPage() {
                     ? `${selectedPlayerIds.length}名を候補に追加`
                     : '選手を選択してください'}
                 </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ステータス変更モーダル */}
+      {statusModalCandidate && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setStatusModalCandidate(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-md w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-bold text-base-dark">ステータスを変更</h2>
+              <p className="text-sm text-neutral-600 mt-1">{statusModalCandidate.name}</p>
+            </div>
+
+            <div className="p-6 space-y-3">
+              <button
+                onClick={() => handleStatusChange(statusModalCandidate, 'candidate')}
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                  statusModalCandidate.status === 'candidate'
+                    ? 'border-yellow-500 bg-yellow-50'
+                    : 'border-neutral-200 hover:border-yellow-300 hover:bg-yellow-50'
+                }`}
+              >
+                <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <Star className="w-5 h-5 text-yellow-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-base-dark">招集候補</p>
+                  <p className="text-sm text-neutral-500">視察・評価対象の選手</p>
+                </div>
+                {statusModalCandidate.status === 'candidate' && (
+                  <Check className="w-5 h-5 text-yellow-600" />
+                )}
+              </button>
+
+              <button
+                onClick={() => handleStatusChange(statusModalCandidate, 'confirmed')}
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                  statusModalCandidate.status === 'confirmed'
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-neutral-200 hover:border-green-300 hover:bg-green-50'
+                }`}
+              >
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-base-dark">招集確定</p>
+                  <p className="text-sm text-neutral-500">招集が確定した選手</p>
+                </div>
+                {statusModalCandidate.status === 'confirmed' && (
+                  <Check className="w-5 h-5 text-green-600" />
+                )}
+              </button>
+            </div>
+
+            <div className="p-6 border-t bg-neutral-50">
+              <button
+                onClick={() => setStatusModalCandidate(null)}
+                className="w-full px-6 py-3 text-neutral-600 hover:text-neutral-800 font-medium transition-colors"
+              >
+                キャンセル
               </button>
             </div>
           </div>

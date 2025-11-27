@@ -1036,3 +1036,438 @@ export function markAnnouncementAsRead(announcementId: string): void {
     announcement.readBy.push(currentUserId);
   }
 }
+
+// ===========================
+// 掲示板（BulletinBoard）- スタッフ→選手への連絡用
+// ===========================
+
+export type BulletinCategory = 'notice' | 'schedule' | 'training' | 'match' | 'lifestyle' | 'other';
+export type BulletinPriority = 'urgent' | 'high' | 'normal' | 'low';
+
+export interface BulletinPost {
+  id: string;
+  title: string;
+  content: string;
+  category: BulletinCategory;
+  priority: BulletinPriority;
+  authorId: string;
+  authorName: string;
+  authorRole: MemberRole;
+  createdAt: string;
+  updatedAt?: string;
+  isPinned: boolean;
+  attachments: Attachment[];
+  // 既読管理
+  readBy: {
+    userId: string;
+    userName: string;
+    readAt: string;
+  }[];
+  // 返信・質問
+  replies: BulletinReply[];
+}
+
+export interface BulletinReply {
+  id: string;
+  postId: string;
+  authorId: string;
+  authorName: string;
+  authorRole: MemberRole;
+  content: string;
+  createdAt: string;
+  updatedAt?: string;
+  // 返信への既読（スタッフが選手の返信を読んだか）
+  readByStaff: {
+    userId: string;
+    readAt: string;
+  }[];
+}
+
+// 掲示板カテゴリ情報
+export function getBulletinCategoryInfo(category: BulletinCategory) {
+  const categoryMap = {
+    notice: {
+      label: 'お知らせ',
+      color: 'text-blue-700',
+      bgColor: 'bg-blue-100',
+      icon: '📢',
+    },
+    schedule: {
+      label: 'スケジュール',
+      color: 'text-purple-700',
+      bgColor: 'bg-purple-100',
+      icon: '📅',
+    },
+    training: {
+      label: 'トレーニング',
+      color: 'text-green-700',
+      bgColor: 'bg-green-100',
+      icon: '🏃',
+    },
+    match: {
+      label: '試合',
+      color: 'text-red-700',
+      bgColor: 'bg-red-100',
+      icon: '⚽',
+    },
+    lifestyle: {
+      label: '生活',
+      color: 'text-orange-700',
+      bgColor: 'bg-orange-100',
+      icon: '🏠',
+    },
+    other: {
+      label: 'その他',
+      color: 'text-gray-700',
+      bgColor: 'bg-gray-100',
+      icon: '📝',
+    },
+  };
+  return categoryMap[category];
+}
+
+export function getBulletinPriorityInfo(priority: BulletinPriority) {
+  const priorityMap = {
+    urgent: { label: '緊急', color: 'text-red-700', bgColor: 'bg-red-100', borderColor: 'border-red-500' },
+    high: { label: '重要', color: 'text-orange-700', bgColor: 'bg-orange-100', borderColor: 'border-orange-400' },
+    normal: { label: '通常', color: 'text-blue-700', bgColor: 'bg-blue-100', borderColor: 'border-blue-300' },
+    low: { label: '低', color: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-300' },
+  };
+  return priorityMap[priority];
+}
+
+// 掲示板モックデータ
+export const mockBulletinPosts: BulletinPost[] = [
+  {
+    id: 'bulletin-1',
+    title: '【重要】準々決勝に向けた注意事項',
+    content: `選手の皆さん
+
+明日11/1の準々決勝（vs 朝鮮民主主義人民共和国）に向けて、以下の点を確認してください。
+
+【集合時間】
+試合当日は18:00にホテルロビー集合です。遅刻厳禁。
+
+【持ち物】
+- ユニフォーム一式
+- スパイク（メイン・サブ）
+- 水筒
+- タオル
+- パスポート（必須）
+
+【注意事項】
+- 前日は22:00までに就寝
+- 試合当日の朝食は7:00-8:30
+- 軽めのストレッチを各自で行うこと
+
+質問があればこの投稿にコメントしてください。
+
+監督 白井貞義`,
+    category: 'match',
+    priority: 'urgent',
+    authorId: 'staff-1',
+    authorName: '白井貞義',
+    authorRole: 'coach',
+    createdAt: '2025-10-30T10:00:00Z',
+    isPinned: true,
+    attachments: [],
+    readBy: [
+      { userId: 'player-1', userName: '福島望愛', readAt: '2025-10-30T10:15:00Z' },
+      { userId: 'player-2', userName: '青木夕菜', readAt: '2025-10-30T10:20:00Z' },
+      { userId: 'player-3', userName: '式田和', readAt: '2025-10-30T10:25:00Z' },
+      { userId: 'player-5', userName: '関口明日香', readAt: '2025-10-30T10:30:00Z' },
+      { userId: 'player-6', userName: '大野羽愛', readAt: '2025-10-30T10:35:00Z' },
+    ],
+    replies: [
+      {
+        id: 'reply-1-1',
+        postId: 'bulletin-1',
+        authorId: 'player-1',
+        authorName: '福島望愛',
+        authorRole: 'player',
+        content: '了解しました！全力で頑張ります！',
+        createdAt: '2025-10-30T10:20:00Z',
+        readByStaff: [{ userId: 'staff-1', readAt: '2025-10-30T10:25:00Z' }],
+      },
+      {
+        id: 'reply-1-2',
+        postId: 'bulletin-1',
+        authorId: 'player-4',
+        authorName: '須長穂乃果',
+        authorRole: 'player',
+        content: 'スパイクのサブは新品でも大丈夫ですか？',
+        createdAt: '2025-10-30T11:00:00Z',
+        readByStaff: [{ userId: 'staff-1', readAt: '2025-10-30T11:05:00Z' }],
+      },
+      {
+        id: 'reply-1-3',
+        postId: 'bulletin-1',
+        authorId: 'staff-1',
+        authorName: '白井貞義',
+        authorRole: 'coach',
+        content: '須長さん、新品でも構いませんが、事前に少し履き慣らしておくことをお勧めします。',
+        createdAt: '2025-10-30T11:10:00Z',
+        readByStaff: [],
+      },
+    ],
+  },
+  {
+    id: 'bulletin-2',
+    title: '本日のトレーニングスケジュール',
+    content: `選手の皆さん
+
+本日10/30のトレーニングスケジュールです。
+
+【午前】
+10:00-11:30 リカバリーセッション
+- 軽めのジョグ
+- ストレッチ
+- アイスバス（希望者）
+
+【午後】
+15:00-17:00 戦術ミーティング（全員参加）
+- 北朝鮮の分析映像視聴
+- セットプレー確認
+
+18:00-19:30 軽めの練習
+- パス回し
+- シュート練習
+
+※体調不良の方はメディカルスタッフに連絡してください。
+
+フィジカルコーチ 高橋恵`,
+    category: 'training',
+    priority: 'high',
+    authorId: 'staff-2',
+    authorName: '高橋恵',
+    authorRole: 'staff',
+    createdAt: '2025-10-30T07:00:00Z',
+    isPinned: false,
+    attachments: [],
+    readBy: [
+      { userId: 'player-1', userName: '福島望愛', readAt: '2025-10-30T07:30:00Z' },
+      { userId: 'player-2', userName: '青木夕菜', readAt: '2025-10-30T07:35:00Z' },
+      { userId: 'player-3', userName: '式田和', readAt: '2025-10-30T07:40:00Z' },
+      { userId: 'player-6', userName: '大野羽愛', readAt: '2025-10-30T08:00:00Z' },
+      { userId: 'player-7', userName: '中村心乃葉', readAt: '2025-10-30T08:10:00Z' },
+      { userId: 'player-8', userName: '平七海', readAt: '2025-10-30T08:15:00Z' },
+    ],
+    replies: [
+      {
+        id: 'reply-2-1',
+        postId: 'bulletin-2',
+        authorId: 'player-7',
+        authorName: '中村心乃葉',
+        authorRole: 'player',
+        content: 'アイスバスの時間は何時頃ですか？',
+        createdAt: '2025-10-30T08:15:00Z',
+        readByStaff: [{ userId: 'staff-2', readAt: '2025-10-30T08:20:00Z' }],
+      },
+      {
+        id: 'reply-2-2',
+        postId: 'bulletin-2',
+        authorId: 'staff-2',
+        authorName: '高橋恵',
+        authorRole: 'staff',
+        content: '11:00-11:30の間で随時利用可能です。混み合う可能性があるので早めにお願いします。',
+        createdAt: '2025-10-30T08:25:00Z',
+        readByStaff: [],
+      },
+    ],
+  },
+  {
+    id: 'bulletin-3',
+    title: '食事・栄養に関するお知らせ',
+    content: `選手の皆さん
+
+試合前の食事について連絡します。
+
+【試合前日（10/31）】
+- 炭水化物をしっかり摂取
+- 揚げ物・脂っこいものは控えめに
+- 水分は2リットル以上
+
+【試合当日（11/1）】
+- 朝食: 7:00-8:30（ビュッフェ）
+- 昼食: 12:00-13:00（軽め）
+- 試合3時間前までに食事完了
+
+不安な食材があれば事前に相談してください。
+
+栄養士 鈴木由美`,
+    category: 'lifestyle',
+    priority: 'normal',
+    authorId: 'staff-4',
+    authorName: '鈴木由美',
+    authorRole: 'staff',
+    createdAt: '2025-10-29T18:00:00Z',
+    isPinned: false,
+    attachments: [],
+    readBy: [
+      { userId: 'player-1', userName: '福島望愛', readAt: '2025-10-29T18:30:00Z' },
+      { userId: 'player-3', userName: '式田和', readAt: '2025-10-29T19:00:00Z' },
+      { userId: 'player-5', userName: '関口明日香', readAt: '2025-10-29T19:30:00Z' },
+    ],
+    replies: [],
+  },
+  {
+    id: 'bulletin-4',
+    title: 'ラバトへの移動について',
+    content: `選手の皆さん
+
+明日10/31のラバトへの移動について連絡します。
+
+【移動スケジュール】
+09:00 ホテルチェックアウト
+09:30 バス出発
+12:00 ラバト到着予定
+13:00 新ホテルチェックイン
+
+【注意事項】
+- 荷物は前日夜にまとめておくこと
+- 貴重品は手荷物で管理
+- バス内での食事OK（軽食を配布）
+
+部屋割りは別途連絡します。
+
+監督 白井貞義`,
+    category: 'schedule',
+    priority: 'high',
+    authorId: 'staff-1',
+    authorName: '白井貞義',
+    authorRole: 'coach',
+    createdAt: '2025-10-29T14:00:00Z',
+    isPinned: false,
+    attachments: [],
+    readBy: [
+      { userId: 'player-1', userName: '福島望愛', readAt: '2025-10-29T14:30:00Z' },
+      { userId: 'player-2', userName: '青木夕菜', readAt: '2025-10-29T14:45:00Z' },
+      { userId: 'player-4', userName: '須長穂乃果', readAt: '2025-10-29T15:00:00Z' },
+      { userId: 'player-6', userName: '大野羽愛', readAt: '2025-10-29T15:15:00Z' },
+      { userId: 'player-8', userName: '平七海', readAt: '2025-10-29T15:30:00Z' },
+    ],
+    replies: [
+      {
+        id: 'reply-4-1',
+        postId: 'bulletin-4',
+        authorId: 'player-8',
+        authorName: '平七海',
+        authorRole: 'player',
+        content: 'スーツケースのサイズ制限はありますか？',
+        createdAt: '2025-10-29T15:35:00Z',
+        readByStaff: [{ userId: 'staff-1', readAt: '2025-10-29T15:40:00Z' }],
+      },
+      {
+        id: 'reply-4-2',
+        postId: 'bulletin-4',
+        authorId: 'staff-1',
+        authorName: '白井貞義',
+        authorRole: 'coach',
+        content: '特に制限はありません。通常のスーツケースで大丈夫です。',
+        createdAt: '2025-10-29T15:45:00Z',
+        readByStaff: [],
+      },
+    ],
+  },
+  {
+    id: 'bulletin-5',
+    title: 'コロンビア戦 勝利おめでとう！',
+    content: `選手の皆さん
+
+ラウンド16 コロンビア戦、4-0での勝利おめでとうございます！
+
+【得点者】
+- 大野羽愛（10分）
+- 福島望愛（22分、57分）
+- 中村心乃葉（43分）
+
+攻守ともに素晴らしい内容でした。
+次の準々決勝も全力で戦いましょう！
+
+しっかり休息を取って、次に備えてください。
+
+監督 白井貞義`,
+    category: 'notice',
+    priority: 'normal',
+    authorId: 'staff-1',
+    authorName: '白井貞義',
+    authorRole: 'coach',
+    createdAt: '2025-10-28T23:00:00Z',
+    isPinned: false,
+    attachments: [],
+    readBy: [
+      { userId: 'player-1', userName: '福島望愛', readAt: '2025-10-28T23:15:00Z' },
+      { userId: 'player-2', userName: '青木夕菜', readAt: '2025-10-28T23:20:00Z' },
+      { userId: 'player-3', userName: '式田和', readAt: '2025-10-28T23:25:00Z' },
+      { userId: 'player-4', userName: '須長穂乃果', readAt: '2025-10-28T23:30:00Z' },
+      { userId: 'player-5', userName: '関口明日香', readAt: '2025-10-28T23:35:00Z' },
+      { userId: 'player-6', userName: '大野羽愛', readAt: '2025-10-28T23:40:00Z' },
+      { userId: 'player-7', userName: '中村心乃葉', readAt: '2025-10-28T23:45:00Z' },
+      { userId: 'player-8', userName: '平七海', readAt: '2025-10-28T23:50:00Z' },
+    ],
+    replies: [
+      {
+        id: 'reply-5-1',
+        postId: 'bulletin-5',
+        authorId: 'player-6',
+        authorName: '大野羽愛',
+        authorRole: 'player',
+        content: 'ありがとうございます！みんなのおかげで得点できました！',
+        createdAt: '2025-10-28T23:45:00Z',
+        readByStaff: [{ userId: 'staff-1', readAt: '2025-10-28T23:50:00Z' }],
+      },
+      {
+        id: 'reply-5-2',
+        postId: 'bulletin-5',
+        authorId: 'player-1',
+        authorName: '福島望愛',
+        authorRole: 'player',
+        content: '次も絶対勝ちます！',
+        createdAt: '2025-10-28T23:50:00Z',
+        readByStaff: [{ userId: 'staff-1', readAt: '2025-10-28T23:55:00Z' }],
+      },
+    ],
+  },
+];
+
+// 掲示板ヘルパー関数
+export function getBulletinPostById(id: string): BulletinPost | null {
+  return mockBulletinPosts.find((p) => p.id === id) || null;
+}
+
+export function getBulletinStats() {
+  const totalPosts = mockBulletinPosts.length;
+  const totalPlayers = mockTeamMembers.filter(m => m.role === 'player').length;
+
+  // 未読の投稿数（現在のユーザーが読んでいないもの）
+  const unreadPosts = mockBulletinPosts.filter(
+    (p) => !p.readBy.some(r => r.userId === currentUserId)
+  ).length;
+
+  // 選手からの未読返信数（スタッフ向け）
+  const unreadReplies = mockBulletinPosts.reduce((sum, post) => {
+    return sum + post.replies.filter(
+      (r) => r.authorRole === 'player' && !r.readByStaff.some(s => s.userId === currentUserId)
+    ).length;
+  }, 0);
+
+  return {
+    totalPosts,
+    unreadPosts,
+    unreadReplies,
+    totalPlayers,
+  };
+}
+
+export function getReadRate(post: BulletinPost): { count: number; total: number; percentage: number } {
+  const totalPlayers = mockTeamMembers.filter(m => m.role === 'player').length;
+  const readCount = post.readBy.filter(r =>
+    mockTeamMembers.find(m => m.id === r.userId)?.role === 'player'
+  ).length;
+
+  return {
+    count: readCount,
+    total: totalPlayers,
+    percentage: totalPlayers > 0 ? Math.round((readCount / totalPlayers) * 100) : 0,
+  };
+}

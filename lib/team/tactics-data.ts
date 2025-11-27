@@ -161,6 +161,39 @@ export const threatLevelInfo = {
   },
 };
 
+// 戦術・スカウトIDと対戦相手DBのIDのマッピング
+// tactics-data.ts の opponentTeam.id -> opponent-intelligence.ts の nationalTeam.id
+export const tacticsToOpponentDbMapping: Record<string, string> = {
+  '1': 'nz',   // ニュージーランド
+  '2': 'zmb',  // ザンビア
+  '3': 'pry',  // パラグアイ
+  '4': 'col',  // コロンビア
+  '5': 'prk',  // 北朝鮮
+};
+
+// 対戦相手DBのIDから戦術・スカウトIDへの逆引き
+export const opponentDbToTacticsMapping: Record<string, string> = {
+  'nz': '1',
+  'zmb': '2',
+  'pry': '3',
+  'col': '4',
+  'prk': '5',
+};
+
+/**
+ * 戦術・スカウトIDから対戦相手DBのIDを取得
+ */
+export function getOpponentDbId(tacticsId: string): string | null {
+  return tacticsToOpponentDbMapping[tacticsId] || null;
+}
+
+/**
+ * 対戦相手DBのIDから戦術・スカウトIDを取得
+ */
+export function getTacticsId(opponentDbId: string): string | null {
+  return opponentDbToTacticsMapping[opponentDbId] || null;
+}
+
 // モックデータ - 対戦相手チーム (FIFA U-17女子ワールドカップモロッコ2025)
 export const opponentTeams: OpponentTeam[] = [
   // グループF 第1節
