@@ -29,7 +29,7 @@ import {
 
 export default function PlayerFeesDetailPage() {
   const params = useParams();
-  const playerId = params.playerId as string;
+  const playerId = params?.playerId as string || '';
 
   const player = players.find((p) => p.id === playerId);
   const feeRecords = getFeeRecordsByPlayerId(playerId);

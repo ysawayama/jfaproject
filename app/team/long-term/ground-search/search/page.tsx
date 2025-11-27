@@ -15,11 +15,11 @@ export default function GroundSearchResultsPage() {
   const router = useRouter();
 
   // URLパラメータから検索条件を取得
-  const [prefecture, setPrefecture] = useState(searchParams.get('prefecture') || '東京都');
-  const [city, setCity] = useState(searchParams.get('city') || '');
-  const [date, setDate] = useState(searchParams.get('date') || '');
-  const [size, setSize] = useState(searchParams.get('size') || '');
-  const [groundType, setGroundType] = useState(searchParams.get('groundType') || '');
+  const [prefecture, setPrefecture] = useState(searchParams?.get('prefecture') || '東京都');
+  const [city, setCity] = useState(searchParams?.get('city') || '');
+  const [date, setDate] = useState(searchParams?.get('date') || '');
+  const [size, setSize] = useState(searchParams?.get('size') || '');
+  const [groundType, setGroundType] = useState(searchParams?.get('groundType') || '');
   const [sortBy, setSortBy] = useState<'recommended' | 'price-low' | 'price-high' | 'distance'>('recommended');
   const [showFilters, setShowFilters] = useState(false);
 

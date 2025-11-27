@@ -59,7 +59,7 @@ export default function CandidatesPage() {
 
   // URLパラメータからステータスを読み取って初期設定
   useEffect(() => {
-    const statusParam = searchParams.get('status');
+    const statusParam = searchParams?.get('status');
     if (statusParam && (statusParam === 'candidate' || statusParam === 'confirmed')) {
       setSelectedStatus(statusParam as CandidateStatus);
     }

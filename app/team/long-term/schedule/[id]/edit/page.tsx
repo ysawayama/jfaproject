@@ -20,7 +20,7 @@ import type { EventType } from '@/lib/team/long-term-data';
 export default function EditEventPage() {
   const params = useParams();
   const router = useRouter();
-  const eventId = params.id as string;
+  const eventId = params?.id as string || '';
 
   const event = teamEvents.find((e) => e.id === eventId);
 

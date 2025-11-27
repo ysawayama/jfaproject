@@ -65,7 +65,7 @@ export default function LargeListDetailPage({
   const searchParams = useSearchParams();
 
   // URLパラメータからデフォルトタブを取得
-  const defaultTab = searchParams.get('tab') as TabType || 'profile';
+  const defaultTab = searchParams?.get('tab') as TabType || 'profile';
   const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
 
   // Supabaseからデータを読み込む

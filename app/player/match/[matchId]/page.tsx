@@ -50,7 +50,7 @@ const getMatchData = (matchId: string) => {
 
 export default function MatchVideoAnalysisPage() {
   const params = useParams();
-  const matchId = params.matchId as string;
+  const matchId = params?.matchId as string || '';
   const match = getMatchData(matchId);
 
   const [player, setPlayer] = useState<any>(null);

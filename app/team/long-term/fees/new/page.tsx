@@ -14,7 +14,7 @@ import type { FeeType, PaymentMethod } from '@/lib/team/long-term-data';
 // useSearchParams()を使うコンポーネントを分離
 function FeeRecordForm() {
   const searchParams = useSearchParams();
-  const preselectedPlayerId = searchParams.get('playerId');
+  const preselectedPlayerId = searchParams?.get('playerId') ?? null;
 
   const [playerId, setPlayerId] = useState(preselectedPlayerId || '');
   const [feeSettingsId, setFeeSettingsId] = useState('');

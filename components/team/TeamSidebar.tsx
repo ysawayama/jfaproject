@@ -130,7 +130,7 @@ export default function TeamSidebar({ isOpen = true, onClose }: TeamSidebarProps
                 {/* メニューアイテム */}
                 <ul className="space-y-1">
                   {filteredItems.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                    const isActive = pathname === item.href || (pathname?.startsWith(item.href + '/') ?? false);
 
                     return (
                       <li key={item.id}>

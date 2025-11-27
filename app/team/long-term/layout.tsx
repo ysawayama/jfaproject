@@ -82,7 +82,7 @@ export default function LongTermLayout({
               const isActive =
                 pathname === item.href ||
                 (item.href !== '/team/long-term' &&
-                  pathname.startsWith(item.href));
+                  (pathname?.startsWith(item.href) ?? false));
 
               return (
                 <Link
@@ -114,7 +114,7 @@ export default function LongTermLayout({
             const isActive =
               pathname === item.href ||
               (item.href !== '/team/long-term' &&
-                pathname.startsWith(item.href));
+                (pathname?.startsWith(item.href) ?? false));
 
             return (
               <Link

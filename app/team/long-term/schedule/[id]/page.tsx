@@ -22,7 +22,7 @@ import type { AttendanceStatus } from '@/lib/team/long-term-data';
 
 export default function EventDetailPage() {
   const params = useParams();
-  const eventId = params.id as string;
+  const eventId = params?.id as string || '';
 
   const event = teamEvents.find((e) => e.id === eventId);
 

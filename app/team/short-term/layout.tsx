@@ -142,7 +142,7 @@ export default function ShortTermLayout({
                   {navigationStructure.preCallActivities.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href ||
-                                   (item.href !== '/team/short-term' && pathname.startsWith(item.href));
+                                   (item.href !== '/team/short-term' && (pathname?.startsWith(item.href) ?? false));
 
                     return (
                       <Link
@@ -185,7 +185,7 @@ export default function ShortTermLayout({
                   {navigationStructure.representativeActivities.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href ||
-                                   (item.href !== '/team/short-term' && pathname.startsWith(item.href));
+                                   (item.href !== '/team/short-term' && (pathname?.startsWith(item.href) ?? false));
 
                     return (
                       <Link
@@ -211,7 +211,7 @@ export default function ShortTermLayout({
               {navigationStructure.common.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href ||
-                               (item.href !== '/team/short-term' && pathname.startsWith(item.href));
+                               (item.href !== '/team/short-term' && (pathname?.startsWith(item.href) ?? false));
 
                 return (
                   <Link
@@ -260,7 +260,7 @@ export default function ShortTermLayout({
           {navigationStructure.common.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href ||
-                           (item.href !== '/team/short-term' && pathname.startsWith(item.href));
+                           (item.href !== '/team/short-term' && (pathname?.startsWith(item.href) ?? false));
 
             return (
               <Link

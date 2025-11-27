@@ -31,7 +31,7 @@ export default function ScoutingPage() {
 
   // URLパラメータからステータスを読み取って初期設定
   useEffect(() => {
-    const statusParam = searchParams.get('status');
+    const statusParam = searchParams?.get('status');
     if (statusParam && (statusParam === 'scheduled' || statusParam === 'in_progress' || statusParam === 'completed')) {
       setSelectedStatus(statusParam as ScoutingStatus);
     }

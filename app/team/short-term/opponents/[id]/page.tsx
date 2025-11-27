@@ -38,7 +38,7 @@ type TabType = 'overview' | 'players' | 'qualifiers' | 'sources' | 'h2h';
 
 export default function OpponentDetailPage() {
   const params = useParams();
-  const teamId = params.id as string;
+  const teamId = params?.id as string || '';
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
   const team = getNationalTeamById(teamId);

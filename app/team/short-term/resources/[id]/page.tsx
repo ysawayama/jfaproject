@@ -14,7 +14,7 @@ import {
 export default function MediaDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const mediaId = params.id as string;
+  const mediaId = params?.id as string || '';
 
   const media = getMediaById(mediaId);
   const [copied, setCopied] = useState(false);

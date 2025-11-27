@@ -23,7 +23,7 @@ import {
 
 export default function GrowthDetailPage() {
   const params = useParams();
-  const recordId = params.id as string;
+  const recordId = params?.id as string || '';
 
   const record = growthRecords.find((r) => r.id === recordId);
   const player = record ? players.find((p) => p.id === record.playerId) : null;

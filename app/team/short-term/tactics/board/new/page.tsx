@@ -12,7 +12,7 @@ type CategoryType = keyof typeof categoryInfo;
 
 export default function NewTacticalBoardPage() {
   const searchParams = useSearchParams();
-  const opponentId = searchParams.get('opponent');
+  const opponentId = searchParams?.get('opponent') ?? null;
 
   const [formData, setFormData] = useState({
     title: '',

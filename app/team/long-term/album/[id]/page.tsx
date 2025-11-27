@@ -27,7 +27,7 @@ import type { MediaType } from '@/lib/team/long-term-data';
 
 export default function AlbumDetailPage() {
   const params = useParams();
-  const albumId = params.id as string;
+  const albumId = params?.id as string || '';
 
   const album = albums.find((a) => a.id === albumId);
   const mediaItems = getMediaByAlbumId(albumId);

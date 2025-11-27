@@ -342,7 +342,7 @@ const getPlayerDetailData = (playerId: string) => {
 
 export default function CoachPlayerDetailPage() {
   const params = useParams();
-  const playerId = params.id as string;
+  const playerId = params?.id as string || '';
   const [activeTab, setActiveTab] = useState<'overview' | 'matches' | 'attendance' | 'notes'>('overview');
 
   const player = getPlayerDetailData(playerId);
