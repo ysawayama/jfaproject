@@ -22,44 +22,58 @@ type TabType = 'pre-call' | 'representative';
 export default function ShortTermDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('pre-call');
 
-  // 招集前活動のダミーデータ
+  // 招集前活動のダミーデータ（U-17女子代表向け）
   const stats = {
-    totalCandidates: 45,
-    watchlisted: 12,
-    confirmed: 23,
-    upcomingScoutings: 3,
+    totalCandidates: 38,
+    watchlisted: 8,
+    confirmed: 21,
+    upcomingScoutings: 5,
   };
 
   const upcomingActivities = [
     {
       id: 1,
-      title: 'U-23代表 合宿',
-      date: '2025年11月15日〜11月20日',
-      location: '静岡・Jヴィレッジ',
+      title: 'U-17女子代表 国内合宿',
+      date: '2025年12月10日〜12月15日',
+      location: '千葉・夢フィールド',
       status: '準備中',
     },
     {
       id: 2,
-      title: 'トレセン活動',
-      date: '2025年11月25日〜11月27日',
+      title: 'JFA U-17女子トレセン',
+      date: '2025年12月20日〜12月22日',
       location: '大阪・J-GREEN堺',
-      status: '招集完了',
+      status: '招集準備中',
+    },
+    {
+      id: 3,
+      title: 'AFC U-17女子選手権2026 予選',
+      date: '2026年3月予定',
+      location: '未定',
+      status: '日程調整中',
     },
   ];
 
   const recentScoutings = [
     {
       id: 1,
-      player: '佐藤太郎',
-      match: 'リーグ第32節 vs FC東京',
+      player: '田中美咲',
+      match: 'JFA U-15女子サッカーリーグ 準決勝',
       date: '2025年10月28日',
-      rating: '⭐⭐⭐⭐',
+      rating: '⭐⭐⭐⭐⭐',
     },
     {
       id: 2,
-      player: '鈴木次郎',
-      match: 'ACL準々決勝',
+      player: '山本花',
+      match: '全日本高校女子サッカー選手権 準々決勝',
       date: '2025年10月26日',
+      rating: '⭐⭐⭐⭐',
+    },
+    {
+      id: 3,
+      player: '佐々木陽菜',
+      match: 'WEリーグU-18カップ 決勝',
+      date: '2025年10月20日',
       rating: '⭐⭐⭐⭐⭐',
     },
   ];
