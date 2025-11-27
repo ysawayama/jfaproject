@@ -341,6 +341,61 @@ export const kuboNationalTeamData = {
   },
 };
 
+// 久保建英 マイシューズログ（※ダミー: アディダス契約選手）
+export interface ProfessionalShoe {
+  id: string;
+  brandModel: string;
+  imageUrl: string;
+  period: string;
+  memo: string;
+  order: number;
+  isCurrentlyUsing: boolean;
+  sponsored: boolean; // プロ選手はスポンサー契約あり
+}
+
+export const kuboShoesLog: ProfessionalShoe[] = [
+  {
+    id: 'kubo-shoe1',
+    brandModel: 'アディダス エックス クレイジーファスト.1',
+    imageUrl: '', // プレースホルダー表示
+    period: '2024年7月 - 現在',
+    memo: '軽さとスピードを追求した最新モデル。ドリブル時のボールタッチが格段に良くなり、細かいフェイントがしやすい。ラ・リーガの激しいプレッシャーの中でも足元の感覚が抜群。',
+    order: 1,
+    isCurrentlyUsing: true,
+    sponsored: true,
+  },
+  {
+    id: 'kubo-shoe2',
+    brandModel: 'アディダス エックス スピードポータル.1',
+    imageUrl: '', // プレースホルダー表示
+    period: '2023年1月 - 2024年6月',
+    memo: 'スピード重視のモデル。左サイドからの仕掛けに最適で、このスパイクでレアル・ソシエダでの初ゴールを決めた思い出深い一足。',
+    order: 2,
+    isCurrentlyUsing: false,
+    sponsored: true,
+  },
+  {
+    id: 'kubo-shoe3',
+    brandModel: 'アディダス エックス スピードフロー.1',
+    imageUrl: '', // プレースホルダー表示
+    period: '2021年7月 - 2022年12月',
+    memo: 'マジョルカ、ヘタフェ、ビジャレアルと複数のクラブで着用。安定したフィット感で、レンタル移籍が続く中でも常にパフォーマンスを発揮できた。',
+    order: 3,
+    isCurrentlyUsing: false,
+    sponsored: true,
+  },
+  {
+    id: 'kubo-shoe4',
+    brandModel: 'アディダス エックス ゴースト.1',
+    imageUrl: '', // プレースホルダー表示
+    period: '2019年8月 - 2021年6月',
+    memo: 'レアル・マドリード加入時から愛用。若手としてトップチームでプレーするプレッシャーの中、このスパイクと共に成長した。日本代表デビュー時もこのスパイクで戦った。',
+    order: 4,
+    isCurrentlyUsing: false,
+    sponsored: true,
+  },
+];
+
 // Team Players Data (for Coach Dashboard)（※ダミー: レアル・ソシエダのチームメイト）
 export const demoTeamPlayers: TeamPlayer[] = [
   {

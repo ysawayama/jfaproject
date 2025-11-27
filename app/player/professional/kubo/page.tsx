@@ -22,7 +22,10 @@ import {
   demoMessages,
   demoNewsItems,
   kuboNationalTeamData,
+  kuboShoesLog,
 } from '@/lib/demo-data';
+import Image from 'next/image';
+import { ShoppingBag, Calendar, Star, Award as AwardIcon } from 'lucide-react';
 import seasonPerformanceData from '@/public/data/kubo-season-performance.json';
 import recentMatchesData from '@/public/data/kubo-recent-matches.json';
 
@@ -117,6 +120,101 @@ export default function PlayerDashboard() {
                 {/* フォトアルバム */}
                 <AnimatedSection delay={300}>
                   <PhotoAlbum />
+                </AnimatedSection>
+
+                {/* マイシューズログ */}
+                <AnimatedSection delay={400}>
+                  <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+                      <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                      マイシューズログ
+                      <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-normal">
+                        adidas契約選手
+                      </span>
+                    </h2>
+                    <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
+                      プロとして戦い続けてきたスパイクの軌跡
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                      {kuboShoesLog.map((shoe) => (
+                        <div
+                          key={shoe.id}
+                          className={`relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border-2 transition-all hover:shadow-xl ${
+                            shoe.isCurrentlyUsing
+                              ? 'border-blue-500 shadow-lg'
+                              : 'border-gray-200 hover:border-blue-300'
+                          }`}
+                        >
+                          {/* 現在使用中バッジ */}
+                          {shoe.isCurrentlyUsing && (
+                            <div className="absolute top-3 right-3 z-10">
+                              <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-xs font-bold flex items-center gap-1 shadow-md">
+                                <Star className="w-3 h-3 fill-current" />
+                                現在使用中
+                              </span>
+                            </div>
+                          )}
+
+                          {/* スポンサーバッジ */}
+                          {shoe.sponsored && !shoe.isCurrentlyUsing && (
+                            <div className="absolute top-3 right-3 z-10">
+                              <span className="px-2 py-1 bg-gray-700 text-white rounded-full text-xs font-semibold flex items-center gap-1">
+                                <AwardIcon className="w-3 h-3" />
+                                Official
+                              </span>
+                            </div>
+                          )}
+
+                          {/* シューズ画像 */}
+                          <div className="aspect-[4/3] bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
+                            {shoe.imageUrl ? (
+                              <Image
+                                src={shoe.imageUrl}
+                                alt={shoe.brandModel}
+                                fill
+                                className="object-contain p-4"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              />
+                            ) : (
+                              <div className="relative w-full h-full">
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="text-center">
+                                    <ShoppingBag className="w-16 h-16 sm:w-20 sm:h-20 text-blue-400 mx-auto mb-2" strokeWidth={1.5} />
+                                    <p className="text-xs sm:text-sm text-blue-600 font-semibold">
+                                      {shoe.order}足目
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="absolute top-2 left-2 w-8 h-8 bg-white/40 rounded-full"></div>
+                                <div className="absolute bottom-4 right-4 w-12 h-12 bg-white/30 rounded-full"></div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* シューズ情報 */}
+                          <div className="p-4 sm:p-5 bg-white">
+                            <div className="mb-3">
+                              <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-1">
+                                {shoe.brandModel}
+                              </h3>
+                              <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
+                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                                {shoe.period}
+                              </p>
+                            </div>
+
+                            {/* メモ */}
+                            <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                              <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                                {shoe.memo}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </AnimatedSection>
               </div>
 

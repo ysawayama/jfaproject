@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -13,13 +13,13 @@ import {
   Users,
 } from 'lucide-react';
 import {
-  largeListPlayers,
   calculateAge,
   getTotalCallUps,
   hasCallUpInCategory,
   type LargeListPlayer,
   type CallUpHistory,
 } from '@/lib/team/large-list-data';
+import { fetchAllPlayers } from '@/lib/supabase/team-data';
 
 export default function LargeListPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,9 +27,23 @@ export default function LargeListPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'name' | 'age' | 'callUps'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Supabaseからデータを読み込む
+  const [players, setPlayers] = useState<LargeListPlayer[]>([]);
+
+  useEffect(() => {
+    const loadPlayers = async () => {
+      setIsLoading(true);
+      const data = await fetchAllPlayers();
+      setPlayers(data);
+      setIsLoading(false);
+    };
+    loadPlayers();
+  }, []);
 
   // フィルタリング
-  const filteredPlayers = largeListPlayers.filter((player) => {
+  const filteredPlayers = players.filter((player) => {
     const matchesSearch =
       player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       player.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -76,12 +90,24 @@ export default function LargeListPage() {
 
   // 統計
   const stats = {
-    total: largeListPlayers.length,
-    u15: largeListPlayers.filter((p) => hasCallUpInCategory(p, 'u15')).length,
-    u16: largeListPlayers.filter((p) => hasCallUpInCategory(p, 'u16')).length,
-    u17: largeListPlayers.filter((p) => hasCallUpInCategory(p, 'u17')).length,
-    seniorA: largeListPlayers.filter((p) => hasCallUpInCategory(p, 'seniorA')).length,
+    total: players.length,
+    u15: players.filter((p) => hasCallUpInCategory(p, 'u15')).length,
+    u16: players.filter((p) => hasCallUpInCategory(p, 'u16')).length,
+    u17: players.filter((p) => hasCallUpInCategory(p, 'u17')).length,
+    seniorA: players.filter((p) => hasCallUpInCategory(p, 'seniorA')).length,
   };
+
+  // ローディング中の表示
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-samurai border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">選手データを読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -427,7 +453,7 @@ export default function LargeListPage() {
 
       {/* 結果表示 */}
       <div className="text-center text-sm text-neutral-600">
-        {sortedPlayers.length}件の選手を表示中（全{largeListPlayers.length}件）
+        {sortedPlayers.length}件の選手を表示中（全{players.length}件）
       </div>
     </div>
   );

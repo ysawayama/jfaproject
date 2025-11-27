@@ -25,6 +25,8 @@ import {
   Star,
 } from 'lucide-react';
 import MobileMenu from '@/components/MobileMenu';
+import ProfilePhotoUpload from '@/components/ProfilePhotoUpload';
+import MediaUpload from '@/components/MediaUpload';
 import {
   takahashiPlayer,
   midorigaokaFCRecords,
@@ -65,14 +67,15 @@ export default function TakahashiPlayerDashboard() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
             {/* プロフィール写真 */}
             <div className="flex-shrink-0">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl bg-white/20 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center overflow-hidden">
-                <div className="w-full h-full bg-gradient-to-br from-green-400/50 to-green-600/50 flex flex-col items-center justify-center gap-1 sm:gap-2">
-                  <User className="w-12 h-12 sm:w-16 sm:h-16 text-white/80" strokeWidth={1.5} />
-                  <span className="text-[10px] sm:text-xs text-white/90 font-medium">
-                    画像を登録
-                  </span>
-                </div>
-              </div>
+              <ProfilePhotoUpload
+                playerId={player.id}
+                playerType="amateur"
+                currentPhotoUrl={player.profileImage}
+                size="md"
+                onUploadSuccess={(url) => {
+                  console.log('Profile photo uploaded:', url);
+                }}
+              />
             </div>
 
             {/* 基本情報 */}
@@ -468,6 +471,16 @@ export default function TakahashiPlayerDashboard() {
                 </div>
               </div>
             ))}
+
+            {/* アップロードボタン */}
+            <MediaUpload
+              teamId={player.teamId}
+              playerId={player.id}
+              source="personal"
+              onUploadSuccess={(mediaItem) => {
+                console.log('Media uploaded:', mediaItem);
+              }}
+            />
           </div>
         </div>
 

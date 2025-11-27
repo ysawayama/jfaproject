@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -12,12 +12,45 @@ import {
   Trophy,
   Activity,
 } from 'lucide-react';
-import { candidates, type Candidate, type CandidateStatus, type OverallRating, type RadarEvaluation } from '@/lib/team/candidates-data';
+import { candidates as initialCandidates, type Candidate, type CandidateStatus, type OverallRating, type RadarEvaluation } from '@/lib/team/candidates-data';
+
+// localStorageキー（candidates/page.tsxと同じ）
+const CANDIDATES_STORAGE_KEY = 'zeami_candidates_list';
 
 // formData用の拡張型（編集画面用にradarEvaluationとoverallRatingを追加）
 type CandidateFormData = Candidate & {
   radarEvaluation?: RadarEvaluation;
   overallRating?: OverallRating;
+};
+
+const defaultFormData: CandidateFormData = {
+  id: '',
+  name: '',
+  nameEn: '',
+  position: 'MF',
+  age: 16,
+  height: 0,
+  weight: 0,
+  club: '',
+  league: '',
+  status: 'candidate' as CandidateStatus,
+  scoutingCount: 0,
+  lastScouted: '',
+  rating: 3,
+  strengths: [],
+  weaknesses: [],
+  recentForm: 'average' as const,
+  injuryStatus: 'healthy' as const,
+  availability: true,
+  notes: '',
+  radarEvaluation: {
+    technical: 3,
+    physical: 3,
+    tactical: 3,
+    mental: 3,
+    social: 3,
+  },
+  overallRating: 'B' as OverallRating,
 };
 
 export default function CandidateEditPage({
@@ -27,52 +60,58 @@ export default function CandidateEditPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const candidate = candidates.find((c) => c.id === id);
 
-  const [formData, setFormData] = useState<CandidateFormData>(
-    candidate ? {
-      ...candidate,
-      radarEvaluation: {
-        technical: 3,
-        physical: 3,
-        tactical: 3,
-        mental: 3,
-        social: 3,
-      },
-      overallRating: 'B' as OverallRating,
-    } : {
-      id: '',
-      name: '',
-      nameEn: '',
-      position: 'MF',
-      age: 16,
-      height: 0,
-      weight: 0,
-      club: '',
-      league: '',
-      status: 'candidate' as CandidateStatus,
-      scoutingCount: 0,
-      lastScouted: '',
-      rating: 3,
-      strengths: [],
-      weaknesses: [],
-      recentForm: 'average' as const,
-      injuryStatus: 'healthy' as const,
-      availability: true,
-      notes: '',
-      radarEvaluation: {
-        technical: 3,
-        physical: 3,
-        tactical: 3,
-        mental: 3,
-        social: 3,
-      },
-      overallRating: 'B' as OverallRating,
+  // localStorageから候補リストを読み込む
+  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
+  const [isLoading, setIsLoading] = useState(true);
+  const [formData, setFormData] = useState<CandidateFormData>(defaultFormData);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(CANDIDATES_STORAGE_KEY);
+    let loadedCandidates = initialCandidates;
+    if (stored) {
+      try {
+        loadedCandidates = JSON.parse(stored);
+        setCandidates(loadedCandidates);
+      } catch {
+        // パースエラー時は初期値を使用
+      }
     }
-  );
+
+    // 候補選手を検索してformDataを設定
+    const candidate = loadedCandidates.find((c) => c.id === id);
+    if (candidate) {
+      setFormData({
+        ...candidate,
+        radarEvaluation: {
+          technical: 3,
+          physical: 3,
+          tactical: 3,
+          mental: 3,
+          social: 3,
+        },
+        overallRating: 'B' as OverallRating,
+      });
+    }
+    setIsLoading(false);
+  }, [id]);
+
+  const candidate = candidates.find((c) => c.id === id);
 
   const [newStrength, setNewStrength] = useState('');
   const [newWeakness, setNewWeakness] = useState('');
+
+  // ローディング中
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-samurai border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!candidate) {
     return (
@@ -91,8 +130,12 @@ export default function CandidateEditPage({
   }
 
   const handleSave = () => {
-    // TODO: 実際の保存処理
-    alert('保存しました（デモ）');
+    // localStorageのデータを更新
+    const updatedCandidates = candidates.map((c) =>
+      c.id === id ? { ...formData } : c
+    );
+    localStorage.setItem(CANDIDATES_STORAGE_KEY, JSON.stringify(updatedCandidates));
+    alert('保存しました');
     router.push(`/team/short-term/candidates/${id}`);
   };
 

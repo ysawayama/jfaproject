@@ -64,49 +64,51 @@ export default function ShortTermDashboard() {
     },
   ];
 
-  // 代表活動のダミーデータ
+  // FIFA U-17女子ワールドカップモロッコ2025 戦績データ
+  // グループF: 日本、ニュージーランド、ザンビア、パラグアイ + ラウンド16 vs コロンビア
   const matchStats = {
-    totalMatches: 12,
-    wins: 8,
-    draws: 2,
-    losses: 2,
-    winRate: 66.7,
-    totalGoals: 24,
-    totalConceded: 10,
+    totalMatches: 4,
+    wins: 3,
+    draws: 1,
+    losses: 0,
+    winRate: 87.5,
+    totalGoals: 10,
+    totalConceded: 1,
   };
 
+  // 準々決勝 vs 朝鮮民主主義人民共和国
   const nextMatch = {
-    tournament: 'FIFA U-17 ワールドカップカタール2025',
-    opponent: 'ブラジル代表',
-    date: '2025年11月20日 19:00',
-    venue: 'アルトゥママスタジアム（ドーハ）',
+    tournament: 'FIFA U-17女子ワールドカップモロッコ2025 準々決勝',
+    opponent: '朝鮮民主主義人民共和国',
+    date: '2025年11月2日 4:00（日本時間）',
+    venue: 'Olympic Stadium Annex Sports Complex Prince Moulay Abdellah（ラバト）',
   };
 
   const opponentInfo = {
-    team: 'ブラジルU-17代表',
-    formation: '4-3-3',
-    keyPlayers: ['エンドリク（FW）', 'ガブリエル（MF）', 'マルコス（DF）'],
-    recentForm: '5勝0分1敗',
-    notes: '攻撃的なスタイル。サイドからの攻撃が特徴。',
+    team: '朝鮮民主主義人民共和国U-17女子代表',
+    formation: '4-4-2',
+    keyPlayers: ['キム・ヨンエ（FW）', 'リ・ソンヒ（MF）', 'チョン・ミョンオク（DF）'],
+    recentForm: 'グループC 1位通過',
+    notes: '組織的な守備と速攻が特徴。フィジカルが強く、セットプレーからの得点力も高い。',
   };
 
   const recentMessages = [
     {
       id: 1,
-      sender: '監督',
-      message: '明日の練習は15:00開始です。全員時間厳守でお願いします。',
+      sender: '白井監督',
+      message: '準々決勝に向けた戦術確認ミーティングを本日19:00から行います。全員必ず参加してください。',
       time: '2時間前',
     },
     {
       id: 2,
-      sender: 'トレーナー',
-      message: '怪我の状況報告：田中選手、軽度の捻挫で2日間休養が必要です。',
+      sender: 'フィジカルコーチ',
+      message: 'グループステージ3試合を戦い抜いた選手たちへ。リカバリーを最優先に、しっかり休養を取ってください。',
       time: '4時間前',
     },
     {
       id: 3,
-      sender: 'コーチ',
-      message: '次の試合のビデオ分析資料をアップロードしました。各自確認をお願いします。',
+      sender: '分析担当',
+      message: '朝鮮民主主義人民共和国戦の分析映像をアップしました。特にセットプレー対策を確認してください。',
       time: '1日前',
     },
   ];
@@ -172,10 +174,10 @@ export default function ShortTermDashboard() {
               </div>
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">
-                  U-17日本代表ポータル
+                  U-17日本女子代表
                 </h1>
                 <p className="text-white/90 text-lg">
-                  FIFA U-17 ワールドカップカタール2025 統合管理システム
+                  FIFA U-17女子ワールドカップモロッコ2025 統合管理システム
                 </p>
               </div>
             </div>
@@ -403,9 +405,14 @@ export default function ShortTermDashboard() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-bold text-base-dark group-hover:text-samurai transition-colors">
-                  本活動の戦績
+                  大会戦績
                 </h2>
                 <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
+              </div>
+
+              {/* グループF 1位通過 */}
+              <div className="bg-green-50 rounded-lg px-3 py-2 mb-3">
+                <p className="text-xs text-green-700 font-semibold">グループF 1位通過 🏆</p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 mb-4">
@@ -429,11 +436,11 @@ export default function ShortTermDashboard() {
                   <span className="text-sm font-bold text-base-dark">{matchStats.winRate}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-neutral-600">総得点</span>
+                  <span className="text-sm text-neutral-600">得点</span>
                   <span className="text-sm font-bold text-green-600">{matchStats.totalGoals}点</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-neutral-600">総失点</span>
+                  <span className="text-sm text-neutral-600">失点</span>
                   <span className="text-sm font-bold text-red-600">{matchStats.totalConceded}点</span>
                 </div>
               </div>

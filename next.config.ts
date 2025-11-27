@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'img.jfa.jp',
-        pathname: '/national_team/img/member/photogallery/**',
+        pathname: '/national_team/img/member/**',
       },
     ],
   },

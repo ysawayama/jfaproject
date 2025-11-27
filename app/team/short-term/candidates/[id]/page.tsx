@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -29,14 +29,18 @@ import {
   History,
 } from 'lucide-react';
 import {
-  candidates,
+  candidates as initialCandidates,
   statusInfo,
   getRadarEvaluation,
   getOverallRating,
   getCandidateEvaluationHistory,
+  type Candidate,
 } from '@/lib/team/candidates-data';
 import { getClubContactByName, type ClubContact } from '@/lib/team/club-contacts-data';
 import { getEvaluationTypeInfo, getGradeInfo } from '@/lib/team/unified-evaluation';
+
+// localStorageキー（candidates/page.tsxと同じ）
+const CANDIDATES_STORAGE_KEY = 'zeami_candidates_list';
 
 export default function CandidateDetailPage({
   params,
@@ -44,6 +48,24 @@ export default function CandidateDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+
+  // localStorageから候補リストを読み込む
+  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(CANDIDATES_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setCandidates(parsed);
+      } catch {
+        setCandidates(initialCandidates);
+      }
+    }
+    setIsLoading(false);
+  }, []);
+
   const candidate = candidates.find((c) => c.id === id);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [contactFormData, setContactFormData] = useState<Partial<ClubContact>>({});
@@ -59,6 +81,18 @@ export default function CandidateDetailPage({
   const radarEvaluation = candidate ? getRadarEvaluation(candidate.id) : null;
   const overallRating = candidate ? getOverallRating(candidate.id) : null;
   const evaluationHistory = candidate ? getCandidateEvaluationHistory(candidate.id) : null;
+
+  // ローディング中
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-samurai border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!candidate) {
     return (
@@ -76,7 +110,8 @@ export default function CandidateDetailPage({
     );
   }
 
-  const status = statusInfo[candidate.status];
+  // 古いステータスが残っている場合は「招集候補」として表示
+  const status = statusInfo[candidate.status] || statusInfo['candidate'];
 
   // 現在のクラブの連絡窓口を取得
   const currentContact = getClubContactByName(candidate.club);

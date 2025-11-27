@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Plus,
@@ -18,10 +18,20 @@ import {
   invitationStatusInfo,
   type InvitationStatus,
 } from '@/lib/team/invitation-data';
-import { candidates } from '@/lib/team/candidates-data';
+import { type Candidate } from '@/lib/team/candidates-data';
+import { fetchAllCandidates } from '@/lib/supabase/team-data';
 
 export default function InvitationPage() {
   const [selectedStatus, setSelectedStatus] = useState<InvitationStatus | 'all'>('all');
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+
+  useEffect(() => {
+    const loadCandidates = async () => {
+      const data = await fetchAllCandidates();
+      setCandidates(data);
+    };
+    loadCandidates();
+  }, []);
 
   // フィルタリング
   const filteredInvitations = invitations.filter((invitation) => {

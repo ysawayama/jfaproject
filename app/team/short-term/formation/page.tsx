@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { candidates } from '@/lib/team/candidates-data';
+import { useState, useEffect } from 'react';
+import { type Candidate } from '@/lib/team/candidates-data';
+import { fetchAllCandidates, upsertCandidate } from '@/lib/supabase/team-data';
 import { formations, getFormation, getFormationNames } from '@/lib/team/formations';
 import { FormationPlayer } from '@/lib/team/formation-types';
-import { Save, Download, Trash2, Plus, X, RefreshCw } from 'lucide-react';
+import { Save, Trash2, Plus, RefreshCw, CheckCircle } from 'lucide-react';
 
 // ポジションスロット型定義（先発 + 交代選手）
 type PositionSlot = {
@@ -19,6 +20,29 @@ export default function FormationPage() {
   );
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [selectionMode, setSelectionMode] = useState<'starter' | 'substitute'>('starter');
+
+  // Supabaseから候補リストを読み込む
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  // 招集確定に選択された選手ID
+  const [confirmedPlayerIds, setConfirmedPlayerIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const loadCandidates = async () => {
+      setIsLoading(true);
+      const data = await fetchAllCandidates();
+      setCandidates(data);
+      // 既に招集確定の選手をセット
+      const alreadyConfirmed = new Set(
+        data.filter((c) => c.status === 'confirmed').map((c) => c.id)
+      );
+      setConfirmedPlayerIds(alreadyConfirmed);
+      setIsLoading(false);
+    };
+    loadCandidates();
+  }, []);
 
   const formation = getFormation(selectedFormation);
 
@@ -99,6 +123,54 @@ export default function FormationPage() {
     }
   };
 
+  // 招集確定トグル
+  const toggleConfirmed = (playerId: string) => {
+    setConfirmedPlayerIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(playerId)) {
+        newSet.delete(playerId);
+      } else {
+        newSet.add(playerId);
+      }
+      return newSet;
+    });
+  };
+
+  // 招集確定を保存
+  const handleConfirmPlayers = async () => {
+    setIsConfirming(true);
+    try {
+      // 候補リスト内の選手のステータスを更新
+      for (const candidate of candidates) {
+        const isConfirmed = confirmedPlayerIds.has(candidate.id);
+        const newStatus = isConfirmed ? 'confirmed' : 'candidate';
+
+        if (candidate.status !== newStatus) {
+          const updatedCandidate = { ...candidate, status: newStatus as 'confirmed' | 'candidate' };
+          await upsertCandidate(updatedCandidate);
+        }
+      }
+
+      // ローカルの状態を更新
+      setCandidates((prev) =>
+        prev.map((c) => ({
+          ...c,
+          status: confirmedPlayerIds.has(c.id) ? 'confirmed' : 'candidate',
+        }))
+      );
+
+      alert(`${confirmedPlayerIds.size}名の招集を確定しました`);
+    } catch (error) {
+      console.error('Error confirming players:', error);
+      alert('招集確定の保存に失敗しました');
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  // 招集確定の選手数
+  const confirmedCount = confirmedPlayerIds.size;
+
   return (
     <div className="space-y-6">
       {/* ヘッダー */}
@@ -154,51 +226,121 @@ export default function FormationPage() {
 
           {/* 選手リスト */}
           <div className="bg-white rounded-xl p-6 border border-neutral-200">
-            <h3 className="font-bold text-base-dark mb-4">
-              利用可能な選手 ({availablePlayers.length - usedPlayerIds.size}/{availablePlayers.length})
-            </h3>
-            <div className="space-y-2 max-h-[600px] overflow-y-auto">
-              {availablePlayers.map((player) => {
-                const isUsed = usedPlayerIds.has(player.id);
-                return (
-                  <div
-                    key={player.id}
-                    className={`p-3 rounded-lg border-2 transition-all ${
-                      isUsed
-                        ? 'border-neutral-200 bg-neutral-50 opacity-50'
-                        : selectedSlot !== null
-                        ? 'border-samurai bg-samurai/5 cursor-pointer hover:bg-samurai/10'
-                        : 'border-neutral-200 bg-white'
-                    }`}
-                    onClick={() => {
-                      if (!isUsed && selectedSlot !== null) {
-                        handlePlayerSelect(player, selectedSlot);
-                      }
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-base-dark">{player.name}</p>
-                        <p className="text-sm text-neutral-600">{player.club}</p>
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${
-                          player.position === 'GK'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : player.position === 'DF'
-                            ? 'bg-blue-100 text-blue-700'
-                            : player.position === 'MF'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        {player.position}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-base-dark">
+                  利用可能な選手 ({availablePlayers.length - usedPlayerIds.size}/{availablePlayers.length})
+                </h3>
+                <span className="text-sm text-green-600 font-semibold">
+                  確定: {confirmedCount}名
+                </span>
+              </div>
+              <p className="text-xs text-neutral-500">
+                選手クリック→フォーメーション配置 / 右の□→招集確定
+              </p>
             </div>
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="w-6 h-6 border-2 border-samurai border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-sm text-neutral-500">読み込み中...</p>
+              </div>
+            ) : availablePlayers.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-neutral-500 mb-2">利用可能な選手がいません</p>
+                <p className="text-xs text-neutral-400">
+                  招集候補リストで「招集確定」または「招集候補」の選手を登録してください
+                </p>
+              </div>
+            ) : (
+            <>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto mb-4">
+                {availablePlayers.map((player) => {
+                  const isUsed = usedPlayerIds.has(player.id);
+                  const isConfirmed = confirmedPlayerIds.has(player.id);
+                  return (
+                    <div
+                      key={player.id}
+                      className={`p-3 rounded-lg border-2 transition-all ${
+                        isUsed
+                          ? 'border-neutral-200 bg-neutral-50 opacity-50'
+                          : selectedSlot !== null
+                          ? 'border-samurai bg-samurai/5 cursor-pointer hover:bg-samurai/10'
+                          : 'border-neutral-200 bg-white'
+                      }`}
+                      onClick={() => {
+                        if (!isUsed && selectedSlot !== null) {
+                          handlePlayerSelect(player, selectedSlot);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-base-dark truncate">{player.name}</p>
+                            {isConfirmed && (
+                              <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded">
+                                確定
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-neutral-600 truncate">{player.club}</p>
+                        </div>
+
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-semibold flex-shrink-0 ${
+                            player.position === 'GK'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : player.position === 'DF'
+                              ? 'bg-blue-100 text-blue-700'
+                              : player.position === 'MF'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {player.position}
+                        </span>
+
+                        {/* 招集確定チェックボックス（独立） */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleConfirmed(player.id);
+                          }}
+                          className={`w-7 h-7 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                            isConfirmed
+                              ? 'bg-green-500 border-green-500 text-white'
+                              : 'border-neutral-300 hover:border-green-400 bg-white'
+                          }`}
+                          title={isConfirmed ? '招集確定を解除' : '招集確定にする'}
+                        >
+                          {isConfirmed && <CheckCircle className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 招集確定ボタン */}
+              <button
+                onClick={handleConfirmPlayers}
+                disabled={isConfirming || confirmedCount === 0}
+                className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isConfirming ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>保存中...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    <span>{confirmedCount}名の招集を確定する</span>
+                  </>
+                )}
+              </button>
+            </>
+            )}
           </div>
         </div>
 
