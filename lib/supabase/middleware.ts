@@ -6,15 +6,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-// デモモード判定（PoC用 - 認証をスキップ）
-const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
-
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  // デモモードの場合は認証チェックをスキップ
+  // デモモード判定（PoC用 - 認証をスキップ）
+  // 関数内で評価することで実行時に環境変数を読み取る
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
   if (isDemoMode) {
     return supabaseResponse;
   }
