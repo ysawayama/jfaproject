@@ -228,6 +228,45 @@ Code Quality Rules:
 ### Latest Learnings (Max 10 items retained)
 <!-- AI adds new learnings. Old ones are auto-patterned -->
 
+#### ⭐ Next.js Edge Runtime環境変数の制約 (2025-11-28)
+**問題**: `NEXT_PUBLIC_`環境変数をミドルウェアで実行時に読み取れない
+```typescript
+// ❌ Edge Runtimeでは動的に読めない（ビルド時に固定される）
+const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+// ミドルウェアはEdge Runtimeで動作するため、
+// NEXT_PUBLIC_プレフィックスの環境変数はビルド時にインライン化される
+```
+**回避策**:
+- `NEXT_PUBLIC_`なしの環境変数を使う（サーバーサイドのみ）
+- または、認証スキップが必要な場合はテストアカウントを用意する
+- Vercelで環境変数を変更後は必ず再デプロイが必要
+
+#### ⭐ Supabase Admin APIでのユーザー管理 (2025-11-28)
+**用途**: テストアカウント作成、権限付与など
+```typescript
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+// ユーザー作成（メール確認済みで）
+await supabase.auth.admin.createUser({
+  email: 'test@example.com',
+  password: 'password',
+  email_confirm: true  // メール確認をスキップ
+});
+
+// パスワード更新
+await supabase.auth.admin.updateUserById(userId, {
+  password: 'new-password'
+});
+
+// user_metadataの更新（roleなど）
+await supabase.auth.admin.updateUserById(userId, {
+  user_metadata: { role: 'admin' }
+});
+```
+**注意**: SERVICE_ROLE_KEYは管理者権限。サーバーサイドのみで使用。
+
 #### ⭐ 配列操作の安全パターン (2025-09-29)
 **問題**: オプショナルチェーン`?.`で配列メソッドを呼ぶとTypeError発生
 ```typescript
