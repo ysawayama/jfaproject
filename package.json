@@ -17,9 +17,9 @@
     "@vercel/blob": "^2.0.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.468.0",
-    "next": "^15.1.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "next": "15.1.9",
+    "react": "19.0.1",
+    "react-dom": "19.0.1",
     "react-youtube": "^10.1.0",
     "recharts": "^2.15.0",
     "zod": "^4.1.12"
