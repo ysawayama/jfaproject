@@ -163,18 +163,22 @@ Start
 ```yaml
 # Record adopted technologies (AI auto-updates)
 Frontend:
-  framework: # Fill when detected
-  styling: # Fill when detected
+  framework: Next.js 15.1.9
+  styling: TailwindCSS 3.4.x
+  ui_library: Recharts, Lucide React
 
 Backend:
-  runtime: # Fill when detected
-  framework: # Fill when detected
+  runtime: Node.js (Vercel Edge)
+  framework: Next.js App Router
 
 Database:
-  primary: # Fill when detected
+  primary: Supabase (PostgreSQL)
+  auth: Supabase Auth
 
 Tools:
-  package_manager: # Fill when detected
+  package_manager: npm
+  deployment: Vercel
+  version_control: GitHub
 ```
 
 ### Recommended Technology Matrix
@@ -228,44 +232,22 @@ Code Quality Rules:
 ### Latest Learnings (Max 10 items retained)
 <!-- AI adds new learnings. Old ones are auto-patterned -->
 
-#### ⭐ Next.js Edge Runtime環境変数の制約 (2025-11-28)
-**問題**: `NEXT_PUBLIC_`環境変数をミドルウェアで実行時に読み取れない
-```typescript
-// ❌ Edge Runtimeでは動的に読めない（ビルド時に固定される）
-const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+#### ⭐ Next.js + React セキュリティアップデート時のビルドエラー対処 (2025-12-08)
+**問題**: Next.js/Reactのセキュリティパッチ適用後、`<Html> should not be imported outside of pages/_document`エラーでビルド失敗
+```yaml
+原因: NODE_ENVが非標準値（例: development）のままビルド実行
+症状:
+  - Vercelがセキュリティ脆弱性でデプロイをブロック
+  - ローカルビルドで謎の_errorページエラー
 
-// ミドルウェアはEdge Runtimeで動作するため、
-// NEXT_PUBLIC_プレフィックスの環境変数はビルド時にインライン化される
+解決策:
+  1. NODE_ENVをunsetしてからビルド: `unset NODE_ENV && npm run build`
+  2. Vercel上では自動的に正しいNODE_ENVが設定される
+  3. 依存パッケージはキャレット(^)を外して固定バージョン推奨
 ```
-**回避策**:
-- `NEXT_PUBLIC_`なしの環境変数を使う（サーバーサイドのみ）
-- または、認証スキップが必要な場合はテストアカウントを用意する
-- Vercelで環境変数を変更後は必ず再デプロイが必要
-
-#### ⭐ Supabase Admin APIでのユーザー管理 (2025-11-28)
-**用途**: テストアカウント作成、権限付与など
-```typescript
-const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-
-// ユーザー作成（メール確認済みで）
-await supabase.auth.admin.createUser({
-  email: 'test@example.com',
-  password: 'password',
-  email_confirm: true  // メール確認をスキップ
-});
-
-// パスワード更新
-await supabase.auth.admin.updateUserById(userId, {
-  password: 'new-password'
-});
-
-// user_metadataの更新（roleなど）
-await supabase.auth.admin.updateUserById(userId, {
-  user_metadata: { role: 'admin' }
-});
-```
-**注意**: SERVICE_ROLE_KEYは管理者権限。サーバーサイドのみで使用。
+**CVE-2025-55182対応バージョン**:
+- Next.js: 15.1.9以上（15.1.4は脆弱）
+- React: 19.0.1以上（19.0.0は脆弱）
 
 #### ⭐ 配列操作の安全パターン (2025-09-29)
 **問題**: オプショナルチェーン`?.`で配列メソッドを呼ぶとTypeError発生
@@ -438,13 +420,14 @@ Auto-processing when >400 lines:
 ## 📊 Metadata
 
 ```yaml
-version: 4.2.0
+version: 4.3.0
 type: "AI Autonomous Evolution System"
-last_updated: 2025-01-24
-lines: 300 # AI auto-updates line count
+last_updated: 2025-12-08
+lines: 320 # AI auto-updates line count
 status: "Active"
 
 # Update History
+4.3.0: Added CVE-2025-55182 security update knowledge, updated tech stack
 4.2.0: Added essential checks for accuracy improvement
 4.1.0: Added commit integration and recommended tech matrix
 4.0.0: Redesigned as AI autonomous system
