@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "JFA 緑プロジェクト - サッカーと生きる、すべての人のために",
-  description: "日本サッカー協会公式 緑プロジェクトプラットフォーム",
+  title: "JFA技術委員会　Japan's Wayシステム - サッカーと生きる、すべての人のために",
+  description: "日本サッカー協会公式 Japan's Wayシステムプラットフォーム",
 };
 
 export const viewport: Viewport = {

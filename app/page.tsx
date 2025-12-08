@@ -10,7 +10,7 @@ export default function Home() {
             <div className="inline-block text-6xl mb-4">⚽</div>
           </div>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            JFA 緑プロジェクト
+            JFA技術委員会　Japan's Wayシステム
           </h1>
           <p className="text-2xl text-gray-600 mb-2">
             サッカーと生きる、すべての人のために
@@ -284,7 +284,7 @@ export default function Home() {
         {/* フッター */}
         <footer className="text-center py-8 text-gray-500 mt-16">
           <p className="text-sm">
-            JFA 緑プロジェクト - 4つのダッシュボード + チームポータル + イントラネット機能
+            JFA技術委員会　Japan's Wayシステム - 4つのダッシュボード + チームポータル + イントラネット機能
           </p>
           <p className="text-xs mt-2">
             2025年最新ベストプラクティス実装 | モダンデザインシステム
